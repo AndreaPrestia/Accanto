@@ -1,0 +1,44 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# .NET
+bin/
+obj/
+*.dll
+*.pdb
+*.cache
+*.log
+TestResults/
+coverage*
+.coverage*
+
+# Node
+node_modules/
+dist/
+.next/
+.cache/
+*.tsbuildinfo
+
+# Vite
+frontend/dist/
+frontend/dev-dist/
+
+# Env / secrets
+.env
+.env.*.local
+.env.local
+
+# Local file storage (user uploads)
+storage/*
+!storage/.gitkeep
+
+# Docker
+*.pid

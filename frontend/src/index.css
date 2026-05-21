@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-accanto-700 text-white hover:bg-accanto-900;
+  }
+  .btn-ghost {
+    @apply btn bg-white border border-accanto-100 text-accanto-700 hover:bg-accanto-50;
+  }
+  .input {
+    @apply w-full rounded-md border border-accanto-100 bg-white px-3 py-2 text-base outline-none focus:border-accanto-500;
+  }
+  .label {
+    @apply block text-sm font-medium text-accanto-700 mb-1;
+  }
+  .card {
+    @apply bg-white rounded-lg border border-accanto-100 p-4;
+  }
+}

@@ -1,0 +1,10 @@
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/.git
+**/.vs
+**/.vscode
+**/.idea
+**/TestResults
+*.user
