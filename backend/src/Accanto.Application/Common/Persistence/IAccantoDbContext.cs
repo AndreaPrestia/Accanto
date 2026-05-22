@@ -12,6 +12,7 @@ public interface IAccantoDbContext
     Microsoft.EntityFrameworkCore.DbSet<MedicalDocument> MedicalDocuments { get; }
     Microsoft.EntityFrameworkCore.DbSet<DoctorQuestion> DoctorQuestions { get; }
     Microsoft.EntityFrameworkCore.DbSet<SharedUpdate> SharedUpdates { get; }
+    Microsoft.EntityFrameworkCore.DbSet<PushSubscription> PushSubscriptions { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

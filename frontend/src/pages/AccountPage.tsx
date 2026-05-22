@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, extractError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
+import PushNotificationsSection from '../components/PushNotificationsSection';
 
 export default function AccountPage() {
   const { user, logout } = useAuth();
@@ -35,7 +36,7 @@ export default function AccountPage() {
 
     setPwdSubmitting(true);
     try {
-      await api.post('/api/account/change-password', {
+      await api.post('/account/change-password', {
         currentPassword: currentPwd,
         newPassword: newPwd
       });
@@ -61,7 +62,7 @@ export default function AccountPage() {
 
     setDeleteSubmitting(true);
     try {
-      await api.delete('/api/account', { data: { currentPassword: deletePwd } });
+      await api.delete('/account', { data: { currentPassword: deletePwd } });
       logout();
       navigate('/login', { replace: true });
     } catch (e) {
@@ -128,6 +129,8 @@ export default function AccountPage() {
           </button>
         </form>
       </section>
+
+      <PushNotificationsSection />
 
       <section className="space-y-3 border-t border-accanto-100 pt-6">
         <h2 className="text-base font-semibold text-red-800">Elimina account</h2>

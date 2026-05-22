@@ -2,6 +2,7 @@ using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Validation;
+using Accanto.Application.Push;
 using Accanto.Domain.Entities;
 using Accanto.Domain.Enums;
 using FluentValidation;
@@ -13,17 +14,20 @@ public class TimelineService : ITimelineService
 {
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
+    private readonly IPushService _push;
     private readonly IValidator<CreateTimelineEntryRequest> _createValidator;
     private readonly IValidator<UpdateTimelineEntryRequest> _updateValidator;
 
     public TimelineService(
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
+        IPushService push,
         IValidator<CreateTimelineEntryRequest> createValidator,
         IValidator<UpdateTimelineEntryRequest> updateValidator)
     {
         _db = db;
         _auth = auth;
+        _push = push;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
     }
@@ -102,6 +106,17 @@ public class TimelineService : ITimelineService
 
         _db.TimelineEntries.Add(entry);
         await _db.SaveChangesAsync(cancellationToken);
+
+        if (entry.Visibility == TimelineVisibility.Circle)
+        {
+            var circle = await _db.CareCircles.FirstOrDefaultAsync(c => c.Id == careCircleId, cancellationToken);
+            var circleName = circle?.Name ?? "Cerchio";
+            var payload = new PushNotificationPayload(
+                Title: circleName,
+                Body: $"Nuova voce nel diario: {entry.Title}",
+                Url: $"/care-circles/{careCircleId}/timeline");
+            _ = _push.NotifyCircleAsync(careCircleId, userId, payload, CancellationToken.None);
+        }
 
         return Map(entry);
     }

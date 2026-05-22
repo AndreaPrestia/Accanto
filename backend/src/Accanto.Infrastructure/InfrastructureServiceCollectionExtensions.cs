@@ -3,9 +3,11 @@ using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
 using Accanto.Application.Common.Storage;
 using Accanto.Application.Export;
+using Accanto.Application.Push;
 using Accanto.Infrastructure.Authorization;
 using Accanto.Infrastructure.Export;
 using Accanto.Infrastructure.Persistence;
+using Accanto.Infrastructure.Push;
 using Accanto.Infrastructure.Security;
 using Accanto.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -28,12 +30,14 @@ public static class InfrastructureServiceCollectionExtensions
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
         services.Configure<StorageOptions>(configuration.GetSection("Storage"));
         services.Configure<EncryptionOptions>(configuration.GetSection("Encryption"));
+        services.Configure<PushOptions>(configuration.GetSection("Push"));
 
         services.AddSingleton<IFieldProtector, AesGcmFieldProtector>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddScoped<ICareCircleAuthorization, CareCircleAuthorization>();
+        services.AddSingleton<IPushService, PushService>();
         services.AddScoped<ICareCircleExportService, CareCircleExportService>();
 
         QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
