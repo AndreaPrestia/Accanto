@@ -2,7 +2,9 @@ using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
 using Accanto.Application.Common.Storage;
+using Accanto.Application.Export;
 using Accanto.Infrastructure.Authorization;
+using Accanto.Infrastructure.Export;
 using Accanto.Infrastructure.Persistence;
 using Accanto.Infrastructure.Security;
 using Accanto.Infrastructure.Storage;
@@ -32,6 +34,9 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddScoped<ICareCircleAuthorization, CareCircleAuthorization>();
+        services.AddScoped<ICareCircleExportService, CareCircleExportService>();
+
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
         return services;
     }

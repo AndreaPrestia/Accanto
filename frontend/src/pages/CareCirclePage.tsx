@@ -37,6 +37,8 @@ export default function CareCirclePage() {
 
       {isOwner && circle.status === 'Active' && <InvitesPanel circleId={circle.id} />}
 
+      <ExportPdfButton circleId={circle.id} />
+
       {isOwner && circle.status === 'Active' && (
         <div className="mt-8">
           <ArchiveButton id={circle.id} onArchived={() => setCircle({ ...circle, status: 'Archived' })} />
@@ -75,5 +77,67 @@ function ArchiveButton({ id, onArchived }: { id: string; onArchived: () => void 
       {error && <p className="text-sm text-red-700 mb-2">{error}</p>}
       <button onClick={click} className="btn-ghost" disabled={busy}>{busy ? 'Archiviazione…' : 'Archivia cerchio'}</button>
     </div>
+  );
+}
+
+function ExportPdfButton({ circleId }: { circleId: string }) {
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const download = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const params: Record<string, string> = {};
+      if (from) params.from = new Date(from + 'T00:00:00').toISOString();
+      if (to) params.to = new Date(to + 'T23:59:59.999').toISOString();
+      const res = await api.get(`/care-circles/${circleId}/export/pdf`, {
+        params,
+        responseType: 'blob'
+      });
+      const disp = res.headers['content-disposition'] as string | undefined;
+      const match = disp?.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+      const filename = match ? decodeURIComponent(match[1]) : `accanto-cerchio.pdf`;
+      const url = URL.createObjectURL(res.data as Blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(extractError(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="mt-8 card">
+      <h3 className="font-medium">Esporta in PDF</h3>
+      <p className="text-sm text-accanto-500 mt-1">Un riassunto del cerchio (diario e domande aperte) da portare al medico.</p>
+      <div className="grid grid-cols-2 gap-2 mt-3">
+        <label className="text-sm">
+          <span className="block text-accanto-700 mb-1">Dal</span>
+          <input type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} className="w-full border border-accanto-200 rounded-lg px-2 py-1" />
+        </label>
+        <label className="text-sm">
+          <span className="block text-accanto-700 mb-1">Al</span>
+          <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} className="w-full border border-accanto-200 rounded-lg px-2 py-1" />
+        </label>
+      </div>
+      {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
+      <div className="mt-3 flex items-center gap-2">
+        <button onClick={download} disabled={busy} className="px-4 py-2 rounded-lg bg-accanto-700 text-white disabled:opacity-60">
+          {busy ? 'Generazione…' : 'Scarica PDF'}
+        </button>
+        {(from || to) && (
+          <button onClick={() => { setFrom(''); setTo(''); }} className="text-sm text-accanto-700 hover:underline">Pulisci filtri</button>
+        )}
+      </div>
+    </section>
   );
 }
