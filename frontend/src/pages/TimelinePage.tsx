@@ -12,6 +12,8 @@ export default function TimelinePage() {
   const [error, setError] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<TimelineEntryType | ''>('');
   const [filterTag, setFilterTag] = useState('');
+  const [filterFrom, setFilterFrom] = useState('');
+  const [filterTo, setFilterTo] = useState('');
   const [showForm, setShowForm] = useState(false);
 
   const load = async () => {
@@ -20,6 +22,9 @@ export default function TimelinePage() {
       const params: any = {};
       if (filterType) params.type = filterType;
       if (filterTag.trim()) params.tag = filterTag.trim();
+      // I filtri data sono "giorno intero" in fuso locale: dalle 00:00 al 23:59:59.999.
+      if (filterFrom) params.from = new Date(`${filterFrom}T00:00:00`).toISOString();
+      if (filterTo) params.to = new Date(`${filterTo}T23:59:59.999`).toISOString();
       const { data } = await api.get<TimelineEntry[]>(`/care-circles/${id}/timeline`, { params });
       setEntries(data);
     } catch (e) {
@@ -27,7 +32,15 @@ export default function TimelinePage() {
     }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [id, filterType, filterTag]);
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [id, filterType, filterTag, filterFrom, filterTo]);
+
+  const hasFilters = !!(filterType || filterTag.trim() || filterFrom || filterTo);
+  const clearFilters = () => {
+    setFilterType('');
+    setFilterTag('');
+    setFilterFrom('');
+    setFilterTo('');
+  };
 
   return (
     <div>
@@ -37,13 +50,30 @@ export default function TimelinePage() {
       </div>
       <p className="text-accanto-500 mb-4">Tieni traccia di ciò che succede, giorno per giorno.</p>
 
-      <div className="grid grid-cols-2 gap-2 mb-4">
+      <div className="grid grid-cols-2 gap-2 mb-2">
         <select className="input" value={filterType} onChange={(e) => setFilterType(e.target.value as any)}>
           <option value="">Tutti i tipi</option>
           {TYPES.map(t => <option key={t} value={t}>{TimelineTypeLabel[t]}</option>)}
         </select>
         <input className="input" placeholder="Filtra per tag" value={filterTag} onChange={(e) => setFilterTag(e.target.value)} />
       </div>
+      <div className="grid grid-cols-2 gap-2 mb-2">
+        <div>
+          <label className="label">Dal</label>
+          <input className="input" type="date" value={filterFrom} max={filterTo || undefined} onChange={(e) => setFilterFrom(e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Al</label>
+          <input className="input" type="date" value={filterTo} min={filterFrom || undefined} onChange={(e) => setFilterTo(e.target.value)} />
+        </div>
+      </div>
+      {hasFilters && (
+        <div className="mb-4">
+          <button type="button" onClick={clearFilters} className="text-sm text-accanto-700 hover:underline">
+            Pulisci filtri
+          </button>
+        </div>
+      )}
 
       <button onClick={() => setShowForm(s => !s)} className="btn-primary mb-4">
         {showForm ? 'Annulla' : '+ Nuova voce'}

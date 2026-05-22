@@ -53,4 +53,32 @@ public class TimelineServiceTests
         var alicesList = await svc.ListAsync(alice, circleId, new TimelineQuery());
         alicesList.Should().HaveCount(2);
     }
+
+    [Fact]
+    public async Task Date_filters_From_To_constrain_results_by_OccurredAt()
+    {
+        var (svc, _, circleId, alice, _) = Setup();
+
+        var jan = new DateTimeOffset(2026, 1, 15, 9, 0, 0, TimeSpan.Zero);
+        var feb = new DateTimeOffset(2026, 2, 15, 9, 0, 0, TimeSpan.Zero);
+        var mar = new DateTimeOffset(2026, 3, 15, 9, 0, 0, TimeSpan.Zero);
+
+        await svc.CreateAsync(alice, circleId, new CreateTimelineEntryRequest(jan, TimelineEntryType.MedicalUpdate, "gen", "x", new(), TimelineVisibility.Circle));
+        await svc.CreateAsync(alice, circleId, new CreateTimelineEntryRequest(feb, TimelineEntryType.MedicalUpdate, "feb", "x", new(), TimelineVisibility.Circle));
+        await svc.CreateAsync(alice, circleId, new CreateTimelineEntryRequest(mar, TimelineEntryType.MedicalUpdate, "mar", "x", new(), TimelineVisibility.Circle));
+
+        // From only
+        var fromFeb = await svc.ListAsync(alice, circleId, new TimelineQuery(From: feb));
+        fromFeb.Select(e => e.Title).Should().BeEquivalentTo(new[] { "mar", "feb" });
+
+        // To only (inclusive on the end)
+        var untilFeb = await svc.ListAsync(alice, circleId, new TimelineQuery(To: feb));
+        untilFeb.Select(e => e.Title).Should().BeEquivalentTo(new[] { "feb", "gen" });
+
+        // Both
+        var only = await svc.ListAsync(alice, circleId, new TimelineQuery(
+            From: new DateTimeOffset(2026, 2, 1, 0, 0, 0, TimeSpan.Zero),
+            To: new DateTimeOffset(2026, 2, 28, 23, 59, 59, TimeSpan.Zero)));
+        only.Should().ContainSingle(e => e.Title == "feb");
+    }
 }

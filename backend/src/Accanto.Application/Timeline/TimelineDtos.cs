@@ -34,4 +34,9 @@ public sealed record TimelineEntryDto(
     DateTimeOffset? UpdatedAt
 );
 
-public sealed record TimelineQuery(TimelineEntryType? Type = null, string? Tag = null);
+public sealed record TimelineQuery(
+    TimelineEntryType? Type = null,
+    string? Tag = null,
+    DateTimeOffset? From = null,
+    DateTimeOffset? To = null
+);

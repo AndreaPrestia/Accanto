@@ -49,6 +49,18 @@ public class TimelineService : ITimelineService
             q = q.Where(e => e.Tags.Contains(tag));
         }
 
+        if (query.From.HasValue)
+        {
+            var from = query.From.Value;
+            q = q.Where(e => e.OccurredAt >= from);
+        }
+
+        if (query.To.HasValue)
+        {
+            var to = query.To.Value;
+            q = q.Where(e => e.OccurredAt <= to);
+        }
+
         var rows = await q.OrderByDescending(e => e.OccurredAt).ToListAsync(cancellationToken);
         return rows.Select(Map).ToList();
     }

@@ -25,8 +25,10 @@ public class TimelineController : ControllerBase
         Guid careCircleId,
         [FromQuery] TimelineEntryType? type,
         [FromQuery] string? tag,
+        [FromQuery] DateTimeOffset? from,
+        [FromQuery] DateTimeOffset? to,
         CancellationToken ct)
-        => Ok(await _svc.ListAsync(_currentUser.RequireUserId(), careCircleId, new TimelineQuery(type, tag), ct));
+        => Ok(await _svc.ListAsync(_currentUser.RequireUserId(), careCircleId, new TimelineQuery(type, tag, from, to), ct));
 
     [HttpGet("{entryId:guid}")]
     public async Task<ActionResult<TimelineEntryDto>> Get(Guid careCircleId, Guid entryId, CancellationToken ct)
