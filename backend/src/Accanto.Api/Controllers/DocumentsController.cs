@@ -29,34 +29,40 @@ public class DocumentsController : ControllerBase
         => Ok(await _svc.GetAsync(_currentUser.RequireUserId(), careCircleId, documentId, ct));
 
     [HttpPost]
+    [Consumes("multipart/form-data")]
     [RequestSizeLimit(20 * 1024 * 1024)]
     public async Task<ActionResult<DocumentDto>> Upload(
         Guid careCircleId,
-        [FromForm] IFormFile file,
-        [FromForm] DocumentCategory category,
-        [FromForm] string? notes,
-        [FromForm] string? tags,
+        [FromForm] UploadDocumentForm form,
         CancellationToken ct)
     {
-        if (file is null || file.Length == 0)
+        if (form.File is null || form.File.Length == 0)
             return BadRequest(new { title = "File mancante." });
 
-        var tagList = string.IsNullOrWhiteSpace(tags)
+        var tagList = string.IsNullOrWhiteSpace(form.Tags)
             ? new List<string>()
-            : tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+            : form.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 
-        await using var stream = file.OpenReadStream();
+        await using var stream = form.File.OpenReadStream();
         var req = new UploadDocumentRequest(
             stream,
-            file.FileName,
-            file.ContentType,
-            file.Length,
-            category,
-            notes,
+            form.File.FileName,
+            form.File.ContentType,
+            form.File.Length,
+            form.Category,
+            form.Notes,
             tagList
         );
         var dto = await _svc.UploadAsync(_currentUser.RequireUserId(), careCircleId, req, ct);
         return CreatedAtAction(nameof(Get), new { careCircleId, documentId = dto.Id }, dto);
+    }
+
+    public class UploadDocumentForm
+    {
+        public IFormFile? File { get; set; }
+        public DocumentCategory Category { get; set; }
+        public string? Notes { get; set; }
+        public string? Tags { get; set; }
     }
 
     [HttpGet("{documentId:guid}/download")]
