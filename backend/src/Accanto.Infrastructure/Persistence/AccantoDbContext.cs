@@ -19,6 +19,7 @@ public class AccantoDbContext : DbContext, IAccantoDbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<CareCircle> CareCircles => Set<CareCircle>();
     public DbSet<CareCircleMember> CareCircleMembers => Set<CareCircleMember>();
+    public DbSet<CareCircleInvite> CareCircleInvites => Set<CareCircleInvite>();
     public DbSet<TimelineEntry> TimelineEntries => Set<TimelineEntry>();
     public DbSet<MedicalDocument> MedicalDocuments => Set<MedicalDocument>();
     public DbSet<DoctorQuestion> DoctorQuestions => Set<DoctorQuestion>();

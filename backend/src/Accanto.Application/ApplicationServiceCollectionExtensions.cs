@@ -2,6 +2,7 @@ using Accanto.Application.Auth;
 using Accanto.Application.CareCircles;
 using Accanto.Application.DoctorQuestions;
 using Accanto.Application.Documents;
+using Accanto.Application.Invites;
 using Accanto.Application.SharedUpdates;
 using Accanto.Application.Timeline;
 using FluentValidation;
@@ -21,6 +22,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<IDoctorQuestionService, DoctorQuestionService>();
         services.AddScoped<ISharedUpdateService, SharedUpdateService>();
+        services.AddScoped<IInviteService, InviteService>();
 
         services.AddSingleton<IDoctorQuestionTemplateProvider, StaticDoctorQuestionTemplateProvider>();
         services.AddSingleton<ISharedUpdateTemplateProvider, StaticSharedUpdateTemplateProvider>();

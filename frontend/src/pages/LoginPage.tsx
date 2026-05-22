@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { extractError } from '../api/client';
 
@@ -7,7 +7,9 @@ export default function LoginPage() {
   const { login } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
-  const from = (loc.state as any)?.from?.pathname ?? '/';
+  const [params] = useSearchParams();
+  const returnTo = params.get('returnTo');
+  const from = returnTo ?? (loc.state as any)?.from?.pathname ?? '/';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

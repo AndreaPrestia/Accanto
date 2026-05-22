@@ -1,11 +1,13 @@
 import { FormEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { extractError } from '../api/client';
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const nav = useNavigate();
+  const [params] = useSearchParams();
+  const returnTo = params.get('returnTo') ?? '/';
 
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -19,7 +21,7 @@ export default function RegisterPage() {
     setBusy(true);
     try {
       await register({ email, displayName, password });
-      nav('/', { replace: true });
+      nav(returnTo, { replace: true });
     } catch (err) {
       setError(extractError(err));
     } finally {

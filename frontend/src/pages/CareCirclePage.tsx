@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, extractError } from '../api/client';
 import { CareCircle, RoleLabel } from '../types';
+import InvitesPanel from '../components/InvitesPanel';
 
 export default function CareCirclePage() {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +34,8 @@ export default function CareCirclePage() {
         <Section to={`/care-circles/${circle.id}/shared-updates`} title="Aggiornamenti per gli altri" desc="Componi messaggi da copiare e inviare." />
         <Section to={`/care-circles/${circle.id}/difficult-day`} title="Giornata difficile" desc="Un piccolo respiro quando serve." emphasis />
       </div>
+
+      {isOwner && circle.status === 'Active' && <InvitesPanel circleId={circle.id} />}
 
       {isOwner && circle.status === 'Active' && (
         <div className="mt-8">

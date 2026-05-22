@@ -91,6 +91,32 @@ export interface SharedUpdate {
 
 export interface SharedUpdateTemplate { title: string; content: string; }
 
+export interface CareCircleInvite {
+  id: string;
+  careCircleId: string;
+  role: CareCircleRole;
+  token: string;
+  expiresAt: string;
+  maxUses: number;
+  usedCount: number;
+  revokedAt?: string | null;
+  createdAt: string;
+  isActive: boolean;
+}
+
+export interface CareCircleInvitePreview {
+  circleName: string;
+  role: CareCircleRole;
+  expiresAt: string;
+  invitedByDisplayName: string;
+}
+
+export interface CreateInviteRequest {
+  role: CareCircleRole;
+  expiresInDays?: number | null;
+  maxUses?: number | null;
+}
+
 // Italian labels
 export const TimelineTypeLabel: Record<TimelineEntryType, string> = {
   MedicalUpdate: 'Aggiornamento medico',

@@ -11,6 +11,7 @@ import DocumentsPage from './pages/DocumentsPage';
 import DoctorQuestionsPage from './pages/DoctorQuestionsPage';
 import SharedUpdatesPage from './pages/SharedUpdatesPage';
 import DifficultDayPage from './pages/DifficultDayPage';
+import InviteAcceptPage from './pages/InviteAcceptPage';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/care-circles/:id/questions" element={<RequireAuth><DoctorQuestionsPage /></RequireAuth>} />
         <Route path="/care-circles/:id/shared-updates" element={<RequireAuth><SharedUpdatesPage /></RequireAuth>} />
         <Route path="/care-circles/:id/difficult-day" element={<RequireAuth><DifficultDayPage /></RequireAuth>} />
+        <Route path="/invite/:token" element={<InviteAcceptPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
