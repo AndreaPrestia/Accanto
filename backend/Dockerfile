@@ -18,7 +18,7 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/* \
-    && useradd -m -u 1000 accanto \
+    && useradd -m accanto \
     && mkdir -p /data/storage \
     && chown -R accanto:accanto /data/storage /app
 USER accanto
