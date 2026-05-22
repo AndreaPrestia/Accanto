@@ -1,0 +1,43 @@
+name: Proposta di funzionalità
+description: Proponi una nuova funzione o un miglioramento
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Le proposte che partono dal **bisogno reale di un caregiver** hanno priorità rispetto a proposte puramente tecniche. Raccontaci prima il contesto.
+
+  - type: textarea
+    id: need
+    attributes:
+      label: Da quale bisogno nasce
+      description: "Chi sei (caregiver, professionista, sviluppatore), cosa stavi cercando di fare in Accanto, cosa è mancato."
+      placeholder: "Sto seguendo mia madre da 3 mesi, ho 4 fratelli e vorrei che potessero vedere il diario senza chiedermi le credenziali."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta
+      description: Come immagini che funzioni, da un punto di vista utente.
+      placeholder: "Vorrei poter generare un link di invito al cerchio con ruolo Viewer e scadenza 7 giorni."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative considerate
+      description: "Cosa hai già provato? Esistono workaround?"
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Quanto è urgente per te
+      options:
+        - "Mi blocca: senza questa non posso usare Accanto"
+        - "Mi semplifica molto la vita"
+        - "Sarebbe bello, posso aspettare"
+    validations:
+      required: true

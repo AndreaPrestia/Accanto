@@ -1,0 +1,28 @@
+{
+	email {$ACCANTO_TLS_EMAIL}
+	# Decommenta per testare contro lo staging di Let's Encrypt (evita rate-limit):
+	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+{$ACCANTO_DOMAIN} {
+	encode zstd gzip
+
+	# Header di sicurezza base
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), microphone=(), camera=()"
+		-Server
+	}
+
+	# Le API vanno al backend (mantenendo il path /api/...)
+	reverse_proxy /api/* backend:8080
+
+	# Health check pubblico (utile per uptime monitor esterni)
+	reverse_proxy /health backend:8080
+
+	# Tutto il resto è la SPA servita da nginx nel container frontend
+	reverse_proxy frontend:80
+}

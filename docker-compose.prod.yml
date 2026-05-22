@@ -1,0 +1,54 @@
+# docker-compose.prod.yml
+#
+# Override per deploy in produzione: rimuove l'esposizione pubblica di Postgres e backend,
+# mette Caddy davanti al frontend con TLS automatico da Let's Encrypt.
+#
+# Uso:
+#   ACCANTO_DOMAIN=accanto.example.com \
+#   ACCANTO_TLS_EMAIL=tu@example.com \
+#   ASPNETCORE_ENVIRONMENT=Production \
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Prerequisiti:
+#  - DNS A/AAAA di ACCANTO_DOMAIN punta al server.
+#  - Porte 80 e 443 raggiungibili da internet (necessarie per ACME HTTP/TLS challenge).
+#  - File .env locale con i segreti veri (Encryption__MasterKey, Jwt__Key, POSTGRES_PASSWORD).
+
+services:
+  db:
+    # Non esporre Postgres su internet.
+    ports: !reset []
+
+  backend:
+    # Non esporre il backend direttamente: ci arriva solo Caddy via rete interna.
+    ports: !reset []
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      Cors__AllowedOrigins: ${Cors__AllowedOrigins:-https://${ACCANTO_DOMAIN}}
+
+  frontend:
+    # Non esporre il frontend direttamente: ci arriva solo Caddy.
+    ports: !reset []
+    expose:
+      - "80"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      ACCANTO_DOMAIN: ${ACCANTO_DOMAIN:?ACCANTO_DOMAIN richiesto (es. accanto.example.com)}
+      ACCANTO_TLS_EMAIL: ${ACCANTO_TLS_EMAIL:?ACCANTO_TLS_EMAIL richiesto per Let's Encrypt}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:

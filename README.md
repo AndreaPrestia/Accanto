@@ -1,5 +1,8 @@
 # Accanto
 
+[![CI](https://github.com/AndreaPrestia/Accanto/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreaPrestia/Accanto/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
 > Un compagno digitale, sobrio e mobile-first, per chi assiste una persona cara.
 
 Accanto è un'applicazione web open source pensata per i **caregiver familiari**: quei figli, fratelli, partner e amici che si trovano, spesso da un giorno all'altro, a coordinare visite, terapie, documenti e relazioni intorno a una persona malata o fragile. Non è un'app medica. Non sostituisce un medico, uno psicologo, un'assistente sociale. È uno spazio dove tutto ciò che riguarda l'assistenza — appuntamenti, sintomi, referti, domande per il medico, aggiornamenti per i parenti — può vivere in un solo posto, con un tono gentile e senza fronzoli.
@@ -128,6 +131,23 @@ Il frontend è servito da **nginx** e fa da reverse proxy a `/api/` verso il bac
 
 I file caricati vivono in `./storage/` sul filesystem host (volume montato in `/data/storage` dentro il container). Il database vive nel volume `db-data`.
 
+### Deploy in produzione (con TLS automatico via Caddy)
+
+Per esporre Accanto su un dominio pubblico con HTTPS automatico (Let's Encrypt):
+
+1. Punta il DNS (`A`/`AAAA`) del dominio al server e apri le porte **80** e **443**.
+2. Compila `.env` con segreti veri (`Encryption__MasterKey`, `Jwt__Key`, `POSTGRES_PASSWORD`).
+3. Avvia con il file di override:
+
+   ```sh
+   ACCANTO_DOMAIN=accanto.example.com \
+   ACCANTO_TLS_EMAIL=tu@example.com \
+   ASPNETCORE_ENVIRONMENT=Production \
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+   ```
+
+In produzione né Postgres né il backend sono esposti su internet: solo Caddy ascolta su 80/443 e fa da reverse proxy. La configurazione vive in [deploy/Caddyfile](deploy/Caddyfile).
+
 ## Sviluppo locale (senza Docker)
 
 ### Backend
@@ -255,3 +275,7 @@ Cerchi di cura, diario, documenti, domande per il medico, aggiornamenti pronti d
 Accanto è rilasciato sotto licenza **GNU Affero General Public License v3.0 (AGPL-3.0)**. Vedi [LICENSE](LICENSE).
 
 Questa scelta è deliberata: chiunque modifichi Accanto e lo offra come servizio web ad altri deve a sua volta rendere disponibile il codice sorgente delle proprie modifiche. Sembra giusto, per uno strumento che tocca i momenti più delicati della vita delle persone.
+
+## Contribuire
+
+Vedi [CONTRIBUTING.md](CONTRIBUTING.md). Per vulnerabilità di sicurezza, [SECURITY.md](SECURITY.md).

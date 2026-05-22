@@ -1,0 +1,72 @@
+name: Bug report
+description: Segnala un comportamento che non va come ti aspettavi
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per la segnalazione. Per i bug di sicurezza **non usare questo template**: vedi [SECURITY.md](https://github.com/AndreaPrestia/Accanto/blob/main/SECURITY.md).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Cosa è successo
+      description: Descrivi il comportamento osservato.
+      placeholder: "Quando carico un documento PDF da 8 MB, l'upload va a buon fine ma il download restituisce 500."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Cosa ti aspettavi
+      placeholder: "Mi aspettavo di poter scaricare il file appena caricato."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passi per riprodurre
+      placeholder: |
+        1. Login come Caregiver
+        2. Vai sul cerchio "X"
+        3. Carica un PDF di 8 MB
+        4. Clicca "Scarica"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Versione / commit
+      placeholder: "v0.1.0 oppure 83500cd"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deploy
+    attributes:
+      label: Come stai facendo girare Accanto
+      options:
+        - Docker compose (default)
+        - Docker compose (con TLS davanti)
+        - .NET + Node locali (no Docker)
+        - Altro (specifica sotto)
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log o messaggi di errore
+      description: "Output di `docker compose logs backend` o console del browser. **NON incollare dati reali di pazienti**: oscurali."
+      render: shell
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: Non sto allegando dati reali di persone assistite (nomi, referti, contenuti di diario)
+          required: true

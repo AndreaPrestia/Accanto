@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Vulnerabilità di sicurezza
+    url: https://github.com/AndreaPrestia/Accanto/security/advisories/new
+    about: Per favore segnala privatamente le vulnerabilità di sicurezza, non aprire una Issue pubblica.
+  - name: Domande, idee, racconti d'uso
+    url: https://github.com/AndreaPrestia/Accanto/discussions
+    about: Per chiacchierate aperte usa le Discussions, non le Issues.
