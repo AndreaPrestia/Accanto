@@ -6,6 +6,8 @@ Accanto è un'applicazione web open source pensata per i **caregiver familiari**
 
 Il progetto è in **italiano** per scelta: la maggior parte dei caregiver italiani usa quotidianamente strumenti generalisti pensati in inglese o per contesti diversi. Accanto vuole sentirsi famigliare nel modo in cui parla.
 
+> **Nota sulla genesi del progetto.** Accanto è scritto interamente con l'aiuto di **Claude** (Anthropic), usato come agente di sviluppo end-to-end. Architettura, codice backend e frontend, test, configurazione Docker, copy in italiano e questo README sono il risultato di una collaborazione iterativa uomo–agente, con revisione umana sulle scelte di dominio, sulla privacy e sul tono. La scelta di affidarsi a un agente è deliberata: il bisogno reale dei caregiver non aspetta, e questo strumento doveva essere disponibile **il prima possibile per chiunque ne avesse bisogno**, gratuitamente e self-hostable. Il codice è qui, leggibile e auditabile: chiunque può ispezionarlo, forkarlo, contribuire.
+
 ---
 
 ## Indice
