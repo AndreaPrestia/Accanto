@@ -13,16 +13,17 @@ Il progetto è in **italiano** per scelta: la maggior parte dei caregiver italia
 ## Indice
 
 1. [Cosa fa](#cosa-fa)
-2. [Architettura](#architettura)
-3. [Stack tecnico](#stack-tecnico)
-4. [Requisiti](#requisiti)
-5. [Avvio rapido (Docker)](#avvio-rapido-docker)
-6. [Sviluppo locale (senza Docker)](#sviluppo-locale-senza-docker)
-7. [API e Swagger](#api-e-swagger)
-8. [Privacy e dati](#privacy-e-dati)
-9. [Modulo AI futuro](#modulo-ai-futuro)
-10. [Roadmap](#roadmap)
-11. [Licenza](#licenza)
+2. [Screenshot](#screenshot)
+3. [Architettura](#architettura)
+4. [Stack tecnico](#stack-tecnico)
+5. [Requisiti](#requisiti)
+6. [Avvio rapido (Docker)](#avvio-rapido-docker)
+7. [Sviluppo locale (senza Docker)](#sviluppo-locale-senza-docker)
+8. [API e Swagger](#api-e-swagger)
+9. [Privacy e dati](#privacy-e-dati)
+10. [Modulo AI futuro](#modulo-ai-futuro)
+11. [Roadmap](#roadmap)
+12. [Licenza](#licenza)
 
 ---
 
@@ -39,6 +40,22 @@ Accanto organizza la cura intorno a un **Cerchio di cura** (`CareCircle`): uno s
 Il **ruolo** di ogni partecipante al cerchio è uno di `Coordinatore` (Owner), `Caregiver`, `In ascolto` (Viewer). I caregiver scrivono, i viewer leggono, il coordinatore può archiviare il cerchio.
 
 L'interfaccia è **mobile-first** e installabile come PWA: aperta dal telefono, si comporta come un'app, anche offline parzialmente (shell e asset cachati).
+
+## Screenshot
+
+Gli screenshot dell'interfaccia sono raccolti in [`docs/screenshots/`](docs/screenshots/). Sono catturati dalla versione corrente in italiano, dal viewport mobile (le viste desktop sono semplici espansioni della stessa griglia).
+
+| Vista | Anteprima |
+|---|---|
+| Home / lista cerchi | ![Home](docs/screenshots/01-home.png) |
+| Dettaglio cerchio | ![Cerchio](docs/screenshots/02-circle.png) |
+| Diario | ![Diario](docs/screenshots/03-timeline.png) |
+| Documenti | ![Documenti](docs/screenshots/04-documents.png) |
+| Domande per il medico | ![Domande](docs/screenshots/05-doctor-questions.png) |
+| Aggiornamenti per gli altri | ![Aggiornamenti](docs/screenshots/06-shared-updates.png) |
+| Giornata difficile | ![Giornata difficile](docs/screenshots/07-difficult-day.png) |
+
+> Se gli screenshot non sono ancora presenti nel repository, vuol dire che la prima release pubblica li sta ancora raccogliendo. Le immagini arriveranno a breve in [`docs/screenshots/`](docs/screenshots/).
 
 ## Architettura
 
