@@ -25,7 +25,9 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
         services.Configure<StorageOptions>(configuration.GetSection("Storage"));
+        services.Configure<EncryptionOptions>(configuration.GetSection("Encryption"));
 
+        services.AddSingleton<IFieldProtector, AesGcmFieldProtector>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();

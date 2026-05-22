@@ -12,6 +12,6 @@ internal static class TestDb
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .EnableSensitiveDataLogging()
             .Options;
-        return new AccantoDbContext(opts);
+        return new AccantoDbContext(opts, new NullFieldProtector());
     }
 }

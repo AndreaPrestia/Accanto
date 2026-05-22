@@ -167,6 +167,30 @@ Accanto è progettato per essere **self-hostable** (sul tuo PC, su un piccolo VP
 - Nessuna telemetria, nessun tracker, nessun analytics di default.
 - I JWT scadono entro la durata configurata (`Jwt__ExpiryMinutes`, default 480 minuti).
 
+### Cifratura a riposo
+
+Trattandosi di dati sensibili (annotazioni cliniche, documenti medici), Accanto cifra a livello applicativo i campi e i file più riservati prima di scriverli su disco:
+
+- **AES-256-GCM** con nonce casuale per record e tag di autenticità (16 byte).
+- **Campi DB cifrati**: titolo e contenuto del diario, domande e note per il medico, contenuto degli aggiornamenti famiglia, note e nome originale dei documenti medici, descrizione del cerchio.
+- **Blob dei documenti** caricati: cifrati in memoria prima della scrittura su disco; decifrati on-demand al download.
+- **Tag e metadati strutturali** (date, tipi, ruoli) restano in chiaro per consentire ricerca e filtri.
+
+La chiave master è una stringa **base64 da 32 byte** fornita via variabile d'ambiente `Encryption__MasterKey`. Generala una volta sola con:
+
+```bash
+openssl rand -base64 32
+```
+
+> ⚠️ **Attenzione**: se perdi la chiave perdi i dati cifrati. Conservala in un gestore di segreti (vault) o almeno in un backup separato dal database. Non ruotare la chiave in v0.1: non è ancora supportata la migrazione automatica del ciphertext.
+
+**Restano a carico di chi fa il deploy**:
+
+- cifratura del disco (LUKS, BitLocker, dm-crypt sul volume Postgres e sul volume dei documenti);
+- terminazione TLS (reverse proxy: Caddy, Traefik, nginx) — il `docker-compose` di esempio espone solo HTTP in locale;
+- backup cifrati del database e della directory `storage/`, includendo SEPARATAMENTE la chiave master;
+- politiche di accesso al server e rotazione delle credenziali Postgres.
+
 **Disclaimer**: Accanto non è un dispositivo medico, non sostituisce nessuna figura sanitaria, non offre diagnosi né consigli terapeutici. È uno strumento di **organizzazione personale**.
 
 ## Modulo AI futuro

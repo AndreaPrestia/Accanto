@@ -1,3 +1,4 @@
+using Accanto.Application.Common.Security;
 using Accanto.Application.Common.Storage;
 using Microsoft.Extensions.Options;
 
@@ -6,8 +7,9 @@ namespace Accanto.Infrastructure.Storage;
 public class LocalFileStorage : IFileStorage
 {
     private readonly string _rootFull;
+    private readonly IFieldProtector _protector;
 
-    public LocalFileStorage(IOptions<StorageOptions> opt)
+    public LocalFileStorage(IOptions<StorageOptions> opt, IFieldProtector protector)
     {
         var root = opt.Value.RootPath;
         if (string.IsNullOrWhiteSpace(root))
@@ -16,6 +18,7 @@ public class LocalFileStorage : IFileStorage
         _rootFull = Path.GetFullPath(root);
         if (!_rootFull.EndsWith(Path.DirectorySeparatorChar))
             _rootFull += Path.DirectorySeparatorChar;
+        _protector = protector;
     }
 
     public async Task<StoredFile> SaveAsync(Stream content, string originalFileName, string contentType, CancellationToken cancellationToken = default)
@@ -34,21 +37,27 @@ public class LocalFileStorage : IFileStorage
         var fullPath = Path.GetFullPath(Path.Combine(_rootFull, relative));
         EnsureWithinRoot(fullPath);
 
-        long size;
+        // Carichiamo l'intero contenuto in memoria (limite upload 20 MB applicato a monte) e cifriamo con AES-GCM.
+        using var ms = new MemoryStream();
+        await content.CopyToAsync(ms, cancellationToken);
+        var plaintext = ms.ToArray();
+        var encrypted = _protector.EncryptBytes(plaintext);
+
         await using (var fs = new FileStream(fullPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, useAsync: true))
         {
-            await content.CopyToAsync(fs, cancellationToken);
-            size = fs.Length;
+            await fs.WriteAsync(encrypted.AsMemory(), cancellationToken);
         }
-        return new StoredFile(internalName, relative, size);
+        // Registriamo la dimensione del plaintext: e' quella significativa per l'utente.
+        return new StoredFile(internalName, relative, plaintext.LongLength);
     }
 
-    public Task<Stream> OpenReadAsync(string relativePath, CancellationToken cancellationToken = default)
+    public async Task<Stream> OpenReadAsync(string relativePath, CancellationToken cancellationToken = default)
     {
         var full = ResolveAndGuard(relativePath);
         if (!File.Exists(full)) throw new FileNotFoundException("File non trovato.", relativePath);
-        Stream stream = new FileStream(full, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true);
-        return Task.FromResult(stream);
+        var encrypted = await File.ReadAllBytesAsync(full, cancellationToken);
+        var plaintext = _protector.DecryptBytes(encrypted);
+        return new MemoryStream(plaintext, writable: false);
     }
 
     public Task DeleteAsync(string relativePath, CancellationToken cancellationToken = default)

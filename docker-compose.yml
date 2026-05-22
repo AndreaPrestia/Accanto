@@ -34,6 +34,7 @@ services:
       Jwt__ExpiryMinutes: ${Jwt__ExpiryMinutes:-480}
       Storage__RootPath: ${Storage__RootPath:-/data/storage}
       Storage__MaxFileSizeBytes: ${Storage__MaxFileSizeBytes:-20971520}
+      Encryption__MasterKey: ${Encryption__MasterKey:?Encryption__MasterKey richiesta (genera con: openssl rand -base64 32)}
       Cors__AllowedOrigins: ${Cors__AllowedOrigins:-http://localhost:5173,http://localhost:8081}
     volumes:
       - ./storage:/data/storage
