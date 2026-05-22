@@ -1,3 +1,4 @@
+using Accanto.Application.Account;
 using Accanto.Application.Auth;
 using Accanto.Application.CareCircles;
 using Accanto.Application.DoctorQuestions;
@@ -17,6 +18,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>(ServiceLifetime.Scoped);
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<ICareCircleService, CareCircleService>();
         services.AddScoped<ITimelineService, TimelineService>();
         services.AddScoped<IDocumentService, DocumentService>();

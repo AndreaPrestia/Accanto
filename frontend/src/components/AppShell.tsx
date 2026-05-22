@@ -13,7 +13,8 @@ export default function AppShell() {
           <Link to="/" className="font-semibold text-accanto-700">Accanto</Link>
           {user && (
             <div className="flex items-center gap-3 text-sm">
-              <span className="text-accanto-500 hidden sm:inline">{user.displayName}</span>
+              <Link to="/account" className="text-accanto-700 hover:underline hidden sm:inline">{user.displayName}</Link>
+              <Link to="/account" className="text-accanto-700 hover:underline sm:hidden">Account</Link>
               <button onClick={logout} className="text-accanto-700 hover:underline">Esci</button>
             </div>
           )}
