@@ -58,8 +58,6 @@ Gli screenshot dell'interfaccia sono raccolti in [`docs/screenshots/`](docs/scre
 | Aggiornamenti per gli altri | ![Aggiornamenti](docs/screenshots/06-shared-updates.png) |
 | Giornata difficile | ![Giornata difficile](docs/screenshots/07-difficult-day.png) |
 
-> Se gli screenshot non sono ancora presenti nel repository, vuol dire che la prima release pubblica li sta ancora raccogliendo. Le immagini arriveranno a breve in [`docs/screenshots/`](docs/screenshots/).
-
 ## Architettura
 
 Monolite modulare in stile Clean Architecture:
