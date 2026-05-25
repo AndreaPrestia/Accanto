@@ -54,6 +54,10 @@
     "deleteConfirmLabel": "Conferma con la password",
     "deleteUnderstand": "Capisco che l'operazione è irreversibile.",
     "deleteCta": "Elimina il mio account",
-    "deleting": "Eliminazione…"
+    "deleting": "Eliminazione…",
+    "exportTitle": "Esporta i tuoi dati",
+    "exportHint": "Scarica un archivio ZIP con il tuo profilo, le voci di diario, i documenti caricati, le domande, gli aggiornamenti, l'audit e le preferenze.",
+    "exportCta": "Scarica archivio",
+    "exportPreparing": "Preparazione…"
   }
 }

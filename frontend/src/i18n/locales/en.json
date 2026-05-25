@@ -54,6 +54,10 @@
     "deleteConfirmLabel": "Confirm with your password",
     "deleteUnderstand": "I understand this action is irreversible.",
     "deleteCta": "Delete my account",
-    "deleting": "Deleting…"
+    "deleting": "Deleting…",
+    "exportTitle": "Export your data",
+    "exportHint": "Download a ZIP archive with your profile, journal entries, uploaded documents, questions, updates, audit log and preferences.",
+    "exportCta": "Download archive",
+    "exportPreparing": "Preparing…"
   }
 }

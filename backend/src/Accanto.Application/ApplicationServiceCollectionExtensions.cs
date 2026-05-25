@@ -21,6 +21,7 @@ public static class ApplicationServiceCollectionExtensions
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IGdprExportService, GdprExportService>();
         services.AddScoped<ICareCircleService, CareCircleService>();
         services.AddScoped<ITimelineService, TimelineService>();
         services.AddScoped<IDocumentService, DocumentService>();

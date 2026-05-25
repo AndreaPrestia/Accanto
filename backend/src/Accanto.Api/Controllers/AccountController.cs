@@ -13,12 +13,14 @@ public class AccountController : ControllerBase
 {
     private readonly IAccountService _svc;
     private readonly INotificationPreferenceService _prefs;
+    private readonly IGdprExportService _export;
     private readonly ICurrentUser _currentUser;
 
-    public AccountController(IAccountService svc, INotificationPreferenceService prefs, ICurrentUser currentUser)
+    public AccountController(IAccountService svc, INotificationPreferenceService prefs, IGdprExportService export, ICurrentUser currentUser)
     {
         _svc = svc;
         _prefs = prefs;
+        _export = export;
         _currentUser = currentUser;
     }
 
@@ -55,5 +57,12 @@ public class AccountController : ControllerBase
     {
         await _svc.UpdateLanguageAsync(_currentUser.RequireUserId(), request, ct);
         return NoContent();
+    }
+
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(CancellationToken ct)
+    {
+        var result = await _export.ExportAsync(_currentUser.RequireUserId(), ct);
+        return File(result.Content, "application/zip", result.FileName);
     }
 }

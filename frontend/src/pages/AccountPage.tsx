@@ -26,6 +26,10 @@ export default function AccountPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
+  // Esportazione dati
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+
   if (!user) return null;
 
   async function submitPassword(e: React.FormEvent) {
@@ -73,6 +77,32 @@ export default function AccountPage() {
       setDeleteError(extractError(e));
     } finally {
       setDeleteSubmitting(false);
+    }
+  }
+
+  async function downloadExport() {
+    setExportError(null);
+    setExporting(true);
+    try {
+      const res = await api.get('/account/export', { responseType: 'blob' });
+      const disposition: string | undefined = res.headers['content-disposition'];
+      let fileName = 'accanto-export.zip';
+      if (disposition) {
+        const match = /filename\*?=(?:UTF-8'')?["']?([^"';]+)/i.exec(disposition);
+        if (match && match[1]) fileName = decodeURIComponent(match[1]);
+      }
+      const url = URL.createObjectURL(res.data as Blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setExportError(extractError(e));
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -143,6 +173,20 @@ export default function AccountPage() {
       <PushNotificationsSection />
 
       <NotificationPreferencesSection />
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold text-accanto-900">{t('account.exportTitle')}</h2>
+        <p className="text-sm text-accanto-500">{t('account.exportHint')}</p>
+        {exportError && <p className="text-sm text-red-600">{exportError}</p>}
+        <button
+          type="button"
+          onClick={downloadExport}
+          disabled={exporting}
+          className="rounded-lg bg-accanto-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+        >
+          {exporting ? t('account.exportPreparing') : t('account.exportCta')}
+        </button>
+      </section>
 
       <section className="space-y-3 border-t border-accanto-100 pt-6">
         <h2 className="text-base font-semibold text-red-800">{t('account.deleteTitle')}</h2>
