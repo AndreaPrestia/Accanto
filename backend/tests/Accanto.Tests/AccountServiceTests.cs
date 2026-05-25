@@ -17,6 +17,7 @@ public class AccountServiceTests
         public Task<StoredFile> SaveAsync(Stream content, string originalFileName, string contentType, CancellationToken ct = default) => throw new NotImplementedException();
         public Task<Stream> OpenReadAsync(string relativePath, CancellationToken ct = default) => throw new NotImplementedException();
         public Task DeleteAsync(string relativePath, CancellationToken ct = default) { Deleted.Add(relativePath); return Task.CompletedTask; }
+        public Task RewriteWithActiveKeyAsync(string relativePath, CancellationToken ct = default) => Task.CompletedTask;
     }
 
     private static (AccountService account, CareCircleService circles, Accanto.Infrastructure.Persistence.AccantoDbContext db, PasswordHasher hasher, FakeStorage storage) Build()

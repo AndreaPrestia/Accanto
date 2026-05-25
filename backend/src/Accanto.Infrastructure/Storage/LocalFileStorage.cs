@@ -67,6 +67,24 @@ public class LocalFileStorage : IFileStorage
         return Task.CompletedTask;
     }
 
+    public async Task RewriteWithActiveKeyAsync(string relativePath, CancellationToken cancellationToken = default)
+    {
+        var full = ResolveAndGuard(relativePath);
+        if (!File.Exists(full)) throw new FileNotFoundException("File non trovato.", relativePath);
+
+        var encrypted = await File.ReadAllBytesAsync(full, cancellationToken);
+        var plaintext = _protector.DecryptBytes(encrypted);
+        var reEncrypted = _protector.EncryptBytes(plaintext);
+
+        // Scrittura atomica: tmp accanto al file + replace.
+        var tmp = full + ".rotating";
+        await using (var fs = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+        {
+            await fs.WriteAsync(reEncrypted.AsMemory(), cancellationToken);
+        }
+        File.Move(tmp, full, overwrite: true);
+    }
+
     private string ResolveAndGuard(string relativePath)
     {
         if (string.IsNullOrWhiteSpace(relativePath))

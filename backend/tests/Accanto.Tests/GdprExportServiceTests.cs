@@ -23,6 +23,7 @@ public class GdprExportServiceTests
             return Task.FromResult<Stream>(new MemoryStream(bytes, writable: false));
         }
         public Task DeleteAsync(string relativePath, CancellationToken ct = default) { Files.Remove(relativePath); return Task.CompletedTask; }
+        public Task RewriteWithActiveKeyAsync(string relativePath, CancellationToken ct = default) => Task.CompletedTask;
     }
 
     private static async Task<(Guid userId, Guid circleId, GdprExportService svc, FakeStorage storage, NoOpAuditLog audit)> SetupAsync()

@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Accanto.Api/Accanto.Api.csproj" />
     <Project Path="src/Accanto.Application/Accanto.Application.csproj" />
+    <Project Path="src/Accanto.Cli/Accanto.Cli.csproj" />
     <Project Path="src/Accanto.Domain/Accanto.Domain.csproj" />
     <Project Path="src/Accanto.Infrastructure/Accanto.Infrastructure.csproj" />
   </Folder>

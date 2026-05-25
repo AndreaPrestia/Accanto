@@ -64,4 +64,85 @@ public class AesGcmFieldProtectorTests
         var act = () => Create("AAAAAAAAAAAAAAAAAAAAAA==");
         act.Should().Throw<InvalidOperationException>();
     }
+
+    // ------------ key-ring v2 ------------
+
+    private const string KeyA = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    private const string KeyB = "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=";
+
+    private static AesGcmFieldProtector Keyring(string? master, string? active, params (string id, string b64)[] keys)
+    {
+        var o = new EncryptionOptions { MasterKey = master, ActiveKeyId = active };
+        foreach (var (id, b64) in keys) o.Keys[id] = b64;
+        return new AesGcmFieldProtector(Options.Create(o));
+    }
+
+    [Fact]
+    public void V2_token_roundtrip_uses_active_key()
+    {
+        var p = Keyring(master: null, active: "k1", ("k1", KeyA));
+        var token = p.Encrypt("paziente Rossi");
+        token.Should().StartWith("v2.k1.");
+        p.Decrypt(token).Should().Be("paziente Rossi");
+    }
+
+    [Fact]
+    public void V1_token_still_decryptable_when_keyring_configured()
+    {
+        var legacy = Keyring(master: KeyA, active: null);
+        var token = legacy.Encrypt("vecchio dato");
+
+        var ring = Keyring(master: KeyA, active: "k2", ("k2", KeyB));
+        ring.Decrypt(token).Should().Be("vecchio dato");
+    }
+
+    [Fact]
+    public void V2_token_with_unknown_key_id_throws()
+    {
+        var writer = Keyring(master: null, active: "k1", ("k1", KeyA));
+        var token = writer.Encrypt("x");
+
+        var reader = Keyring(master: null, active: "kZ", ("kZ", KeyB));
+        var act = () => reader.Decrypt(token);
+        act.Should().Throw<System.Security.Cryptography.CryptographicException>();
+    }
+
+    [Fact]
+    public void ActiveKeyId_not_in_keys_throws()
+    {
+        var act = () => Keyring(master: null, active: "missing", ("k1", KeyA));
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void Invalid_key_id_throws()
+    {
+        var o = new EncryptionOptions { ActiveKeyId = "ok" };
+        o.Keys["ok"] = KeyA;
+        o.Keys["bad id with space"] = KeyB;
+        var act = () => new AesGcmFieldProtector(Options.Create(o));
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void V2_bytes_roundtrip_via_magic_header()
+    {
+        var p = Keyring(master: null, active: "k1", ("k1", KeyA));
+        var input = new byte[] { 7, 8, 9, 10, 11 };
+        var blob = p.EncryptBytes(input);
+        blob[0].Should().Be(0xA1);
+        blob[1].Should().Be(0x02);
+        p.DecryptBytes(blob).Should().Equal(input);
+    }
+
+    [Fact]
+    public void V1_legacy_bytes_still_decryptable_under_keyring()
+    {
+        var legacy = Keyring(master: KeyA, active: null);
+        var blob = legacy.EncryptBytes(new byte[] { 1, 2, 3 });
+        blob[0].Should().NotBe(0xA1);
+
+        var ring = Keyring(master: KeyA, active: "k2", ("k2", KeyB));
+        ring.DecryptBytes(blob).Should().Equal(new byte[] { 1, 2, 3 });
+    }
 }
