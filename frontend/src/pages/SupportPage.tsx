@@ -27,7 +27,7 @@ export default function SupportPage() {
       </div>
       <p className="text-accanto-500 mb-4">{t('support.intro')}</p>
 
-      <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label={t('support.filterAria')}>
+      <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label={t('support.filterAria')}>
         <CategoryChip
           active={active === 'all'}
           onClick={() => setActive('all')}

@@ -69,8 +69,9 @@ export default function LoginPage() {
         <form onSubmit={submitTwoFactor} className="space-y-4">
           {!useRecovery ? (
             <div>
-              <label className="label">{t('auth.twoFactorCode')}</label>
+              <label className="label" htmlFor="login-2fa-code">{t('auth.twoFactorCode')}</label>
               <input
+                id="login-2fa-code"
                 className="input"
                 inputMode="numeric"
                 autoComplete="one-time-code"
@@ -84,8 +85,9 @@ export default function LoginPage() {
             </div>
           ) : (
             <div>
-              <label className="label">{t('auth.twoFactorRecoveryCode')}</label>
+              <label className="label" htmlFor="login-2fa-recovery">{t('auth.twoFactorRecoveryCode')}</label>
               <input
+                id="login-2fa-recovery"
                 className="input"
                 autoComplete="off"
                 required
@@ -115,12 +117,12 @@ export default function LoginPage() {
       <p className="text-accanto-500 mb-6">{t('auth.loginSubtitle')}</p>
       <form onSubmit={submit} className="space-y-4">
         <div>
-          <label className="label">{t('auth.email')}</label>
-          <input className="input" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <label className="label" htmlFor="login-email">{t('auth.email')}</label>
+          <input id="login-email" className="input" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div>
-          <label className="label">{t('auth.password')}</label>
-          <input className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <label className="label" htmlFor="login-password">{t('auth.password')}</label>
+          <input id="login-password" className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         {error && <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">{error}</div>}
         <button className="btn-primary w-full" disabled={busy}>{busy ? t('auth.loggingIn') : t('auth.loginCta')}</button>

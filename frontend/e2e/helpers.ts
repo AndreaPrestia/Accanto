@@ -33,3 +33,11 @@ export async function registerViaUi(page: Page, user: TestUser) {
   await page.getByRole('button', { name: 'Crea il mio spazio' }).click();
   await expect(page).not.toHaveURL(/\/register/);
 }
+
+export async function loginViaUi(page: Page, email: string, password: string) {
+  await page.goto('/login');
+  const inputs = page.locator('input.input');
+  await inputs.nth(0).fill(email);
+  await inputs.nth(1).fill(password);
+  await page.getByRole('button', { name: /accedi|entra/i }).click();
+}

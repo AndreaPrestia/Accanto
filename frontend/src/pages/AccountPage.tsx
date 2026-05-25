@@ -127,8 +127,9 @@ export default function AccountPage() {
         <h2 className="text-base font-semibold text-accanto-900">{t('account.changePassword')}</h2>
         <form onSubmit={submitPassword} className="space-y-3">
           <div>
-            <label className="block text-sm text-accanto-700 mb-1">{t('account.currentPassword')}</label>
+            <label className="block text-sm text-accanto-700 mb-1" htmlFor="account-current-pwd">{t('account.currentPassword')}</label>
             <input
+              id="account-current-pwd"
               type="password"
               value={currentPwd}
               onChange={(e) => setCurrentPwd(e.target.value)}
@@ -138,8 +139,9 @@ export default function AccountPage() {
             />
           </div>
           <div>
-            <label className="block text-sm text-accanto-700 mb-1">{t('account.newPassword')}</label>
+            <label className="block text-sm text-accanto-700 mb-1" htmlFor="account-new-pwd">{t('account.newPassword')}</label>
             <input
+              id="account-new-pwd"
               type="password"
               value={newPwd}
               onChange={(e) => setNewPwd(e.target.value)}
@@ -151,8 +153,9 @@ export default function AccountPage() {
             <p className="text-xs text-accanto-500 mt-1">{t('account.passwordHint')}</p>
           </div>
           <div>
-            <label className="block text-sm text-accanto-700 mb-1">{t('account.confirmNewPassword')}</label>
+            <label className="block text-sm text-accanto-700 mb-1" htmlFor="account-new-pwd-confirm">{t('account.confirmNewPassword')}</label>
             <input
+              id="account-new-pwd-confirm"
               type="password"
               value={newPwd2}
               onChange={(e) => setNewPwd2(e.target.value)}
@@ -207,8 +210,9 @@ export default function AccountPage() {
         </p>
         <form onSubmit={submitDelete} className="space-y-3">
           <div>
-            <label className="block text-sm text-accanto-700 mb-1">{t('account.deleteConfirmLabel')}</label>
+            <label className="block text-sm text-accanto-700 mb-1" htmlFor="account-delete-pwd">{t('account.deleteConfirmLabel')}</label>
             <input
+              id="account-delete-pwd"
               type="password"
               value={deletePwd}
               onChange={(e) => setDeletePwd(e.target.value)}
