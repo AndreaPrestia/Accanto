@@ -15,6 +15,8 @@ File previsti:
 - `05-doctor-questions.png` — domande per il medico
 - `06-shared-updates.png` — aggiornamenti pronti da copiare
 - `07-difficult-day.png` — pagina "Giornata difficile"
+- `08-audit-log.png` — registro azioni del cerchio
+- `09-account.png` — pagina account (preferenze, 2FA, sessioni, registro sicurezza, esportazione dati)
 
 ## Note
 
