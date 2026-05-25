@@ -25,6 +25,7 @@ public class AccantoDbContext : DbContext, IAccantoDbContext
     public DbSet<DoctorQuestion> DoctorQuestions => Set<DoctorQuestion>();
     public DbSet<SharedUpdate> SharedUpdates => Set<SharedUpdate>();
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
+    public DbSet<AuditLogEntry> AuditLogEntries => Set<AuditLogEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

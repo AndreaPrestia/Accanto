@@ -1,3 +1,4 @@
+using Accanto.Application.Audit;
 using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
@@ -13,17 +14,20 @@ public class DoctorQuestionService : IDoctorQuestionService
 {
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
+    private readonly IAuditLog _audit;
     private readonly IValidator<CreateDoctorQuestionRequest> _createValidator;
     private readonly IValidator<UpdateDoctorQuestionRequest> _updateValidator;
 
     public DoctorQuestionService(
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
+        IAuditLog audit,
         IValidator<CreateDoctorQuestionRequest> createValidator,
         IValidator<UpdateDoctorQuestionRequest> updateValidator)
     {
         _db = db;
         _auth = auth;
+        _audit = audit;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
     }
@@ -55,6 +59,9 @@ public class DoctorQuestionService : IDoctorQuestionService
         };
         _db.DoctorQuestions.Add(q);
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.QuestionCreated, AuditResourceType.DoctorQuestion, q.Id, Snippet(q.Question), CancellationToken.None);
+
         return Map(q);
     }
 
@@ -73,6 +80,9 @@ public class DoctorQuestionService : IDoctorQuestionService
         q.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.QuestionUpdated, AuditResourceType.DoctorQuestion, q.Id, Snippet(q.Question), CancellationToken.None);
+
         return Map(q);
     }
 
@@ -81,9 +91,14 @@ public class DoctorQuestionService : IDoctorQuestionService
         await _auth.EnsureMemberAsync(userId, careCircleId, CareCircleRole.Caregiver, cancellationToken);
         var q = await _db.DoctorQuestions.FirstOrDefaultAsync(x => x.Id == questionId && x.CareCircleId == careCircleId, cancellationToken)
             ?? throw new NotFoundException("Domanda non trovata.");
+        var snip = Snippet(q.Question);
         _db.DoctorQuestions.Remove(q);
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.QuestionDeleted, AuditResourceType.DoctorQuestion, questionId, snip, CancellationToken.None);
     }
+
+    private static string Snippet(string text) => text.Length <= 80 ? text : text[..80] + "…";
 
     private static DoctorQuestionDto Map(DoctorQuestion q) => new(
         q.Id, q.CareCircleId, q.CreatedByUserId, q.Question, q.Category, q.Status, q.AnswerNotes, q.CreatedAt, q.UpdatedAt);

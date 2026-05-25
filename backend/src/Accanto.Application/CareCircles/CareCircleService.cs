@@ -1,3 +1,4 @@
+using Accanto.Application.Audit;
 using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
@@ -12,17 +13,20 @@ public class CareCircleService : ICareCircleService
 {
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
+    private readonly IAuditLog _audit;
     private readonly IValidator<CreateCareCircleRequest> _createValidator;
     private readonly IValidator<UpdateCareCircleRequest> _updateValidator;
 
     public CareCircleService(
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
+        IAuditLog audit,
         IValidator<CreateCareCircleRequest> createValidator,
         IValidator<UpdateCareCircleRequest> updateValidator)
     {
         _db = db;
         _auth = auth;
+        _audit = audit;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
     }
@@ -82,6 +86,8 @@ public class CareCircleService : ICareCircleService
         _db.CareCircleMembers.Add(membership);
         await _db.SaveChangesAsync(cancellationToken);
 
+        _ = _audit.LogAsync(circle.Id, userId, AuditActionType.CircleCreated, AuditResourceType.CareCircle, circle.Id, circle.Name, CancellationToken.None);
+
         return Map(circle, CareCircleRole.Owner);
     }
 
@@ -101,6 +107,8 @@ public class CareCircleService : ICareCircleService
 
         await _db.SaveChangesAsync(cancellationToken);
 
+        _ = _audit.LogAsync(circle.Id, userId, AuditActionType.CircleUpdated, AuditResourceType.CareCircle, circle.Id, circle.Name, CancellationToken.None);
+
         var role = await _db.CareCircleMembers
             .Where(m => m.CareCircleId == id && m.UserId == userId)
             .Select(m => m.Role)
@@ -117,6 +125,8 @@ public class CareCircleService : ICareCircleService
         circle.Status = CareCircleStatus.Archived;
         circle.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(circle.Id, userId, AuditActionType.CircleArchived, AuditResourceType.CareCircle, circle.Id, circle.Name, CancellationToken.None);
     }
 
     private static CareCircleDto Map(CareCircle c, CareCircleRole role) =>

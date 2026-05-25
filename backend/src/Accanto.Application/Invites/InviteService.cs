@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Accanto.Application.Audit;
 using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
@@ -17,15 +18,18 @@ public class InviteService : IInviteService
 
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
+    private readonly IAuditLog _audit;
     private readonly IValidator<CreateInviteRequest> _createValidator;
 
     public InviteService(
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
+        IAuditLog audit,
         IValidator<CreateInviteRequest> createValidator)
     {
         _db = db;
         _auth = auth;
+        _audit = audit;
         _createValidator = createValidator;
     }
 
@@ -52,6 +56,8 @@ public class InviteService : IInviteService
 
         _db.CareCircleInvites.Add(invite);
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.InviteCreated, AuditResourceType.Invite, invite.Id, $"Ruolo {invite.Role}", CancellationToken.None);
 
         return Map(invite, now);
     }
@@ -81,6 +87,8 @@ public class InviteService : IInviteService
 
         invite.RevokedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.InviteRevoked, AuditResourceType.Invite, invite.Id, null, CancellationToken.None);
     }
 
     public async Task<InvitePreviewDto> PreviewAsync(string token, CancellationToken cancellationToken = default)
@@ -134,6 +142,8 @@ public class InviteService : IInviteService
 
         invite.UsedCount += 1;
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(invite.CareCircleId, userId, AuditActionType.MemberJoined, AuditResourceType.Membership, userId, $"Ruolo {invite.Role}", CancellationToken.None);
 
         return invite.CareCircleId;
     }

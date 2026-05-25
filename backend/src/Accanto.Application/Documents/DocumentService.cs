@@ -1,3 +1,4 @@
+using Accanto.Application.Audit;
 using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
@@ -14,17 +15,20 @@ public class DocumentService : IDocumentService
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
     private readonly IFileStorage _storage;
+    private readonly IAuditLog _audit;
     private readonly DocumentStorageOptions _options;
 
     public DocumentService(
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
         IFileStorage storage,
+        IAuditLog audit,
         IOptions<DocumentStorageOptions> options)
     {
         _db = db;
         _auth = auth;
         _storage = storage;
+        _audit = audit;
         _options = options.Value;
     }
 
@@ -91,6 +95,9 @@ public class DocumentService : IDocumentService
 
         _db.MedicalDocuments.Add(doc);
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.DocumentUploaded, AuditResourceType.MedicalDocument, doc.Id, doc.OriginalFileName, CancellationToken.None);
+
         return Map(doc);
     }
 
@@ -112,8 +119,11 @@ public class DocumentService : IDocumentService
         var doc = await _db.MedicalDocuments.FirstOrDefaultAsync(d => d.Id == documentId && d.CareCircleId == careCircleId, cancellationToken)
             ?? throw new NotFoundException("Documento non trovato.");
 
+        var name = doc.OriginalFileName;
         _db.MedicalDocuments.Remove(doc);
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.DocumentDeleted, AuditResourceType.MedicalDocument, documentId, name, CancellationToken.None);
 
         try
         {

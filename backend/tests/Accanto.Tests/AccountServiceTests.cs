@@ -29,7 +29,7 @@ public class AccountServiceTests
             new ChangePasswordRequestValidator(),
             new DeleteAccountRequestValidator());
         var auth = new Accanto.Infrastructure.Authorization.CareCircleAuthorization(db);
-        var circles = new CareCircleService(db, auth, new CreateCareCircleRequestValidator(), new UpdateCareCircleRequestValidator());
+        var circles = new CareCircleService(db, auth, new NoOpAuditLog(), new CreateCareCircleRequestValidator(), new UpdateCareCircleRequestValidator());
         return (account, circles, db, hasher, storage);
     }
 

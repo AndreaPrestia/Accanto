@@ -15,7 +15,7 @@ public class CareCircleServiceTests
         var auth = new CareCircleAuthorization(db);
         IValidator<CreateCareCircleRequest> createV = new CreateCareCircleRequestValidator();
         IValidator<UpdateCareCircleRequest> updateV = new UpdateCareCircleRequestValidator();
-        return new CareCircleService(db, auth, createV, updateV);
+        return new CareCircleService(db, auth, new NoOpAuditLog(), createV, updateV);
     }
 
     [Fact]

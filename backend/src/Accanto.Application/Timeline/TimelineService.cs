@@ -1,3 +1,4 @@
+using Accanto.Application.Audit;
 using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
@@ -15,6 +16,7 @@ public class TimelineService : ITimelineService
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
     private readonly IPushService _push;
+    private readonly IAuditLog _audit;
     private readonly IValidator<CreateTimelineEntryRequest> _createValidator;
     private readonly IValidator<UpdateTimelineEntryRequest> _updateValidator;
 
@@ -22,12 +24,14 @@ public class TimelineService : ITimelineService
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
         IPushService push,
+        IAuditLog audit,
         IValidator<CreateTimelineEntryRequest> createValidator,
         IValidator<UpdateTimelineEntryRequest> updateValidator)
     {
         _db = db;
         _auth = auth;
         _push = push;
+        _audit = audit;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
     }
@@ -118,6 +122,8 @@ public class TimelineService : ITimelineService
             _ = _push.NotifyCircleAsync(careCircleId, userId, payload, CancellationToken.None);
         }
 
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.EntryCreated, AuditResourceType.TimelineEntry, entry.Id, entry.Title, CancellationToken.None);
+
         return Map(entry);
     }
 
@@ -143,6 +149,9 @@ public class TimelineService : ITimelineService
         entry.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.EntryUpdated, AuditResourceType.TimelineEntry, entry.Id, entry.Title, CancellationToken.None);
+
         return Map(entry);
     }
 
@@ -158,8 +167,11 @@ public class TimelineService : ITimelineService
             throw new ForbiddenException("Non puoi eliminare questa voce.");
         }
 
+        var title = entry.Title;
         _db.TimelineEntries.Remove(entry);
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.EntryDeleted, AuditResourceType.TimelineEntry, entryId, title, CancellationToken.None);
     }
 
     private static List<string> NormalizeTags(IEnumerable<string>? tags) =>

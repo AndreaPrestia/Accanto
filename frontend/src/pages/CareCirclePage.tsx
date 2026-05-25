@@ -35,6 +35,12 @@ export default function CareCirclePage() {
         <Section to={`/care-circles/${circle.id}/difficult-day`} title="Giornata difficile" desc="Un piccolo respiro quando serve." emphasis />
       </div>
 
+      <div className="mt-3">
+        <Link to={`/care-circles/${circle.id}/audit`} className="text-sm text-accanto-500 hover:underline">
+          Vedi registro azioni
+        </Link>
+      </div>
+
       {isOwner && circle.status === 'Active' && <InvitesPanel circleId={circle.id} />}
 
       <ExportPdfButton circleId={circle.id} />

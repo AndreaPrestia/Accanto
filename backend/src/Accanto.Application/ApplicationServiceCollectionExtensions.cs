@@ -1,4 +1,5 @@
 using Accanto.Application.Account;
+using Accanto.Application.Audit;
 using Accanto.Application.Auth;
 using Accanto.Application.CareCircles;
 using Accanto.Application.DoctorQuestions;
@@ -25,6 +26,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IDoctorQuestionService, DoctorQuestionService>();
         services.AddScoped<ISharedUpdateService, SharedUpdateService>();
         services.AddScoped<IInviteService, InviteService>();
+        services.AddScoped<IAuditService, AuditService>();
 
         services.AddSingleton<IDoctorQuestionTemplateProvider, StaticDoctorQuestionTemplateProvider>();
         services.AddSingleton<ISharedUpdateTemplateProvider, StaticSharedUpdateTemplateProvider>();

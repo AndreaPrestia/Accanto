@@ -1,3 +1,4 @@
+using Accanto.Application.Audit;
 using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
@@ -13,15 +14,18 @@ public class SharedUpdateService : ISharedUpdateService
 {
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
+    private readonly IAuditLog _audit;
     private readonly IValidator<CreateSharedUpdateRequest> _createValidator;
 
     public SharedUpdateService(
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
+        IAuditLog audit,
         IValidator<CreateSharedUpdateRequest> createValidator)
     {
         _db = db;
         _auth = auth;
+        _audit = audit;
         _createValidator = createValidator;
     }
 
@@ -59,6 +63,9 @@ public class SharedUpdateService : ISharedUpdateService
         };
         _db.SharedUpdates.Add(u);
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.UpdateCreated, AuditResourceType.SharedUpdate, u.Id, null, CancellationToken.None);
+
         return Map(u);
     }
 
@@ -69,6 +76,8 @@ public class SharedUpdateService : ISharedUpdateService
             ?? throw new NotFoundException("Aggiornamento non trovato.");
         _db.SharedUpdates.Remove(u);
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.UpdateDeleted, AuditResourceType.SharedUpdate, updateId, null, CancellationToken.None);
     }
 
     private static SharedUpdateDto Map(SharedUpdate u) =>
