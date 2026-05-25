@@ -1,6 +1,7 @@
 using Accanto.Application.Account;
 using Accanto.Application.Audit;
 using Accanto.Application.Auth;
+using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.CareCircles;
 using Accanto.Application.DoctorQuestions;
 using Accanto.Application.Documents;
@@ -23,6 +24,7 @@ public static class ApplicationServiceCollectionExtensions
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<ITwoFactorService, TwoFactorService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IGdprExportService, GdprExportService>();
         services.AddScoped<ICareCircleService, CareCircleService>();

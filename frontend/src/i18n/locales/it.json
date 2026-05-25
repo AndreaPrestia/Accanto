@@ -34,7 +34,14 @@
     "yourName": "Come ti chiami",
     "email": "Email",
     "password": "Password",
-    "passwordHint": "Almeno 8 caratteri."
+    "passwordHint": "Almeno 8 caratteri.",
+    "twoFactorTitle": "Verifica in due passaggi",
+    "twoFactorSubtitle": "Inserisci il codice generato dalla tua app autenticatore.",
+    "twoFactorCode": "Codice a 6 cifre",
+    "twoFactorRecoveryCode": "Codice di recupero",
+    "twoFactorVerify": "Verifica",
+    "twoFactorUseRecovery": "Usa un codice di recupero",
+    "twoFactorUseCode": "Usa il codice dell'app"
   },
   "account": {
     "title": "Il tuo account",
@@ -68,6 +75,23 @@
     "sessionsRevoke": "Revoca",
     "sessionsRevoking": "Revoca…",
     "sessionsLoadError": "Impossibile caricare le sessioni.",
-    "sessionsUnknownDevice": "Dispositivo sconosciuto"
+    "sessionsUnknownDevice": "Dispositivo sconosciuto",
+    "twoFactorTitle": "Autenticazione a due fattori",
+    "twoFactorHint": "Aggiungi una protezione extra al tuo account con un'app autenticatore (es. Google Authenticator, Aegis, 1Password).",
+    "twoFactorDisabled": "Attualmente non attiva.",
+    "twoFactorEnabled": "Autenticazione a due fattori attiva.",
+    "twoFactorRecoveryRemaining_one": "{{count}} codice di recupero rimasto",
+    "twoFactorRecoveryRemaining_other": "{{count}} codici di recupero rimasti",
+    "twoFactorEnableCta": "Attiva 2FA",
+    "twoFactorScanHint": "Scansiona il QR con la tua app autenticatore, oppure inserisci il codice segreto manualmente.",
+    "twoFactorSecretLabel": "Codice segreto",
+    "twoFactorCodeLabel": "Codice a 6 cifre",
+    "twoFactorConfirmCta": "Conferma e attiva",
+    "twoFactorRecoveryHeading": "Salva i codici di recupero",
+    "twoFactorRecoveryHint": "Conservali in un posto sicuro: ognuno può essere usato una sola volta se perdi l'accesso all'app.",
+    "twoFactorDisableTitle": "Disattiva 2FA",
+    "twoFactorDisableCta": "Disattiva",
+    "twoFactorRegenTitle": "Rigenera codici di recupero",
+    "twoFactorRegenCta": "Genera nuovi codici"
   }
 }

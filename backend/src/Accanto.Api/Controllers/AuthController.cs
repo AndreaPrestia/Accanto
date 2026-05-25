@@ -28,8 +28,14 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     [AllowAnonymous]
     [EnableRateLimiting("auth-login")]
-    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken ct)
+    public async Task<ActionResult<LoginResult>> Login([FromBody] LoginRequest request, CancellationToken ct)
         => Ok(await _auth.LoginAsync(request, BuildClientInfo(), ct));
+
+    [HttpPost("two-factor")]
+    [AllowAnonymous]
+    [EnableRateLimiting("auth-login")]
+    public async Task<ActionResult<AuthResponse>> TwoFactor([FromBody] TwoFactorLoginRequest request, CancellationToken ct)
+        => Ok(await _auth.CompleteTwoFactorAsync(request, BuildClientInfo(), ct));
 
     [HttpPost("refresh")]
     [AllowAnonymous]

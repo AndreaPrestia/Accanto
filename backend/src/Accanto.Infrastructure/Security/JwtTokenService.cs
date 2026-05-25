@@ -43,4 +43,66 @@ public class JwtTokenService : IJwtTokenService
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
         return new AccessToken(jwt, expires);
     }
+
+    private const string TwoFactorPurposeClaim = "purpose";
+    private const string TwoFactorPurposeValue = "2fa";
+
+    public TwoFactorChallengeToken IssueTwoFactorChallenge(Guid userId, TimeSpan lifetime)
+    {
+        if (string.IsNullOrWhiteSpace(_opt.Key) || _opt.Key.Length < 32)
+            throw new InvalidOperationException("Jwt key non configurata o troppo corta (almeno 32 caratteri).");
+
+        var expires = DateTimeOffset.UtcNow.Add(lifetime);
+        var creds = new SigningCredentials(
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.Key)),
+            SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+            new Claim(TwoFactorPurposeClaim, TwoFactorPurposeValue),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: _opt.Issuer,
+            audience: _opt.Audience,
+            claims: claims,
+            notBefore: DateTime.UtcNow,
+            expires: expires.UtcDateTime,
+            signingCredentials: creds);
+
+        return new TwoFactorChallengeToken(new JwtSecurityTokenHandler().WriteToken(token), expires);
+    }
+
+    public Guid? ValidateTwoFactorChallenge(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return null;
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var principal = handler.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _opt.Issuer,
+                ValidAudience = _opt.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.Key)),
+                ClockSkew = TimeSpan.FromSeconds(30)
+            }, out _);
+
+            var purpose = principal.FindFirst(TwoFactorPurposeClaim)?.Value;
+            if (purpose != TwoFactorPurposeValue) return null;
+
+            var sub = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Guid.TryParse(sub, out var id) ? id : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

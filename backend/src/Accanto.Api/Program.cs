@@ -74,6 +74,9 @@ builder.Services.Configure<RefreshTokenOptions>(o =>
 // Lockout dopo N tentativi di login falliti. Configurabile via env Lockout:*.
 builder.Services.Configure<LockoutOptions>(builder.Configuration.GetSection("Lockout"));
 
+// 2FA TOTP: issuer per QR code + durata challenge.
+builder.Services.Configure<Accanto.Application.Auth.TwoFactor.TwoFactorOptions>(builder.Configuration.GetSection("TwoFactor"));
+
 // Rate limiting su endpoint sensibili (login/register/cambio password/invio inviti)
 var rateLimits = builder.Configuration.GetSection("RateLimit").Get<RateLimitOptions>() ?? new RateLimitOptions();
 builder.Services.Configure<RateLimitOptions>(builder.Configuration.GetSection("RateLimit"));

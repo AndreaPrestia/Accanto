@@ -86,7 +86,10 @@ public class RefreshTokenTests : IClassFixture<AccantoFactory>
         var login = await client.PostAsJsonAsync("/api/auth/login",
             new LoginRequest("rt4@example.com", "passwordSegreta1"));
         login.StatusCode.Should().Be(HttpStatusCode.OK);
-        var auth2 = await login.Content.ReadFromJsonAsync<AuthResponse>(JsonOpts);
+        var loginResult = await login.Content.ReadFromJsonAsync<LoginResult>(JsonOpts);
+        loginResult.Should().NotBeNull();
+        loginResult!.RequiresTwoFactor.Should().BeFalse();
+        var auth2 = loginResult.Auth!;
 
         client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", auth2!.AccessToken);

@@ -12,6 +12,18 @@ public sealed record AuthResponse(
     DateTimeOffset RefreshTokenExpiresAt,
     UserDto User);
 
+/// <summary>
+/// Esito della login: se l'utente ha 2FA attiva ritorna solo il challenge token,
+/// altrimenti contiene l'AuthResponse completo.
+/// </summary>
+public sealed record LoginResult(
+    bool RequiresTwoFactor,
+    string? TwoFactorToken,
+    DateTimeOffset? TwoFactorTokenExpiresAt,
+    AuthResponse? Auth);
+
+public sealed record TwoFactorLoginRequest(string TwoFactorToken, string? Code, string? RecoveryCode);
+
 public sealed record RefreshTokenRequest(string RefreshToken);
 public sealed record LogoutRequest(string RefreshToken);
 

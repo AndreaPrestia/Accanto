@@ -1,12 +1,13 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import i18n, { SUPPORTED_LANGUAGES } from '../i18n';
 import { api } from '../api/client';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '../types';
+import { AuthResponse, LoginRequest, LoginResult, RegisterRequest, User } from '../types';
 
 interface AuthCtx {
   user: User | null;
   loading: boolean;
-  login: (req: LoginRequest) => Promise<void>;
+  login: (req: LoginRequest) => Promise<LoginResult>;
+  completeTwoFactor: (twoFactorToken: string, code?: string, recoveryCode?: string) => Promise<void>;
   register: (req: RegisterRequest) => Promise<void>;
   logout: () => void;
   setLanguage: (lang: string) => void;
@@ -48,8 +49,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (req: LoginRequest) => {
-    const { data } = await api.post<AuthResponse>('/auth/login', req);
+  const login = async (req: LoginRequest): Promise<LoginResult> => {
+    const { data } = await api.post<LoginResult>('/auth/login', req);
+    if (!data.requiresTwoFactor && data.auth) {
+      persist(data.auth);
+    }
+    return data;
+  };
+
+  const completeTwoFactor = async (twoFactorToken: string, code?: string, recoveryCode?: string) => {
+    const { data } = await api.post<AuthResponse>('/auth/two-factor', {
+      twoFactorToken,
+      code: code ?? null,
+      recoveryCode: recoveryCode ?? null
+    });
     persist(data);
   };
 
@@ -81,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  return <Ctx.Provider value={{ user, loading, login, register, logout, setLanguage }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, loading, login, completeTwoFactor, register, logout, setLanguage }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {

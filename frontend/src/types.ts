@@ -24,6 +24,15 @@ export interface User { id: string; email: string; displayName: string; language
 export interface AuthResponse { accessToken: string; expiresAt: string; refreshToken: string; refreshTokenExpiresAt: string; user: User; }
 export interface RegisterRequest { email: string; displayName: string; password: string; }
 export interface LoginRequest { email: string; password: string; }
+export interface LoginResult {
+  requiresTwoFactor: boolean;
+  twoFactorToken?: string | null;
+  twoFactorTokenExpiresAt?: string | null;
+  auth?: AuthResponse | null;
+}
+export interface TwoFactorStatus { enabled: boolean; remainingRecoveryCodes: number; }
+export interface TwoFactorSetupResponse { secret: string; otpAuthUri: string; }
+export interface TwoFactorEnableResponse { recoveryCodes: string[]; }
 export interface ActiveSession {
   id: string;
   createdAt: string;

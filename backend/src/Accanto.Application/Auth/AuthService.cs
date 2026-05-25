@@ -1,3 +1,4 @@
+using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
@@ -14,7 +15,9 @@ public class AuthService : IAuthService
     private readonly IPasswordHasher _hasher;
     private readonly IJwtTokenService _jwt;
     private readonly IRefreshTokenService _refresh;
+    private readonly ITwoFactorService _twoFactor;
     private readonly LockoutOptions _lockout;
+    private readonly TwoFactorOptions _tfOpt;
     private readonly TimeProvider _time;
     private readonly IValidator<RegisterRequest> _registerValidator;
     private readonly IValidator<LoginRequest> _loginValidator;
@@ -24,7 +27,9 @@ public class AuthService : IAuthService
         IPasswordHasher hasher,
         IJwtTokenService jwt,
         IRefreshTokenService refresh,
+        ITwoFactorService twoFactor,
         IOptions<LockoutOptions> lockout,
+        IOptions<TwoFactorOptions> twoFactorOptions,
         TimeProvider time,
         IValidator<RegisterRequest> registerValidator,
         IValidator<LoginRequest> loginValidator)
@@ -33,7 +38,9 @@ public class AuthService : IAuthService
         _hasher = hasher;
         _jwt = jwt;
         _refresh = refresh;
+        _twoFactor = twoFactor;
         _lockout = lockout.Value;
+        _tfOpt = twoFactorOptions.Value;
         _time = time;
         _registerValidator = registerValidator;
         _loginValidator = loginValidator;
@@ -73,7 +80,7 @@ public class AuthService : IAuthService
         return await BuildResponseAsync(user, client, cancellationToken);
     }
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
+    public async Task<LoginResult> LoginAsync(LoginRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
     {
         var result = await _loginValidator.ValidateAsync(request, cancellationToken);
         if (!result.IsValid)
@@ -135,6 +142,41 @@ public class AuthService : IAuthService
             user.LastFailedLoginAt = null;
             await _db.SaveChangesAsync(cancellationToken);
         }
+
+        // Se il 2FA è attivo, la login si ferma qui: ritorna un challenge token al client.
+        if (user.TwoFactorEnabled)
+        {
+            var challenge = _jwt.IssueTwoFactorChallenge(user.Id, TimeSpan.FromMinutes(Math.Max(1, _tfOpt.ChallengeLifetimeMinutes)));
+            return new LoginResult(true, challenge.Token, challenge.ExpiresAt, null);
+        }
+
+        var auth = await BuildResponseAsync(user, client, cancellationToken);
+        return new LoginResult(false, null, null, auth);
+    }
+
+    public async Task<AuthResponse> CompleteTwoFactorAsync(TwoFactorLoginRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
+    {
+        var userId = _jwt.ValidateTwoFactorChallenge(request.TwoFactorToken)
+            ?? throw new ForbiddenException("Challenge 2FA non valido o scaduto.");
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken)
+            ?? throw new ForbiddenException("Challenge 2FA non valido o scaduto.");
+
+        if (!user.TwoFactorEnabled)
+            throw new ForbiddenException("Challenge 2FA non valido o scaduto.");
+
+        var ok = false;
+        if (!string.IsNullOrWhiteSpace(request.Code))
+        {
+            ok = await _twoFactor.VerifyUserCodeAsync(user.Id, request.Code!, cancellationToken);
+        }
+        if (!ok && !string.IsNullOrWhiteSpace(request.RecoveryCode))
+        {
+            ok = await _twoFactor.ConsumeRecoveryCodeAsync(user.Id, request.RecoveryCode!, cancellationToken);
+        }
+
+        if (!ok)
+            throw new ForbiddenException("Codice 2FA non valido.");
 
         return await BuildResponseAsync(user, client, cancellationToken);
     }

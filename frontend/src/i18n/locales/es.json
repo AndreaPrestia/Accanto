@@ -34,7 +34,14 @@
     "yourName": "Cómo te llamas",
     "email": "Correo electrónico",
     "password": "Contraseña",
-    "passwordHint": "Al menos 8 caracteres."
+    "passwordHint": "Al menos 8 caracteres.",
+    "twoFactorTitle": "Verificación en dos pasos",
+    "twoFactorSubtitle": "Introduce el código generado por tu app autenticadora.",
+    "twoFactorCode": "Código de 6 dígitos",
+    "twoFactorRecoveryCode": "Código de recuperación",
+    "twoFactorVerify": "Verificar",
+    "twoFactorUseRecovery": "Usar un código de recuperación",
+    "twoFactorUseCode": "Usar el código de la app"
   },
   "account": {
     "title": "Tu cuenta",
@@ -68,6 +75,23 @@
     "sessionsRevoke": "Revocar",
     "sessionsRevoking": "Revocando…",
     "sessionsLoadError": "No se pudieron cargar las sesiones.",
-    "sessionsUnknownDevice": "Dispositivo desconocido"
+    "sessionsUnknownDevice": "Dispositivo desconocido",
+    "twoFactorTitle": "Autenticación de dos factores",
+    "twoFactorHint": "Añade una protección extra a tu cuenta con una app autenticadora (p. ej. Google Authenticator, Aegis, 1Password).",
+    "twoFactorDisabled": "Actualmente desactivada.",
+    "twoFactorEnabled": "Autenticación de dos factores activa.",
+    "twoFactorRecoveryRemaining_one": "Queda {{count}} código de recuperación",
+    "twoFactorRecoveryRemaining_other": "Quedan {{count}} códigos de recuperación",
+    "twoFactorEnableCta": "Activar 2FA",
+    "twoFactorScanHint": "Escanea el QR con tu app autenticadora, o introduce el secreto manualmente.",
+    "twoFactorSecretLabel": "Código secreto",
+    "twoFactorCodeLabel": "Código de 6 dígitos",
+    "twoFactorConfirmCta": "Confirmar y activar",
+    "twoFactorRecoveryHeading": "Guarda los códigos de recuperación",
+    "twoFactorRecoveryHint": "Guárdalos en un lugar seguro: cada uno puede usarse solo una vez si pierdes el acceso a la app.",
+    "twoFactorDisableTitle": "Desactivar 2FA",
+    "twoFactorDisableCta": "Desactivar",
+    "twoFactorRegenTitle": "Regenerar códigos de recuperación",
+    "twoFactorRegenCta": "Generar nuevos códigos"
   }
 }
