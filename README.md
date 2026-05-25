@@ -275,8 +275,12 @@ Cerchi di cura, diario, documenti, domande per il medico, aggiornamenti pronti d
 - 2FA TOTP con codici di recupero (Otp.NET) — setup via QR code, integrato nel login a 2 step.
 - Audit log eventi auth per utente (registrazione, login, lockout, 2FA, cambio password, revoca sessione) visibile in `/account`.
 
-**v0.5 (idea)**
-- Sezione "cura di chi cura" più ricca: check-in emotivo, suggerimenti contestuali, contatti di supporto regionali.
+**v0.5 — Cura di chi cura**
+- Check-in emotivo privato del caregiver da `/account` (umore, energia, stress 1-5 + nota), con grafico di trend a 30 giorni. I dati sono privati, mai condivisi col cerchio, ed inclusi nell'export GDPR.
+- Pagina `/support` con contatti italiani di supporto (emergenza, ascolto, demenze, cure palliative, associazioni caregiver, supporto sociale) filtrabili per categoria.
+- Pagina `/self-care` con micro-promemoria del giorno, segnali di burnout, riposo e confini.
+
+**v0.6 (idea)**
 - Modulo AI opzionale (riassunti, suggerimenti) con provider configurabile.
 - Backup/restore guidato dell'istanza.
 
