@@ -86,14 +86,14 @@ export default function WellbeingSection() {
   };
 
   return (
-    <section className="wellbeing-section">
-      <h2>{t('account.wellbeing.title')}</h2>
-      <p className="muted">{t('account.wellbeing.hint')}</p>
+    <section className="space-y-3">
+      <h2 className="text-base font-semibold text-accanto-900">{t('account.wellbeing.title')}</h2>
+      <p className="text-sm text-accanto-500">{t('account.wellbeing.hint')}</p>
 
-      {error && <p className="error">{error}</p>}
-      {success && <p className="success">{success}</p>}
+      {error && <p className="text-sm text-red-700">{error}</p>}
+      {success && <p className="text-sm text-green-700">{success}</p>}
 
-      <form onSubmit={handleSubmit} className="wellbeing-form">
+      <form onSubmit={handleSubmit} className="space-y-4 card">
         <ScaleField
           label={t('account.wellbeing.mood')}
           value={mood}
@@ -115,24 +115,29 @@ export default function WellbeingSection() {
           lowLabel={t('account.wellbeing.stressLow')}
           highLabel={t('account.wellbeing.stressHigh')}
         />
-        <label className="field">
-          <span>{t('account.wellbeing.note')}</span>
+        <div>
+          <label className="block text-sm text-accanto-700 mb-1">{t('account.wellbeing.note')}</label>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             maxLength={500}
             rows={2}
             placeholder={t('account.wellbeing.notePlaceholder')}
+            className="w-full border border-accanto-200 rounded-lg px-3 py-2 text-sm"
           />
-        </label>
-        <button type="submit" disabled={busy}>
+        </div>
+        <button
+          type="submit"
+          disabled={busy}
+          className="w-full sm:w-auto px-4 py-2 rounded-lg bg-accanto-700 text-white text-sm font-medium disabled:opacity-60"
+        >
           {t('account.wellbeing.save')}
         </button>
       </form>
 
       <Trend items={items} t={t} />
 
-      <p className="muted" style={{ marginTop: '1rem' }}>
+      <p className="text-sm text-accanto-500">
         <Link to="/self-care" className="text-accanto-700 underline">
           {t('account.wellbeing.selfCareLink')} →
         </Link>
@@ -143,19 +148,25 @@ export default function WellbeingSection() {
       </p>
 
       {items.length > 0 && (
-        <details className="wellbeing-history">
-          <summary>{t('account.wellbeing.history', { count: items.length })}</summary>
-          <ul>
+        <details className="card">
+          <summary className="cursor-pointer text-sm font-medium text-accanto-700">
+            {t('account.wellbeing.history', { count: items.length })}
+          </summary>
+          <ul className="mt-3 space-y-3">
             {items.map((c) => (
-              <li key={c.id}>
-                <div>
-                  <strong>{fmtDate(c.createdAt)}</strong>
-                  <span className="muted">
-                    {' '}· {t('account.wellbeing.mood')} {c.mood}/5 · {t('account.wellbeing.energy')} {c.energy}/5 · {t('account.wellbeing.stress')} {c.stress}/5
-                  </span>
+              <li key={c.id} className="border-t border-accanto-100 pt-3 first:border-t-0 first:pt-0">
+                <div className="text-sm">
+                  <strong className="text-accanto-900">{fmtDate(c.createdAt)}</strong>
+                  <div className="text-xs text-accanto-500 mt-0.5">
+                    {t('account.wellbeing.mood')} {c.mood}/5 · {t('account.wellbeing.energy')} {c.energy}/5 · {t('account.wellbeing.stress')} {c.stress}/5
+                  </div>
                 </div>
-                {c.note && <p>{c.note}</p>}
-                <button type="button" className="link-button" onClick={() => handleDelete(c.id)}>
+                {c.note && <p className="text-sm text-accanto-700 mt-1">{c.note}</p>}
+                <button
+                  type="button"
+                  className="text-xs text-red-700 underline mt-1"
+                  onClick={() => handleDelete(c.id)}
+                >
                   {t('common.delete', { defaultValue: 'Elimina' })}
                 </button>
               </li>
@@ -181,14 +192,19 @@ function ScaleField({
   highLabel: string;
 }) {
   return (
-    <fieldset className="scale-field">
-      <legend>{label}</legend>
-      <div className="scale-buttons">
+    <fieldset className="border-0 p-0 m-0">
+      <legend className="text-sm font-medium text-accanto-700 mb-2">{label}</legend>
+      <div className="flex gap-2">
         {SCALE.map((n) => (
           <button
             key={n}
             type="button"
-            className={n === value ? 'selected' : ''}
+            className={
+              'flex-1 h-10 rounded-lg border text-sm font-medium transition-colors ' +
+              (n === value
+                ? 'bg-accanto-700 text-white border-accanto-700'
+                : 'bg-white text-accanto-700 border-accanto-200 hover:border-accanto-400')
+            }
             onClick={() => onChange(n)}
             aria-pressed={n === value}
           >
@@ -196,9 +212,9 @@ function ScaleField({
           </button>
         ))}
       </div>
-      <div className="scale-labels">
-        <small className="muted">{lowLabel}</small>
-        <small className="muted">{highLabel}</small>
+      <div className="flex justify-between mt-1">
+        <small className="text-xs text-accanto-500">{lowLabel}</small>
+        <small className="text-xs text-accanto-500">{highLabel}</small>
       </div>
     </fieldset>
   );
@@ -215,7 +231,7 @@ function Trend({
   const sorted = useMemo(() => [...items].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [items]);
 
   if (sorted.length < 2) {
-    return <p className="muted">{t('account.wellbeing.trendEmpty')}</p>;
+    return <p className="text-sm text-accanto-500">{t('account.wellbeing.trendEmpty')}</p>;
   }
 
   const width = 320;
@@ -226,19 +242,38 @@ function Trend({
   const path = (key: 'mood' | 'energy' | 'stress') =>
     sorted.map((c, i) => `${i === 0 ? 'M' : 'L'} ${xs[i].toFixed(1)} ${yFor(c[key]).toFixed(1)}`).join(' ');
 
+  const colors = {
+    mood: '#0ea5e9',
+    energy: '#16a34a',
+    stress: '#dc2626'
+  } as const;
+
   return (
-    <div className="trend-wrap">
-      <h3>{t('account.wellbeing.trend', { days: TREND_DAYS })}</h3>
-      <svg viewBox={`0 0 ${width} ${height}`} className="trend-svg" role="img" aria-label={t('account.wellbeing.trend', { days: TREND_DAYS })}>
-        <line x1={padding} y1={yFor(3)} x2={width - padding} y2={yFor(3)} className="trend-axis" />
-        <path d={path('mood')} className="trend-line trend-mood" />
-        <path d={path('energy')} className="trend-line trend-energy" />
-        <path d={path('stress')} className="trend-line trend-stress" />
+    <div className="card">
+      <h3 className="text-sm font-medium text-accanto-700 mb-2">{t('account.wellbeing.trend', { days: TREND_DAYS })}</h3>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="w-full h-32"
+        role="img"
+        aria-label={t('account.wellbeing.trend', { days: TREND_DAYS })}
+      >
+        <line
+          x1={padding}
+          y1={yFor(3)}
+          x2={width - padding}
+          y2={yFor(3)}
+          stroke="#e5e7eb"
+          strokeWidth={1}
+          strokeDasharray="3 3"
+        />
+        <path d={path('mood')} fill="none" stroke={colors.mood} strokeWidth={2} />
+        <path d={path('energy')} fill="none" stroke={colors.energy} strokeWidth={2} />
+        <path d={path('stress')} fill="none" stroke={colors.stress} strokeWidth={2} />
       </svg>
-      <div className="trend-legend">
-        <span className="trend-key trend-mood">● {t('account.wellbeing.mood')}</span>
-        <span className="trend-key trend-energy">● {t('account.wellbeing.energy')}</span>
-        <span className="trend-key trend-stress">● {t('account.wellbeing.stress')}</span>
+      <div className="flex flex-wrap gap-3 mt-2 text-xs">
+        <span style={{ color: colors.mood }}>● {t('account.wellbeing.mood')}</span>
+        <span style={{ color: colors.energy }}>● {t('account.wellbeing.energy')}</span>
+        <span style={{ color: colors.stress }}>● {t('account.wellbeing.stress')}</span>
       </div>
     </div>
   );

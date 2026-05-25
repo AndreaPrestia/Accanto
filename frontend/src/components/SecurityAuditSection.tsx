@@ -49,52 +49,54 @@ export default function SecurityAuditSection() {
   const hasNext = data ? skip + data.items.length < total : false;
 
   return (
-    <section className="security-audit-section">
-      <h2>{t('account.securityAudit.title')}</h2>
-      <p className="muted">{t('account.securityAudit.hint')}</p>
+    <section className="space-y-3">
+      <h2 className="text-base font-semibold text-accanto-900">{t('account.securityAudit.title')}</h2>
+      <p className="text-sm text-accanto-500">{t('account.securityAudit.hint')}</p>
 
-      {error && <p className="error">{error}</p>}
+      {error && <p className="text-sm text-red-700">{error}</p>}
 
       {data && data.items.length === 0 && (
-        <p className="muted">{t('account.securityAudit.empty')}</p>
+        <p className="text-sm text-accanto-500">{t('account.securityAudit.empty')}</p>
       )}
 
       {data && data.items.length > 0 && (
-        <table className="audit-table">
-          <thead>
-            <tr>
-              <th>{t('account.securityAudit.colWhen')}</th>
-              <th>{t('account.securityAudit.colEvent')}</th>
-              <th>{t('account.securityAudit.colDetails')}</th>
-              <th>{t('account.securityAudit.colWhere')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.items.map((e) => (
-              <tr key={e.id}>
-                <td>{fmt(e.timestamp)}</td>
-                <td>{eventLabel(e.eventType)}</td>
-                <td>{e.summary ?? ''}</td>
-                <td>
-                  {e.ipAddress ?? ''}
-                  {e.userAgent ? (
-                    <>
-                      <br />
-                      <small className="muted">{e.userAgent}</small>
-                    </>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ul className="space-y-2">
+          {data.items.map((e) => (
+            <li key={e.id} className="card">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-sm font-medium text-accanto-900">{eventLabel(e.eventType)}</span>
+                <span className="text-xs text-accanto-500 shrink-0">{fmt(e.timestamp)}</span>
+              </div>
+              {e.summary && (
+                <p className="text-sm text-accanto-700 mt-1">{e.summary}</p>
+              )}
+              {(e.ipAddress || e.userAgent) && (
+                <p className="text-xs text-accanto-500 mt-1 break-words">
+                  {e.ipAddress}
+                  {e.ipAddress && e.userAgent ? ' · ' : ''}
+                  {e.userAgent}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
 
-      <div className="pager">
-        <button type="button" disabled={!hasPrev || busy} onClick={() => load(Math.max(0, skip - PAGE_SIZE))}>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          disabled={!hasPrev || busy}
+          onClick={() => load(Math.max(0, skip - PAGE_SIZE))}
+          className="px-3 py-1.5 rounded-lg border border-accanto-200 text-sm text-accanto-700 disabled:opacity-50"
+        >
           {t('common.previous', { defaultValue: '← Precedente' })}
         </button>
-        <button type="button" disabled={!hasNext || busy} onClick={() => load(skip + PAGE_SIZE)}>
+        <button
+          type="button"
+          disabled={!hasNext || busy}
+          onClick={() => load(skip + PAGE_SIZE)}
+          className="px-3 py-1.5 rounded-lg border border-accanto-200 text-sm text-accanto-700 disabled:opacity-50"
+        >
           {t('common.next', { defaultValue: 'Successivo →' })}
         </button>
       </div>
