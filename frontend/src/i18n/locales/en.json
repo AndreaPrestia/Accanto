@@ -137,7 +137,26 @@
       "trend": "Last {{days}} days",
       "trendEmpty": "At least two check-ins are needed to see a trend.",
       "history": "History ({{count}})",
-      "confirmDelete": "Delete this check-in?"
+      "confirmDelete": "Delete this check-in?",
+      "supportLink": "Need to talk to someone? Find support"
+    }
+  },
+  "support": {
+    "title": "Find support",
+    "intro": "A small list of Italian organisations that listen and walk alongside people who care for someone else. No one should do this alone.",
+    "filterAria": "Filter by category",
+    "hours": "Hours",
+    "call": "Call",
+    "website": "Website",
+    "disclaimer": "Information is indicative. For up-to-date hours and local contacts, check the organisation's official website.",
+    "categories": {
+      "all": "All",
+      "emergency": "Emergency",
+      "listening": "Listening",
+      "dementia": "Dementia",
+      "palliative": "Palliative care",
+      "caregiver": "Caregiver",
+      "social": "Social help"
     }
   }
 }

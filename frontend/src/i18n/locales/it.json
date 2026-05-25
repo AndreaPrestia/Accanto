@@ -137,7 +137,26 @@
       "trend": "Andamento ultimi {{days}} giorni",
       "trendEmpty": "Servono almeno due check-in per vedere un andamento.",
       "history": "Storico ({{count}})",
-      "confirmDelete": "Eliminare questo check-in?"
+      "confirmDelete": "Eliminare questo check-in?",
+      "supportLink": "Hai bisogno di parlare con qualcuno? Trova supporto"
+    }
+  },
+  "support": {
+    "title": "Trovi supporto",
+    "intro": "Una piccola lista di realt\u00e0 italiane che ascoltano e accompagnano chi si prende cura di qualcuno. Nessuno deve fare tutto da solo.",
+    "filterAria": "Filtra per categoria",
+    "hours": "Orari",
+    "call": "Chiama",
+    "website": "Sito",
+    "disclaimer": "Le informazioni sono indicative. Per orari aggiornati e contatti locali, visita il sito ufficiale dell\u2019organizzazione.",
+    "categories": {
+      "all": "Tutte",
+      "emergency": "Emergenza",
+      "listening": "Ascolto",
+      "dementia": "Demenza",
+      "palliative": "Cure palliative",
+      "caregiver": "Caregiver",
+      "social": "Aiuto sociale"
     }
   }
 }

@@ -14,6 +14,7 @@ import DifficultDayPage from './pages/DifficultDayPage';
 import InviteAcceptPage from './pages/InviteAcceptPage';
 import AccountPage from './pages/AccountPage';
 import AuditPage from './pages/AuditPage';
+import SupportPage from './pages/SupportPage';
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/care-circles/:id/audit" element={<RequireAuth><AuditPage /></RequireAuth>} />
         <Route path="/invite/:token" element={<InviteAcceptPage />} />
         <Route path="/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
+        <Route path="/support" element={<SupportPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

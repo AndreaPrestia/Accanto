@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { api, extractError } from '../api/client';
 import { CaregiverCheckIn } from '../types';
 
@@ -130,6 +131,12 @@ export default function WellbeingSection() {
       </form>
 
       <Trend items={items} t={t} />
+
+      <p className="muted" style={{ marginTop: '1rem' }}>
+        <Link to="/support" className="text-accanto-700 underline">
+          {t('account.wellbeing.supportLink')} →
+        </Link>
+      </p>
 
       {items.length > 0 && (
         <details className="wellbeing-history">

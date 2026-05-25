@@ -137,7 +137,26 @@
       "trend": "Últimos {{days}} días",
       "trendEmpty": "Hacen falta al menos dos check-in para ver una tendencia.",
       "history": "Historial ({{count}})",
-      "confirmDelete": "¿Eliminar este check-in?"
+      "confirmDelete": "¿Eliminar este check-in?",
+      "supportLink": "¿Necesitas hablar con alguien? Encuentra apoyo"
+    }
+  },
+  "support": {
+    "title": "Encuentra apoyo",
+    "intro": "Una peque\u00f1a lista de organizaciones italianas que escuchan y acompa\u00f1an a quien cuida de otra persona. Nadie deber\u00eda estar solo en esto.",
+    "filterAria": "Filtrar por categor\u00eda",
+    "hours": "Horario",
+    "call": "Llamar",
+    "website": "Sitio",
+    "disclaimer": "La informaci\u00f3n es orientativa. Para horarios actualizados y contactos locales, consulta el sitio oficial de la organizaci\u00f3n.",
+    "categories": {
+      "all": "Todas",
+      "emergency": "Emergencia",
+      "listening": "Escucha",
+      "dementia": "Demencia",
+      "palliative": "Cuidados paliativos",
+      "caregiver": "Cuidador",
+      "social": "Ayuda social"
     }
   }
 }

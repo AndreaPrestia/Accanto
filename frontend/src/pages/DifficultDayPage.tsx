@@ -32,7 +32,11 @@ export default function DifficultDayPage() {
 
       <div className="mt-8 text-sm text-accanto-500">
         <p className="mb-2">Se senti di non farcela, parlare con qualcuno aiuta.</p>
-        <p>In Italia, Telefono Amico Italia: <a className="text-accanto-700 underline" href="tel:0223272327">02 2327 2327</a>.</p>
+        <p>
+          <Link to="/support" className="text-accanto-700 underline">
+            Vedi i contatti di supporto →
+          </Link>
+        </p>
         <p className="mt-1">Se c&rsquo;è un&rsquo;emergenza sanitaria, chiama il 112.</p>
       </div>
     </div>
