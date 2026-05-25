@@ -133,6 +133,10 @@ export default function WellbeingSection() {
       <Trend items={items} t={t} />
 
       <p className="muted" style={{ marginTop: '1rem' }}>
+        <Link to="/self-care" className="text-accanto-700 underline">
+          {t('account.wellbeing.selfCareLink')} →
+        </Link>
+        {' · '}
         <Link to="/support" className="text-accanto-700 underline">
           {t('account.wellbeing.supportLink')} →
         </Link>

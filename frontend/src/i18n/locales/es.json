@@ -138,8 +138,58 @@
       "trendEmpty": "Hacen falta al menos dos check-in para ver una tendencia.",
       "history": "Historial ({{count}})",
       "confirmDelete": "¿Eliminar este check-in?",
-      "supportLink": "¿Necesitas hablar con alguien? Encuentra apoyo"
+      "supportLink": "¿Necesitas hablar con alguien? Encuentra apoyo",
+      "selfCareLink": "Cuidándote"
     }
+  },
+  "selfCare": {
+    "title": "Cuidándote",
+    "intro": "Quien cuida a un ser querido a menudo se olvida de cuidarse. No es egoísmo: es mantenimiento necesario, como el coche que lleva a todos a casa.",
+    "daily": {
+      "title": "Un pequeño gesto para hoy",
+      "tips": {
+        "0": "Bebe un vaso de agua, ahora, antes de volver a cualquier otra cosa.",
+        "1": "Tres respiraciones lentas: inhala 4, exhala 6. Solo eso.",
+        "2": "Durante cinco minutos pon el móvil en silencio y haz algo para ti.",
+        "3": "Manda un mensaje a alguien que te quiere: un simple «hola» basta.",
+        "4": "Sal al umbral, mira fuera, siente el aire.",
+        "5": "Come algo, aunque sea poco. No te saltes las comidas.",
+        "6": "Túmbate cinco minutos. No tienes que dormir, solo parar.",
+        "7": "Escribe una frase: qué es lo que más pesa hoy.",
+        "8": "Piensa una cosa que hayas hecho bien hoy. Solo una.",
+        "9": "Pregúntate: ¿hay algo que pueda delegar hoy en alguien?"
+      }
+    },
+    "burnout": {
+      "title": "Señales que no hay que ignorar",
+      "intro": "El desgaste del cuidador es real. Si reconoces varias de estas señales juntas, no esperes.",
+      "signs": [
+        "Cansancio que no se cura con el sueño",
+        "Irritabilidad hacia la persona a la que cuidas",
+        "Insomnio o sueño fragmentado",
+        "Llanto frecuente, sensación de vacío",
+        "Aislamiento de amigos y familia",
+        "Descuido de ti: higiene, comidas, salud",
+        "Pensamientos de huir o de no poder más"
+      ],
+      "outro": "Si te reconoces en más de tres puntos, habla con tu médico o con un servicio de escucha. No es debilidad: es información útil."
+    },
+    "rest": {
+      "title": "La regla del descanso",
+      "body": "Descansar no es una recompensa, es combustible. Programa el descanso como programas los medicamentos: a horario fijo, incluso cuando «parece que no hace falta». Cuando la necesidad aprieta, ya suele ser tarde."
+    },
+    "boundaries": {
+      "title": "Límites sanos",
+      "intro": "Decir «no» a algo significa decir «sí» a otra cosa: a ti, a tu salud, a un cuidado que dure en el tiempo.",
+      "points": [
+        "No tienes que estar disponible 24 horas al día.",
+        "Pedir ayuda no es fracaso: es estrategia.",
+        "Repartir tareas con quien te rodea (familia, servicios) es un acto de responsabilidad.",
+        "Es normal sentir cosas contradictorias: amor y agotamiento, gratitud y rabia. Conviven."
+      ]
+    },
+    "supportLink": "Encuentra contactos y servicios de apoyo",
+    "disclaimer": "Estas páginas no sustituyen un consejo médico o psicológico. Si lo estás pasando mal, habla con un profesional."
   },
   "support": {
     "title": "Encuentra apoyo",

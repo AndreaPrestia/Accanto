@@ -138,8 +138,58 @@
       "trendEmpty": "Servono almeno due check-in per vedere un andamento.",
       "history": "Storico ({{count}})",
       "confirmDelete": "Eliminare questo check-in?",
-      "supportLink": "Hai bisogno di parlare con qualcuno? Trova supporto"
+      "supportLink": "Hai bisogno di parlare con qualcuno? Trova supporto",
+      "selfCareLink": "Cura di te"
     }
+  },
+  "selfCare": {
+    "title": "Cura di te",
+    "intro": "Chi accudisce una persona cara spesso dimentica di accudire sé stesso. Non è egoismo: è manutenzione necessaria, come l’auto che porta tutti a destinazione.",
+    "daily": {
+      "title": "Un piccolo gesto per oggi",
+      "tips": {
+        "0": "Bevi un bicchiere d’acqua, adesso, prima di tornare a fare altro.",
+        "1": "Tre respiri lenti: dentro per 4, fuori per 6. Solo questo.",
+        "2": "Per cinque minuti metti il telefono in silenzioso e fai una cosa per te.",
+        "3": "Manda un messaggio a chi ti vuole bene: anche un «ciao» basta.",
+        "4": "Esci sulla soglia di casa, guarda fuori, senti l’aria.",
+        "5": "Mangia qualcosa, anche poco. Non saltare i pasti.",
+        "6": "Stenditi cinque minuti. Non devi addormentarti, basta fermarti.",
+        "7": "Scrivi una frase: cos’è che oggi pesa di più.",
+        "8": "Pensa una cosa che hai fatto bene oggi. Una basta.",
+        "9": "Chiediti: c’è una cosa che posso delegare oggi a qualcuno?"
+      }
+    },
+    "burnout": {
+      "title": "Segnali da non ignorare",
+      "intro": "Il logoramento del caregiver è reale. Se ne riconosci diversi insieme, non aspettare.",
+      "signs": [
+        "Stanchezza che non passa con il sonno",
+        "Irritabilità verso la persona di cui ti prendi cura",
+        "Insonnia o sonno frammentato",
+        "Pianto frequente, senso di vuoto",
+        "Isolamento dagli amici e dalla famiglia",
+        "Trascuratezza di sé: igiene, pasti, salute",
+        "Pensieri di fuga o di non farcela più"
+      ],
+      "outro": "Se ti riconosci in più di tre punti, parla con il tuo medico o con un servizio di ascolto. Non è debolezza: è informazione utile."
+    },
+    "rest": {
+      "title": "La regola del riposo",
+      "body": "Riposare non è ricompensa, è carburante. Programma il riposo come programmi le medicine: a orario fisso, anche quando «sembra che non ce ne sia bisogno». Quando il bisogno si fa sentire, è spesso troppo tardi."
+    },
+    "boundaries": {
+      "title": "Confini sani",
+      "intro": "Dire «no» a qualcosa significa dire «sì» a qualcos’altro: a te, alla tua salute, a una cura sostenibile nel tempo.",
+      "points": [
+        "Non sei tenuto a essere disponibile 24 ore su 24.",
+        "Chiedere aiuto non è fallimento: è strategia.",
+        "Dividere i compiti con chi ti sta intorno (famiglia, servizi) è un atto di responsabilità.",
+        "È normale provare sentimenti contrastanti: amore e stanchezza, gratitudine e rabbia. Convivono."
+      ]
+    },
+    "supportLink": "Trova contatti e servizi di supporto",
+    "disclaimer": "Queste pagine non sostituiscono un consulto medico o psicologico. Se stai male, parlane con un professionista."
   },
   "support": {
     "title": "Trovi supporto",

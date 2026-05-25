@@ -138,8 +138,58 @@
       "trendEmpty": "At least two check-ins are needed to see a trend.",
       "history": "History ({{count}})",
       "confirmDelete": "Delete this check-in?",
-      "supportLink": "Need to talk to someone? Find support"
+      "supportLink": "Need to talk to someone? Find support",
+      "selfCareLink": "Caring for yourself"
     }
+  },
+  "selfCare": {
+    "title": "Caring for yourself",
+    "intro": "People who care for someone they love often forget to look after themselves. It isn't selfishness — it's necessary maintenance, like the car that carries everyone home.",
+    "daily": {
+      "title": "A small gesture for today",
+      "tips": {
+        "0": "Drink a glass of water, now, before going back to anything else.",
+        "1": "Three slow breaths: in for 4, out for 6. Just that.",
+        "2": "For five minutes put your phone on silent and do one thing for yourself.",
+        "3": "Send a message to someone who loves you: even a plain 'hi' counts.",
+        "4": "Step outside your door, look around, feel the air.",
+        "5": "Eat something, even a little. Don't skip meals.",
+        "6": "Lie down for five minutes. You don't have to sleep, just stop.",
+        "7": "Write one sentence: what feels heaviest today.",
+        "8": "Think of one thing you did well today. Just one.",
+        "9": "Ask yourself: is there one thing I can hand off to someone today?"
+      }
+    },
+    "burnout": {
+      "title": "Signs not to ignore",
+      "intro": "Caregiver burnout is real. If you recognise several of these together, don't wait.",
+      "signs": [
+        "Tiredness that sleep doesn't fix",
+        "Irritability toward the person you care for",
+        "Insomnia or broken sleep",
+        "Frequent crying, sense of emptiness",
+        "Isolation from friends and family",
+        "Neglecting yourself: hygiene, meals, health",
+        "Thoughts of running away or not being able to go on"
+      ],
+      "outro": "If more than three of these feel familiar, talk to your doctor or a listening service. It isn't weakness — it's useful information."
+    },
+    "rest": {
+      "title": "The rule of rest",
+      "body": "Rest isn't a reward, it's fuel. Schedule rest the way you schedule medication: at fixed times, even when it 'doesn't feel necessary'. By the time the need hits, it's often too late."
+    },
+    "boundaries": {
+      "title": "Healthy limits",
+      "intro": "Saying 'no' to something means saying 'yes' to something else: to you, to your health, to care that lasts.",
+      "points": [
+        "You are not required to be available 24/7.",
+        "Asking for help isn't failure: it's strategy.",
+        "Sharing tasks with people around you (family, services) is an act of responsibility.",
+        "Mixed feelings are normal: love and exhaustion, gratitude and anger. They coexist."
+      ]
+    },
+    "supportLink": "Find contacts and support services",
+    "disclaimer": "These pages do not replace medical or psychological advice. If you are suffering, talk to a professional."
   },
   "support": {
     "title": "Find support",

@@ -15,6 +15,7 @@ import InviteAcceptPage from './pages/InviteAcceptPage';
 import AccountPage from './pages/AccountPage';
 import AuditPage from './pages/AuditPage';
 import SupportPage from './pages/SupportPage';
+import SelfCarePage from './pages/SelfCarePage';
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/invite/:token" element={<InviteAcceptPage />} />
         <Route path="/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/self-care" element={<SelfCarePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
