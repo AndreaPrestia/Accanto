@@ -10,6 +10,7 @@ using Accanto.Application.Notifications;
 using Accanto.Application.Security;
 using Accanto.Application.SharedUpdates;
 using Accanto.Application.Timeline;
+using Accanto.Application.Wellbeing;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -37,6 +38,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ISecurityAuditQueryService, SecurityAuditQueryService>();
         services.AddScoped<INotificationPreferenceService, NotificationPreferenceService>();
+        services.AddScoped<ICheckInService, CheckInService>();
 
         services.AddSingleton<IDoctorQuestionTemplateProvider, StaticDoctorQuestionTemplateProvider>();
         services.AddSingleton<ISharedUpdateTemplateProvider, StaticSharedUpdateTemplateProvider>();

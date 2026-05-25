@@ -80,6 +80,11 @@ public class GdprExportService : IGdprExportService
             .OrderBy(p => p.Topic)
             .ToListAsync(cancellationToken);
 
+        var checkIns = await _db.CaregiverCheckIns
+            .Where(c => c.UserId == userId)
+            .OrderBy(c => c.CreatedAt)
+            .ToListAsync(cancellationToken);
+
         var generatedAt = DateTimeOffset.UtcNow;
 
         var profilePayload = new
@@ -169,6 +174,16 @@ public class GdprExportService : IGdprExportService
             p.UpdatedAt
         });
 
+        var checkInsPayload = checkIns.Select(c => new
+        {
+            c.Id,
+            c.Mood,
+            c.Energy,
+            c.Stress,
+            c.Note,
+            c.CreatedAt
+        });
+
         using var buffer = new MemoryStream();
         using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
         {
@@ -180,6 +195,7 @@ public class GdprExportService : IGdprExportService
             await WriteJsonEntryAsync(zip, "shared-updates.json", updatesPayload, cancellationToken);
             await WriteJsonEntryAsync(zip, "audit-log.json", auditPayload, cancellationToken);
             await WriteJsonEntryAsync(zip, "notification-preferences.json", prefsPayload, cancellationToken);
+            await WriteJsonEntryAsync(zip, "wellbeing-check-ins.json", checkInsPayload, cancellationToken);
             await WriteTextEntryAsync(zip, "README.txt", BuildReadme(user.DisplayName, generatedAt), cancellationToken);
 
             foreach (var doc in documents)
@@ -252,6 +268,7 @@ Contenuto:
 - shared-updates.json          Aggiornamenti condivisi che hai pubblicato.
 - audit-log.json               Tracce delle azioni che hai compiuto.
 - notification-preferences.json Preferenze per le notifiche email.
+- wellbeing-check-ins.json     Check-in del tuo benessere (privati).
 ";
     }
 

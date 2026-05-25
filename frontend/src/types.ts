@@ -67,6 +67,15 @@ export interface PagedResult<T> {
   take: number;
 }
 
+export interface CaregiverCheckIn {
+  id: string;
+  mood: number;
+  energy: number;
+  stress: number;
+  note?: string | null;
+  createdAt: string;
+}
+
 export interface CareCircle {
   id: string;
   name: string;

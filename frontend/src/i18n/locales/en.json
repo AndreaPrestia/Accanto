@@ -117,6 +117,27 @@
         "SessionRevoked": "Session revoked",
         "AllSessionsRevoked": "All sessions revoked"
       }
+    },
+    "wellbeing": {
+      "title": "How are you today?",
+      "hint": "A small private check-in. Only you see it: it helps you notice how you're changing over time.",
+      "mood": "Mood",
+      "moodLow": "Down",
+      "moodHigh": "Calm",
+      "energy": "Energy",
+      "energyLow": "Drained",
+      "energyHigh": "Energized",
+      "stress": "Stress",
+      "stressLow": "Calm",
+      "stressHigh": "Overwhelmed",
+      "note": "A note (optional)",
+      "notePlaceholder": "How did today go?",
+      "save": "Save check-in",
+      "saved": "Check-in saved.",
+      "trend": "Last {{days}} days",
+      "trendEmpty": "At least two check-ins are needed to see a trend.",
+      "history": "History ({{count}})",
+      "confirmDelete": "Delete this check-in?"
     }
   }
 }

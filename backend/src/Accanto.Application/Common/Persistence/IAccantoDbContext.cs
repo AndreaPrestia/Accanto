@@ -17,6 +17,7 @@ public interface IAccantoDbContext
     Microsoft.EntityFrameworkCore.DbSet<UserNotificationPreference> UserNotificationPreferences { get; }
     Microsoft.EntityFrameworkCore.DbSet<RefreshToken> RefreshTokens { get; }
     Microsoft.EntityFrameworkCore.DbSet<SecurityAuditLogEntry> SecurityAuditLogEntries { get; }
+    Microsoft.EntityFrameworkCore.DbSet<CaregiverCheckIn> CaregiverCheckIns { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

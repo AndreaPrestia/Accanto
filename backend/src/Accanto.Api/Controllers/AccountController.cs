@@ -4,6 +4,7 @@ using Accanto.Application.Auth;
 using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.Notifications;
 using Accanto.Application.Security;
+using Accanto.Application.Wellbeing;
 using Accanto.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ public class AccountController : ControllerBase
     private readonly ITwoFactorService _twoFactor;
     private readonly ISecurityAuditLog _audit;
     private readonly ISecurityAuditQueryService _auditQuery;
+    private readonly ICheckInService _checkIns;
     private readonly ICurrentUser _currentUser;
 
     public AccountController(
@@ -33,6 +35,7 @@ public class AccountController : ControllerBase
         ITwoFactorService twoFactor,
         ISecurityAuditLog audit,
         ISecurityAuditQueryService auditQuery,
+        ICheckInService checkIns,
         ICurrentUser currentUser)
     {
         _svc = svc;
@@ -42,6 +45,7 @@ public class AccountController : ControllerBase
         _twoFactor = twoFactor;
         _audit = audit;
         _auditQuery = auditQuery;
+        _checkIns = checkIns;
         _currentUser = currentUser;
     }
 
@@ -145,6 +149,30 @@ public class AccountController : ControllerBase
     [EnableRateLimiting("auth-sensitive")]
     public async Task<ActionResult<EnableTwoFactorResponse>> TwoFactorRegenerateCodes([FromBody] RegenerateRecoveryCodesRequest request, CancellationToken ct)
         => Ok(await _twoFactor.RegenerateRecoveryCodesAsync(_currentUser.RequireUserId(), request, ct));
+
+    // ---------- Wellbeing check-in ----------
+
+    [HttpGet("check-ins")]
+    public async Task<ActionResult<IReadOnlyList<CaregiverCheckInDto>>> ListCheckIns(
+        [FromQuery] DateTimeOffset? from,
+        [FromQuery] DateTimeOffset? to,
+        [FromQuery] int take = 60,
+        CancellationToken ct = default)
+        => Ok(await _checkIns.ListAsync(_currentUser.RequireUserId(), from, to, take, ct));
+
+    [HttpPost("check-ins")]
+    public async Task<ActionResult<CaregiverCheckInDto>> CreateCheckIn([FromBody] CreateCheckInRequest request, CancellationToken ct)
+    {
+        var created = await _checkIns.CreateAsync(_currentUser.RequireUserId(), request, ct);
+        return Created($"/api/account/check-ins/{created.Id}", created);
+    }
+
+    [HttpDelete("check-ins/{id:guid}")]
+    public async Task<IActionResult> DeleteCheckIn(Guid id, CancellationToken ct)
+    {
+        await _checkIns.DeleteAsync(_currentUser.RequireUserId(), id, ct);
+        return NoContent();
+    }
 
     private ClientInfo BuildClientInfo()
     {

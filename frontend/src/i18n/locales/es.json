@@ -117,6 +117,27 @@
         "SessionRevoked": "Sesión revocada",
         "AllSessionsRevoked": "Todas las sesiones revocadas"
       }
+    },
+    "wellbeing": {
+      "title": "¿Cómo estás hoy?",
+      "hint": "Un pequeño check-in privado. Solo tú lo ves: ayuda a notar cómo cambias con el tiempo.",
+      "mood": "Ánimo",
+      "moodLow": "Bajo",
+      "moodHigh": "Tranquilo",
+      "energy": "Energía",
+      "energyLow": "Agotado",
+      "energyHigh": "Lleno",
+      "stress": "Estrés",
+      "stressLow": "Calma",
+      "stressHigh": "Desbordado",
+      "note": "Una nota (opcional)",
+      "notePlaceholder": "¿Cómo ha ido el día?",
+      "save": "Guardar check-in",
+      "saved": "Check-in guardado.",
+      "trend": "Últimos {{days}} días",
+      "trendEmpty": "Hacen falta al menos dos check-in para ver una tendencia.",
+      "history": "Historial ({{count}})",
+      "confirmDelete": "¿Eliminar este check-in?"
     }
   }
 }
