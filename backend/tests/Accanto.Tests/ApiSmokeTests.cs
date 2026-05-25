@@ -51,6 +51,6 @@ public class ApiSmokeTests : IClassFixture<AccantoFactory>
         var mine = await client.GetFromJsonAsync<List<CareCircleDto>>("/api/care-circles", JsonOpts);
         mine.Should().NotBeNull();
         mine!.Should().HaveCount(1);
-        mine[0].Name.Should().Be("Mamma");
+        mine![0].Name.Should().Be("Mamma");
     }
 }

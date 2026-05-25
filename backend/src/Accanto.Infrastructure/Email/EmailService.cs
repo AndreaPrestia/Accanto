@@ -45,7 +45,7 @@ public class EmailService : IEmailService
 
             using var client = new SmtpClient();
             var secure = _options.UseStartTls ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto;
-            await client.ConnectAsync(_options.SmtpHost, _options.SmtpPort, secure, cancellationToken);
+            await client.ConnectAsync(_options.SmtpHost!, _options.SmtpPort, secure, cancellationToken);
             if (!string.IsNullOrWhiteSpace(_options.Username))
             {
                 await client.AuthenticateAsync(_options.Username, _options.Password ?? string.Empty, cancellationToken);
