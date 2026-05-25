@@ -15,6 +15,7 @@ interface AuthCtx {
 const Ctx = createContext<AuthCtx | undefined>(undefined);
 
 const TOKEN_KEY = 'accanto.token';
+const REFRESH_KEY = 'accanto.refreshToken';
 const USER_KEY = 'accanto.user';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -37,6 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const persist = (res: AuthResponse) => {
     localStorage.setItem(TOKEN_KEY, res.accessToken);
+    if (res.refreshToken) {
+      localStorage.setItem(REFRESH_KEY, res.refreshToken);
+    }
     localStorage.setItem(USER_KEY, JSON.stringify(res.user));
     setUser(res.user);
     if (res.user.language && (SUPPORTED_LANGUAGES as readonly string[]).includes(res.user.language)) {
@@ -55,7 +59,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    const refreshToken = localStorage.getItem(REFRESH_KEY);
+    if (refreshToken) {
+      // Fire-and-forget: revoca lato server, ma non bloccare l'UX se la rete è giù.
+      api.post('/auth/logout', { refreshToken }).catch(() => { /* ignore */ });
+    }
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_KEY);
     localStorage.removeItem(USER_KEY);
     setUser(null);
   };

@@ -22,6 +22,16 @@ public class AccantoFactory : WebApplicationFactory<Program>
         // Chiave AES-256 deterministica di test (32 zeri in base64). NON usare in produzione.
         builder.UseSetting("Encryption:MasterKey", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=");
 
+        // Rate limit alti per i test
+        builder.UseSetting("RateLimit:Login:PermitLimit", "10000");
+        builder.UseSetting("RateLimit:Login:Window", "00:01:00");
+        builder.UseSetting("RateLimit:Register:PermitLimit", "10000");
+        builder.UseSetting("RateLimit:Register:Window", "00:01:00");
+        builder.UseSetting("RateLimit:Sensitive:PermitLimit", "10000");
+        builder.UseSetting("RateLimit:Sensitive:Window", "00:01:00");
+        builder.UseSetting("RateLimit:InviteCreate:PermitLimit", "10000");
+        builder.UseSetting("RateLimit:InviteCreate:Window", "00:01:00");
+
         builder.ConfigureServices(services =>
         {
             // Remove all EF/DbContext services that the production registration created.

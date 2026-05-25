@@ -12,6 +12,7 @@ public class AuthService : IAuthService
     private readonly IAccantoDbContext _db;
     private readonly IPasswordHasher _hasher;
     private readonly IJwtTokenService _jwt;
+    private readonly IRefreshTokenService _refresh;
     private readonly IValidator<RegisterRequest> _registerValidator;
     private readonly IValidator<LoginRequest> _loginValidator;
 
@@ -19,17 +20,19 @@ public class AuthService : IAuthService
         IAccantoDbContext db,
         IPasswordHasher hasher,
         IJwtTokenService jwt,
+        IRefreshTokenService refresh,
         IValidator<RegisterRequest> registerValidator,
         IValidator<LoginRequest> loginValidator)
     {
         _db = db;
         _hasher = hasher;
         _jwt = jwt;
+        _refresh = refresh;
         _registerValidator = registerValidator;
         _loginValidator = loginValidator;
     }
 
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
     {
         var result = await _registerValidator.ValidateAsync(request, cancellationToken);
         if (!result.IsValid)
@@ -60,11 +63,10 @@ public class AuthService : IAuthService
         _db.Users.Add(user);
         await _db.SaveChangesAsync(cancellationToken);
 
-        var token = _jwt.Issue(user);
-        return new AuthResponse(token.Token, token.ExpiresAt, ToDto(user));
+        return await BuildResponseAsync(user, client, cancellationToken);
     }
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthResponse> LoginAsync(LoginRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
     {
         var result = await _loginValidator.ValidateAsync(request, cancellationToken);
         if (!result.IsValid)
@@ -83,15 +85,34 @@ public class AuthService : IAuthService
             throw new ForbiddenException("Email o password non corretti.");
         }
 
-        var token = _jwt.Issue(user);
-        return new AuthResponse(token.Token, token.ExpiresAt, ToDto(user));
+        return await BuildResponseAsync(user, client, cancellationToken);
     }
+
+    public async Task<AuthResponse> RefreshAsync(RefreshTokenRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
+    {
+        var (issued, userId) = await _refresh.RotateAsync(request.RefreshToken, client, cancellationToken);
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken)
+            ?? throw new ForbiddenException("Refresh token non valido.");
+
+        var access = _jwt.Issue(user);
+        return new AuthResponse(access.Token, access.ExpiresAt, issued.Token, issued.ExpiresAt, ToDto(user));
+    }
+
+    public Task LogoutAsync(LogoutRequest request, CancellationToken cancellationToken = default)
+        => _refresh.RevokeAsync(request.RefreshToken, cancellationToken);
 
     public async Task<UserDto> GetMeAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken)
             ?? throw new NotFoundException("Utente non trovato.");
         return ToDto(user);
+    }
+
+    private async Task<AuthResponse> BuildResponseAsync(User user, ClientInfo? client, CancellationToken cancellationToken)
+    {
+        var access = _jwt.Issue(user);
+        var refresh = await _refresh.IssueAsync(user.Id, client, cancellationToken);
+        return new AuthResponse(access.Token, access.ExpiresAt, refresh.Token, refresh.ExpiresAt, ToDto(user));
     }
 
     private static UserDto ToDto(User u) => new(u.Id, u.Email, u.DisplayName, u.Language, u.CreatedAt);

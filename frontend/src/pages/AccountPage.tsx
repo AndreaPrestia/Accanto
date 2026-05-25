@@ -6,6 +6,7 @@ import { useAuth } from '../auth/AuthContext';
 import PushNotificationsSection from '../components/PushNotificationsSection';
 import NotificationPreferencesSection from '../components/NotificationPreferencesSection';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import ActiveSessionsSection from '../components/ActiveSessionsSection';
 
 export default function AccountPage() {
   const { user, logout } = useAuth();
@@ -173,6 +174,8 @@ export default function AccountPage() {
       <PushNotificationsSection />
 
       <NotificationPreferencesSection />
+
+      <ActiveSessionsSection />
 
       <section className="space-y-3">
         <h2 className="text-base font-semibold text-accanto-900">{t('account.exportTitle')}</h2>

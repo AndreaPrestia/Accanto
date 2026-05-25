@@ -1,3 +1,4 @@
+using Accanto.Application.Auth;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
@@ -15,6 +16,7 @@ public class AccountService : IAccountService
     private readonly IPasswordHasher _hasher;
     private readonly IFileStorage _storage;
     private readonly ICircleEmailNotifier _email;
+    private readonly IRefreshTokenService _refresh;
     private readonly IValidator<ChangePasswordRequest> _changeValidator;
     private readonly IValidator<DeleteAccountRequest> _deleteValidator;
 
@@ -23,6 +25,7 @@ public class AccountService : IAccountService
         IPasswordHasher hasher,
         IFileStorage storage,
         ICircleEmailNotifier email,
+        IRefreshTokenService refresh,
         IValidator<ChangePasswordRequest> changeValidator,
         IValidator<DeleteAccountRequest> deleteValidator)
     {
@@ -30,6 +33,7 @@ public class AccountService : IAccountService
         _hasher = hasher;
         _storage = storage;
         _email = email;
+        _refresh = refresh;
         _changeValidator = changeValidator;
         _deleteValidator = deleteValidator;
     }
@@ -47,6 +51,10 @@ public class AccountService : IAccountService
 
         user.PasswordHash = _hasher.Hash(request.NewPassword);
         await _db.SaveChangesAsync(cancellationToken);
+
+        // Sicurezza: invalida tutte le altre sessioni attive (refresh token) per impedire che
+        // chi conosce la vecchia password mantenga l'accesso tramite un refresh token rubato.
+        await _refresh.RevokeAllForUserAsync(userId, cancellationToken);
 
         _ = _email.SendSecurityEmailAsync(userId, "Password modificata", EmailTemplates.PasswordChanged(), CancellationToken.None);
     }

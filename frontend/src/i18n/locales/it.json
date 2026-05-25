@@ -58,6 +58,16 @@
     "exportTitle": "Esporta i tuoi dati",
     "exportHint": "Scarica un archivio ZIP con il tuo profilo, le voci di diario, i documenti caricati, le domande, gli aggiornamenti, l'audit e le preferenze.",
     "exportCta": "Scarica archivio",
-    "exportPreparing": "Preparazione…"
+    "exportPreparing": "Preparazione…",
+    "sessionsTitle": "Sessioni attive",
+    "sessionsHint": "Dispositivi e browser collegati al tuo account. Revoca quelli che non riconosci.",
+    "sessionsEmpty": "Nessuna altra sessione attiva.",
+    "sessionsCurrent": "Questa sessione",
+    "sessionsCreatedAt": "Accesso",
+    "sessionsExpiresAt": "Scadenza",
+    "sessionsRevoke": "Revoca",
+    "sessionsRevoking": "Revoca…",
+    "sessionsLoadError": "Impossibile caricare le sessioni.",
+    "sessionsUnknownDevice": "Dispositivo sconosciuto"
   }
 }

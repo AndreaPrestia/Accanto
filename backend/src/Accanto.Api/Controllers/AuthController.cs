@@ -23,16 +23,37 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     [EnableRateLimiting("auth-register")]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken ct)
-        => Ok(await _auth.RegisterAsync(request, ct));
+        => Ok(await _auth.RegisterAsync(request, BuildClientInfo(), ct));
 
     [HttpPost("login")]
     [AllowAnonymous]
     [EnableRateLimiting("auth-login")]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken ct)
-        => Ok(await _auth.LoginAsync(request, ct));
+        => Ok(await _auth.LoginAsync(request, BuildClientInfo(), ct));
+
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    [EnableRateLimiting("auth-login")]
+    public async Task<ActionResult<AuthResponse>> Refresh([FromBody] RefreshTokenRequest request, CancellationToken ct)
+        => Ok(await _auth.RefreshAsync(request, BuildClientInfo(), ct));
+
+    [HttpPost("logout")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request, CancellationToken ct)
+    {
+        await _auth.LogoutAsync(request, ct);
+        return NoContent();
+    }
 
     [HttpGet("me")]
     [Authorize]
     public async Task<ActionResult<UserDto>> Me(CancellationToken ct)
         => Ok(await _auth.GetMeAsync(_currentUser.RequireUserId(), ct));
+
+    private ClientInfo BuildClientInfo()
+    {
+        var ua = Request.Headers.UserAgent.ToString();
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        return new ClientInfo(string.IsNullOrWhiteSpace(ua) ? null : ua, ip);
+    }
 }

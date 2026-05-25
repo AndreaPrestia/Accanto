@@ -1,4 +1,5 @@
 using Accanto.Application.Account;
+using Accanto.Application.Auth;
 using Accanto.Application.CareCircles;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Storage;
@@ -27,6 +28,7 @@ public class AccountServiceTests
         var storage = new FakeStorage();
         var account = new AccountService(
             db, hasher, storage, new NoOpCircleEmailNotifier(),
+            new NoOpRefreshTokenService(),
             new ChangePasswordRequestValidator(),
             new DeleteAccountRequestValidator());
         var auth = new Accanto.Infrastructure.Authorization.CareCircleAuthorization(db);

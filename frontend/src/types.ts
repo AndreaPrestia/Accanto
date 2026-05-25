@@ -21,9 +21,17 @@ export type DoctorQuestionStatus = 'ToAsk' | 'Asked' | 'Answered' | 'Archived';
 export type SharedUpdateAudience = 'CloseFamily' | 'ExtendedFamily' | 'Friends' | 'Generic';
 
 export interface User { id: string; email: string; displayName: string; language?: string | null; createdAt: string; }
-export interface AuthResponse { accessToken: string; expiresAt: string; user: User; }
+export interface AuthResponse { accessToken: string; expiresAt: string; refreshToken: string; refreshTokenExpiresAt: string; user: User; }
 export interface RegisterRequest { email: string; displayName: string; password: string; }
 export interface LoginRequest { email: string; password: string; }
+export interface ActiveSession {
+  id: string;
+  createdAt: string;
+  expiresAt: string;
+  userAgent?: string | null;
+  ipAddress?: string | null;
+  current: boolean;
+}
 
 export interface CareCircle {
   id: string;

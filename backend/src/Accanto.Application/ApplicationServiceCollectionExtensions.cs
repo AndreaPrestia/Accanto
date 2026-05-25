@@ -19,7 +19,10 @@ public static class ApplicationServiceCollectionExtensions
     {
         services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>(ServiceLifetime.Scoped);
 
+        services.AddSingleton(TimeProvider.System);
+
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IGdprExportService, GdprExportService>();
         services.AddScoped<ICareCircleService, CareCircleService>();

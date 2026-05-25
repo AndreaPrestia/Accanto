@@ -27,6 +27,7 @@ public class AccantoDbContext : DbContext, IAccantoDbContext
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
     public DbSet<AuditLogEntry> AuditLogEntries => Set<AuditLogEntry>();
     public DbSet<UserNotificationPreference> UserNotificationPreferences => Set<UserNotificationPreference>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

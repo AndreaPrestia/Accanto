@@ -12,12 +12,12 @@ public class RateLimitTests
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            base.ConfigureWebHost(builder);
             // Soglie volutamente basse per esercitare il 429 nei test.
             builder.UseSetting("RateLimit:Login:PermitLimit", "2");
             builder.UseSetting("RateLimit:Login:Window", "00:01:00");
             builder.UseSetting("RateLimit:Register:PermitLimit", "2");
             builder.UseSetting("RateLimit:Register:Window", "00:01:00");
-            base.ConfigureWebHost(builder);
         }
     }
 

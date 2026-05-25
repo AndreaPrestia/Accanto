@@ -4,6 +4,7 @@ using System.Threading.RateLimiting;
 using Accanto.Api.Common;
 using Accanto.Api.Configuration;
 using Accanto.Application;
+using Accanto.Application.Auth;
 using Accanto.Infrastructure;
 using Accanto.Infrastructure.Persistence;
 using FluentValidation.AspNetCore;
@@ -62,6 +63,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddAuthorization();
+
+// Refresh token: scadenza (giorni) dalla stessa sezione Jwt usata per l'access token.
+builder.Services.Configure<RefreshTokenOptions>(o =>
+{
+    var days = builder.Configuration.GetValue<int?>("Jwt:RefreshTokenExpiryDays");
+    if (days is > 0) o.ExpiryDays = days.Value;
+});
 
 // Rate limiting su endpoint sensibili (login/register/cambio password/invio inviti)
 var rateLimits = builder.Configuration.GetSection("RateLimit").Get<RateLimitOptions>() ?? new RateLimitOptions();

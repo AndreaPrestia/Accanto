@@ -1,5 +1,6 @@
 using Accanto.Api.Common;
 using Accanto.Application.Account;
+using Accanto.Application.Auth;
 using Accanto.Application.Notifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,13 +16,20 @@ public class AccountController : ControllerBase
     private readonly IAccountService _svc;
     private readonly INotificationPreferenceService _prefs;
     private readonly IGdprExportService _export;
+    private readonly IRefreshTokenService _sessions;
     private readonly ICurrentUser _currentUser;
 
-    public AccountController(IAccountService svc, INotificationPreferenceService prefs, IGdprExportService export, ICurrentUser currentUser)
+    public AccountController(
+        IAccountService svc,
+        INotificationPreferenceService prefs,
+        IGdprExportService export,
+        IRefreshTokenService sessions,
+        ICurrentUser currentUser)
     {
         _svc = svc;
         _prefs = prefs;
         _export = export;
+        _sessions = sessions;
         _currentUser = currentUser;
     }
 
@@ -67,5 +75,21 @@ public class AccountController : ControllerBase
     {
         var result = await _export.ExportAsync(_currentUser.RequireUserId(), ct);
         return File(result.Content, "application/zip", result.FileName);
+    }
+
+    [HttpGet("sessions")]
+    public async Task<ActionResult<IReadOnlyList<ActiveSessionDto>>> ListSessions(
+        [FromQuery(Name = "current")] string? currentRefreshToken,
+        CancellationToken ct)
+    {
+        var list = await _sessions.ListActiveAsync(_currentUser.RequireUserId(), currentRefreshToken, ct);
+        return Ok(list);
+    }
+
+    [HttpDelete("sessions/{id:guid}")]
+    public async Task<IActionResult> RevokeSession(Guid id, CancellationToken ct)
+    {
+        await _sessions.RevokeByIdAsync(_currentUser.RequireUserId(), id, ct);
+        return NoContent();
     }
 }
