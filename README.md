@@ -57,6 +57,9 @@ Gli screenshot dell'interfaccia sono raccolti in [`docs/screenshots/`](docs/scre
 | Domande per il medico | ![Domande](docs/screenshots/05-doctor-questions.png) |
 | Aggiornamenti per gli altri | ![Aggiornamenti](docs/screenshots/06-shared-updates.png) |
 | Giornata difficile | ![Giornata difficile](docs/screenshots/07-difficult-day.png) |
+| Registro azioni | ![Registro azioni](docs/screenshots/08-audit-log.png) |
+| Account | ![Account](docs/screenshots/09-account.png) |
+
 
 ## Architettura
 
