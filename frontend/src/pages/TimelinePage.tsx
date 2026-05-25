@@ -15,6 +15,13 @@ export default function TimelinePage() {
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkMsg, setBulkMsg] = useState<string | null>(null);
+  const [bulkAddTags, setBulkAddTags] = useState('');
+  const [bulkRemoveTags, setBulkRemoveTags] = useState('');
+  const [bulkVisibility, setBulkVisibility] = useState<'' | TimelineVisibility>('');
 
   const load = async () => {
     if (!id) return;
@@ -81,6 +88,89 @@ export default function TimelinePage() {
 
       {showForm && <NewEntryForm careCircleId={id!} onCreated={() => { setShowForm(false); load(); }} />}
 
+      <div className="flex items-center gap-3 mb-3">
+        <button
+          type="button"
+          onClick={() => {
+            setSelectMode(m => !m);
+            setSelected(new Set());
+            setBulkMsg(null);
+          }}
+          className="text-sm text-accanto-700 hover:underline"
+        >
+          {selectMode ? 'Esci da selezione multipla' : 'Selezione multipla'}
+        </button>
+        {selectMode && entries && entries.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setSelected(new Set(entries.map(e => e.id)))}
+            className="text-sm text-accanto-500 hover:underline"
+          >
+            Seleziona tutte ({entries.length})
+          </button>
+        )}
+      </div>
+
+      {selectMode && (
+        <div className="card mb-4 space-y-3">
+          <h2 className="font-medium">Modifica selezionate ({selected.size})</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="label">Aggiungi tag (separati da virgola)</label>
+              <input className="input" value={bulkAddTags} onChange={(e) => setBulkAddTags(e.target.value)} placeholder="urgente, controllo" />
+            </div>
+            <div>
+              <label className="label">Rimuovi tag (separati da virgola)</label>
+              <input className="input" value={bulkRemoveTags} onChange={(e) => setBulkRemoveTags(e.target.value)} placeholder="vecchio" />
+            </div>
+          </div>
+          <div>
+            <label className="label">Visibilità</label>
+            <select className="input" value={bulkVisibility} onChange={(e) => setBulkVisibility(e.target.value as any)}>
+              <option value="">Non modificare</option>
+              {VIS.map(v => <option key={v} value={v}>{VisibilityLabel[v]}</option>)}
+            </select>
+          </div>
+          {bulkMsg && <p className="text-sm text-accanto-700">{bulkMsg}</p>}
+          <button
+            type="button"
+            disabled={bulkBusy || selected.size === 0}
+            className="btn-primary"
+            onClick={async () => {
+              const addTags = bulkAddTags.split(',').map(s => s.trim()).filter(Boolean);
+              const removeTags = bulkRemoveTags.split(',').map(s => s.trim()).filter(Boolean);
+              if (addTags.length === 0 && removeTags.length === 0 && !bulkVisibility) {
+                setBulkMsg('Specifica almeno una modifica.');
+                return;
+              }
+              if (!confirm(`Applicare le modifiche a ${selected.size} voci?`)) return;
+              setBulkBusy(true);
+              setBulkMsg(null);
+              try {
+                const { data } = await api.patch<{ updated: number; skipped: number }>(`/care-circles/${id}/timeline/bulk`, {
+                  entryIds: Array.from(selected),
+                  tagsToAdd: addTags.length ? addTags : null,
+                  tagsToRemove: removeTags.length ? removeTags : null,
+                  newVisibility: bulkVisibility || null
+                });
+                setBulkMsg(`${data.updated} aggiornate, ${data.skipped} saltate.`);
+                setSelected(new Set());
+                setBulkAddTags('');
+                setBulkRemoveTags('');
+                setBulkVisibility('');
+                await load();
+              } catch (e) {
+                setBulkMsg(extractError(e));
+              } finally {
+                setBulkBusy(false);
+              }
+            }}
+          >
+            {bulkBusy ? 'Applicazione…' : 'Applica modifiche'}
+          </button>
+        </div>
+      )}
+
       {error && <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 mb-3">{error}</div>}
 
       {entries === null ? (
@@ -89,14 +179,30 @@ export default function TimelinePage() {
         <p className="text-accanto-500">Ancora nessuna voce.</p>
       ) : (
         <div className="space-y-3">
-          {entries.map(e => <EntryCard key={e.id} entry={e} careCircleId={id!} onDeleted={load} />)}
+          {entries.map(e => (
+            <EntryCard
+              key={e.id}
+              entry={e}
+              careCircleId={id!}
+              onDeleted={load}
+              selectMode={selectMode}
+              selected={selected.has(e.id)}
+              onToggleSelect={() => {
+                setSelected(prev => {
+                  const next = new Set(prev);
+                  if (next.has(e.id)) next.delete(e.id); else next.add(e.id);
+                  return next;
+                });
+              }}
+            />
+          ))}
         </div>
       )}
     </div>
   );
 }
 
-function EntryCard({ entry, careCircleId, onDeleted }: { entry: TimelineEntry; careCircleId: string; onDeleted: () => void }) {
+function EntryCard({ entry, careCircleId, onDeleted, selectMode, selected, onToggleSelect }: { entry: TimelineEntry; careCircleId: string; onDeleted: () => void; selectMode: boolean; selected: boolean; onToggleSelect: () => void }) {
   const [busy, setBusy] = useState(false);
   const del = async () => {
     if (!confirm('Eliminare questa voce?')) return;
@@ -110,9 +216,14 @@ function EntryCard({ entry, careCircleId, onDeleted }: { entry: TimelineEntry; c
   return (
     <div className="card">
       <div className="flex items-baseline justify-between gap-2">
-        <div>
-          <h3 className="font-medium">{entry.title}</h3>
-          <p className="text-xs text-accanto-500">{when} • {TimelineTypeLabel[entry.type]} • {VisibilityLabel[entry.visibility]}</p>
+        <div className="flex items-baseline gap-2">
+          {selectMode && (
+            <input type="checkbox" checked={selected} onChange={onToggleSelect} className="mt-1" aria-label="Seleziona voce" />
+          )}
+          <div>
+            <h3 className="font-medium">{entry.title}</h3>
+            <p className="text-xs text-accanto-500">{when} • {TimelineTypeLabel[entry.type]} • {VisibilityLabel[entry.visibility]}</p>
+          </div>
         </div>
         <button onClick={del} disabled={busy} className="text-sm text-accanto-500 hover:text-red-700">Elimina</button>
       </div>

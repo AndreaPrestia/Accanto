@@ -40,3 +40,12 @@ public sealed record TimelineQuery(
     DateTimeOffset? From = null,
     DateTimeOffset? To = null
 );
+
+public sealed record BulkUpdateTimelineEntriesRequest(
+    IReadOnlyList<Guid> EntryIds,
+    IReadOnlyList<string>? TagsToAdd,
+    IReadOnlyList<string>? TagsToRemove,
+    TimelineVisibility? NewVisibility
+);
+
+public sealed record BulkUpdateResultDto(int Updated, int Skipped);

@@ -30,7 +30,7 @@ public class TimelineServiceTests
         var auth = new CareCircleAuthorization(db);
         IValidator<CreateTimelineEntryRequest> cv = new CreateTimelineEntryRequestValidator();
         IValidator<UpdateTimelineEntryRequest> uv = new UpdateTimelineEntryRequestValidator();
-        var svc = new TimelineService(db, auth, new NoOpPushService(), new NoOpCircleEmailNotifier(), new NoOpAuditLog(), cv, uv);
+        var svc = new TimelineService(db, auth, new NoOpPushService(), new NoOpCircleEmailNotifier(), new NoOpAuditLog(), cv, uv, new BulkUpdateTimelineEntriesRequestValidator());
         return (svc, db, circleId, alice, bob);
     }
 
@@ -80,5 +80,69 @@ public class TimelineServiceTests
             From: new DateTimeOffset(2026, 2, 1, 0, 0, 0, TimeSpan.Zero),
             To: new DateTimeOffset(2026, 2, 28, 23, 59, 59, TimeSpan.Zero)));
         only.Should().ContainSingle(e => e.Title == "feb");
+    }
+
+    [Fact]
+    public async Task BulkUpdate_adds_and_removes_tags_and_changes_visibility()
+    {
+        var (svc, _, circleId, alice, _) = Setup();
+
+        var e1 = await svc.CreateAsync(alice, circleId, new CreateTimelineEntryRequest(
+            DateTimeOffset.UtcNow, TimelineEntryType.MedicalUpdate, "a", "x", new List<string> { "vecchio" }, TimelineVisibility.Circle));
+        var e2 = await svc.CreateAsync(alice, circleId, new CreateTimelineEntryRequest(
+            DateTimeOffset.UtcNow, TimelineEntryType.MedicalUpdate, "b", "y", new List<string>(), TimelineVisibility.Circle));
+
+        var result = await svc.BulkUpdateAsync(alice, circleId, new BulkUpdateTimelineEntriesRequest(
+            new[] { e1.Id, e2.Id },
+            TagsToAdd: new[] { "urgente" },
+            TagsToRemove: new[] { "vecchio" },
+            NewVisibility: TimelineVisibility.Private));
+
+        result.Updated.Should().Be(2);
+        result.Skipped.Should().Be(0);
+
+        var fetched1 = await svc.GetAsync(alice, circleId, e1.Id);
+        fetched1.Tags.Should().BeEquivalentTo(new[] { "urgente" });
+        fetched1.Visibility.Should().Be(TimelineVisibility.Private);
+
+        var fetched2 = await svc.GetAsync(alice, circleId, e2.Id);
+        fetched2.Tags.Should().BeEquivalentTo(new[] { "urgente" });
+    }
+
+    [Fact]
+    public async Task BulkUpdate_skips_private_entries_of_other_users()
+    {
+        var (svc, _, circleId, alice, bob) = Setup();
+
+        var alicePrivate = await svc.CreateAsync(alice, circleId, new CreateTimelineEntryRequest(
+            DateTimeOffset.UtcNow, TimelineEntryType.PersonalNote, "segreta", "x", new List<string>(), TimelineVisibility.Private));
+        var publicEntry = await svc.CreateAsync(alice, circleId, new CreateTimelineEntryRequest(
+            DateTimeOffset.UtcNow, TimelineEntryType.MedicalUpdate, "pubblica", "x", new List<string>(), TimelineVisibility.Circle));
+
+        var result = await svc.BulkUpdateAsync(bob, circleId, new BulkUpdateTimelineEntriesRequest(
+            new[] { alicePrivate.Id, publicEntry.Id },
+            TagsToAdd: new[] { "tag" },
+            TagsToRemove: null,
+            NewVisibility: null));
+
+        result.Updated.Should().Be(1);
+        result.Skipped.Should().Be(1);
+
+        // Voce privata di Alice resta invariata.
+        var aliceView = await svc.GetAsync(alice, circleId, alicePrivate.Id);
+        aliceView.Tags.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task BulkUpdate_requires_at_least_one_operation()
+    {
+        var (svc, _, circleId, alice, _) = Setup();
+        var entry = await svc.CreateAsync(alice, circleId, new CreateTimelineEntryRequest(
+            DateTimeOffset.UtcNow, TimelineEntryType.MedicalUpdate, "a", "x", new List<string>(), TimelineVisibility.Circle));
+
+        var act = async () => await svc.BulkUpdateAsync(alice, circleId, new BulkUpdateTimelineEntriesRequest(
+            new[] { entry.Id }, null, null, null));
+
+        await act.Should().ThrowAsync<Accanto.Application.Common.Exceptions.AppValidationException>();
     }
 }

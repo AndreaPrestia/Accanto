@@ -21,6 +21,7 @@ public class TimelineService : ITimelineService
     private readonly IAuditLog _audit;
     private readonly IValidator<CreateTimelineEntryRequest> _createValidator;
     private readonly IValidator<UpdateTimelineEntryRequest> _updateValidator;
+    private readonly IValidator<BulkUpdateTimelineEntriesRequest> _bulkValidator;
 
     public TimelineService(
         IAccantoDbContext db,
@@ -29,7 +30,8 @@ public class TimelineService : ITimelineService
         ICircleEmailNotifier email,
         IAuditLog audit,
         IValidator<CreateTimelineEntryRequest> createValidator,
-        IValidator<UpdateTimelineEntryRequest> updateValidator)
+        IValidator<UpdateTimelineEntryRequest> updateValidator,
+        IValidator<BulkUpdateTimelineEntriesRequest> bulkValidator)
     {
         _db = db;
         _auth = auth;
@@ -38,6 +40,7 @@ public class TimelineService : ITimelineService
         _audit = audit;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
+        _bulkValidator = bulkValidator;
     }
 
     public async Task<IReadOnlyList<TimelineEntryDto>> ListAsync(Guid userId, Guid careCircleId, TimelineQuery query, CancellationToken cancellationToken = default)
@@ -190,6 +193,87 @@ public class TimelineService : ITimelineService
             .Where(t => t.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+    public async Task<BulkUpdateResultDto> BulkUpdateAsync(Guid userId, Guid careCircleId, BulkUpdateTimelineEntriesRequest request, CancellationToken cancellationToken = default)
+    {
+        await _auth.EnsureMemberAsync(userId, careCircleId, CareCircleRole.Caregiver, cancellationToken);
+        await _bulkValidator.EnsureValidAsync(request, cancellationToken);
+
+        var ids = request.EntryIds.Distinct().ToList();
+        var entries = await _db.TimelineEntries
+            .Where(e => e.CareCircleId == careCircleId && ids.Contains(e.Id))
+            .ToListAsync(cancellationToken);
+
+        var addTags = NormalizeTags(request.TagsToAdd);
+        var removeTags = new HashSet<string>(
+            NormalizeTags(request.TagsToRemove),
+            StringComparer.OrdinalIgnoreCase);
+
+        var now = DateTimeOffset.UtcNow;
+        var updated = 0;
+        var skipped = 0;
+
+        foreach (var entry in entries)
+        {
+            // Le voci private di altre persone non sono modificabili.
+            if (entry.Visibility == TimelineVisibility.Private && entry.CreatedByUserId != userId)
+            {
+                skipped++;
+                continue;
+            }
+
+            var tagsChanged = false;
+            if (addTags.Count > 0)
+            {
+                var merged = entry.Tags
+                    .Concat(addTags)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                if (merged.Count != entry.Tags.Count)
+                {
+                    entry.Tags = merged;
+                    tagsChanged = true;
+                }
+            }
+            if (removeTags.Count > 0)
+            {
+                var filtered = entry.Tags.Where(t => !removeTags.Contains(t)).ToList();
+                if (filtered.Count != entry.Tags.Count)
+                {
+                    entry.Tags = filtered;
+                    tagsChanged = true;
+                }
+            }
+
+            var visibilityChanged = false;
+            if (request.NewVisibility.HasValue && entry.Visibility != request.NewVisibility.Value)
+            {
+                entry.Visibility = request.NewVisibility.Value;
+                visibilityChanged = true;
+            }
+
+            if (tagsChanged || visibilityChanged)
+            {
+                entry.UpdatedAt = now;
+                updated++;
+            }
+            else
+            {
+                skipped++;
+            }
+        }
+
+        // Voci richieste ma non trovate nel cerchio: contate come saltate.
+        skipped += ids.Count - entries.Count;
+
+        if (updated > 0)
+        {
+            await _db.SaveChangesAsync(cancellationToken);
+            _ = _audit.LogAsync(careCircleId, userId, AuditActionType.EntriesBulkUpdated, AuditResourceType.TimelineEntry, null, $"{updated} voci aggiornate", CancellationToken.None);
+        }
+
+        return new BulkUpdateResultDto(updated, skipped);
+    }
 
     private static TimelineEntryDto Map(TimelineEntry e) => new(
         e.Id, e.CareCircleId, e.CreatedByUserId, e.OccurredAt, e.Type,

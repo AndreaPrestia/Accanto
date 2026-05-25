@@ -51,4 +51,8 @@ public class TimelineController : ControllerBase
         await _svc.DeleteAsync(_currentUser.RequireUserId(), careCircleId, entryId, ct);
         return NoContent();
     }
+
+    [HttpPatch("bulk")]
+    public async Task<ActionResult<BulkUpdateResultDto>> BulkUpdate(Guid careCircleId, [FromBody] BulkUpdateTimelineEntriesRequest request, CancellationToken ct)
+        => Ok(await _svc.BulkUpdateAsync(_currentUser.RequireUserId(), careCircleId, request, ct));
 }

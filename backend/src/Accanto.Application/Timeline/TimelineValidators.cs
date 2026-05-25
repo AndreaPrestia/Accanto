@@ -23,3 +23,21 @@ public class UpdateTimelineEntryRequestValidator : AbstractValidator<UpdateTimel
         RuleForEach(x => x.Tags).MaximumLength(40);
     }
 }
+
+public class BulkUpdateTimelineEntriesRequestValidator : AbstractValidator<BulkUpdateTimelineEntriesRequest>
+{
+    public BulkUpdateTimelineEntriesRequestValidator()
+    {
+        RuleFor(x => x.EntryIds).NotNull().WithMessage("Seleziona almeno una voce.");
+        When(x => x.EntryIds is not null, () =>
+        {
+            RuleFor(x => x.EntryIds.Count).GreaterThan(0).WithMessage("Seleziona almeno una voce.");
+            RuleFor(x => x.EntryIds.Count).LessThanOrEqualTo(100).WithMessage("Puoi aggiornare al massimo 100 voci per volta.");
+        });
+        RuleForEach(x => x.TagsToAdd).MaximumLength(40).When(x => x.TagsToAdd != null);
+        RuleForEach(x => x.TagsToRemove).MaximumLength(40).When(x => x.TagsToRemove != null);
+        RuleFor(x => x)
+            .Must(x => (x.TagsToAdd is { Count: > 0 }) || (x.TagsToRemove is { Count: > 0 }) || x.NewVisibility.HasValue)
+            .WithMessage("Specifica almeno una modifica (tag o visibilità).");
+    }
+}
