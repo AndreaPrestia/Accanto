@@ -261,14 +261,23 @@ Cerchi di cura, diario, documenti, domande per il medico, aggiornamenti pronti d
 - Filtri data nel diario.
 
 **v0.3**
-- Multilingua (en, es) con copy mantenuto in italiano come base.
-- Editing dei tag e visibilità in massa.
-- Modulo AI opzionale (riassunti, suggerimenti) con provider configurabile.
-- 2FA TOTP.
+- Registro azioni per cerchio (audit log) visibile a tutti i membri.
+- Notifiche email opzionali per topic (con preferenze utente) — MailKit/SMTP, no-op se non configurato.
+- Editing in massa del diario (tag e visibilità).
+- Multilingua: italiano, inglese, spagnolo (backend + frontend, email + PDF localizzati su `PreferredLanguage`).
+- Esportazione GDPR: ZIP con tutti i dati dell'utente + documenti decifrati.
+- Rotazione delle chiavi di cifratura (token `v2.{keyId}.…`, retrocompat `v1.`) + CLI `Accanto.Cli` (`generate-key`, `rotate-keys`).
 
-**v0.4**
+**v0.4 — Sicurezza & account**
+- Rate limiting per endpoint sensibili (login, register, change-password, delete, invite-create) configurabile via env.
+- Refresh token con rotation + reuse detection. Sessioni attive visibili e revocabili da `/account`.
+- Lockout temporaneo dopo N tentativi di login falliti (configurabile).
+- 2FA TOTP con codici di recupero (Otp.NET) — setup via QR code, integrato nel login a 2 step.
+- Audit log eventi auth per utente (registrazione, login, lockout, 2FA, cambio password, revoca sessione) visibile in `/account`.
+
+**v0.5 (idea)**
 - Sezione "cura di chi cura" più ricca: check-in emotivo, suggerimenti contestuali, contatti di supporto regionali.
-- Audit trail per cerchi condivisi.
+- Modulo AI opzionale (riassunti, suggerimenti) con provider configurabile.
 - Backup/restore guidato dell'istanza.
 
 ## Licenza
