@@ -36,6 +36,16 @@ services:
       Storage__MaxFileSizeBytes: ${Storage__MaxFileSizeBytes:-20971520}
       Encryption__MasterKey: "${Encryption__MasterKey:?Encryption__MasterKey richiesta - genera con openssl rand -base64 32}"
       Cors__AllowedOrigins: ${Cors__AllowedOrigins:-http://localhost:5173,http://localhost:8081}
+      # In sviluppo locale i rate limit sono volutamente rilassati per non bloccare i test E2E.
+      # In produzione lasciare i default di RateLimitOptions (5/min login, 10/h register, ecc.).
+      RateLimit__Login__PermitLimit: ${RateLimit__Login__PermitLimit:-10000}
+      RateLimit__Login__Window: ${RateLimit__Login__Window:-00:01:00}
+      RateLimit__Register__PermitLimit: ${RateLimit__Register__PermitLimit:-10000}
+      RateLimit__Register__Window: ${RateLimit__Register__Window:-00:01:00}
+      RateLimit__Sensitive__PermitLimit: ${RateLimit__Sensitive__PermitLimit:-10000}
+      RateLimit__Sensitive__Window: ${RateLimit__Sensitive__Window:-00:01:00}
+      RateLimit__InviteCreate__PermitLimit: ${RateLimit__InviteCreate__PermitLimit:-10000}
+      RateLimit__InviteCreate__Window: ${RateLimit__InviteCreate__Window:-00:01:00}
     volumes:
       - ./storage:/data/storage
     ports:

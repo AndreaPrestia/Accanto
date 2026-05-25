@@ -296,6 +296,7 @@ Cerchi di cura, diario, documenti, domande per il medico, aggiornamenti pronti d
 **v0.6 (idea)**
 - Modulo AI opzionale (riassunti, suggerimenti) con provider configurabile.
 - Backup/restore guidato dell'istanza.
+- Estensione test E2E ai flussi cerchio/documenti/aggiornamenti, audit a11y, traduzioni complete `en` / `es`.
 
 ## Licenza
 
