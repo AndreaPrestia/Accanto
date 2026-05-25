@@ -26,6 +26,7 @@ public class AccantoDbContext : DbContext, IAccantoDbContext
     public DbSet<SharedUpdate> SharedUpdates => Set<SharedUpdate>();
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
     public DbSet<AuditLogEntry> AuditLogEntries => Set<AuditLogEntry>();
+    public DbSet<UserNotificationPreference> UserNotificationPreferences => Set<UserNotificationPreference>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

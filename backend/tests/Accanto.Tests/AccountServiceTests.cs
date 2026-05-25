@@ -25,7 +25,7 @@ public class AccountServiceTests
         var hasher = new PasswordHasher();
         var storage = new FakeStorage();
         var account = new AccountService(
-            db, hasher, storage,
+            db, hasher, storage, new NoOpCircleEmailNotifier(),
             new ChangePasswordRequestValidator(),
             new DeleteAccountRequestValidator());
         var auth = new Accanto.Infrastructure.Authorization.CareCircleAuthorization(db);

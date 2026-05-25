@@ -1,5 +1,6 @@
 using Accanto.Application.Audit;
 using Accanto.Application.Common.Authorization;
+using Accanto.Application.Email;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
 using Accanto.Application.Common.Storage;
@@ -7,6 +8,7 @@ using Accanto.Application.Export;
 using Accanto.Application.Push;
 using Accanto.Infrastructure.Audit;
 using Accanto.Infrastructure.Authorization;
+using Accanto.Infrastructure.Email;
 using Accanto.Infrastructure.Export;
 using Accanto.Infrastructure.Persistence;
 using Accanto.Infrastructure.Push;
@@ -33,6 +35,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.Configure<StorageOptions>(configuration.GetSection("Storage"));
         services.Configure<EncryptionOptions>(configuration.GetSection("Encryption"));
         services.Configure<PushOptions>(configuration.GetSection("Push"));
+        services.Configure<EmailOptions>(configuration.GetSection("Email"));
 
         services.AddSingleton<IFieldProtector, AesGcmFieldProtector>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
@@ -41,6 +44,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<ICareCircleAuthorization, CareCircleAuthorization>();
         services.AddSingleton<IPushService, PushService>();
         services.AddSingleton<IAuditLog, AuditLog>();
+        services.AddSingleton<IEmailService, EmailService>();
+        services.AddSingleton<ICircleEmailNotifier, CircleEmailNotifier>();
         services.AddScoped<ICareCircleExportService, CareCircleExportService>();
 
         QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;

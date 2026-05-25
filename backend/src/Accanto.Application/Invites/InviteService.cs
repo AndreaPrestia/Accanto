@@ -3,6 +3,7 @@ using Accanto.Application.Audit;
 using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
+using Accanto.Application.Email;
 using Accanto.Domain.Entities;
 using Accanto.Domain.Enums;
 using FluentValidation;
@@ -19,17 +20,20 @@ public class InviteService : IInviteService
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
     private readonly IAuditLog _audit;
+    private readonly ICircleEmailNotifier _email;
     private readonly IValidator<CreateInviteRequest> _createValidator;
 
     public InviteService(
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
         IAuditLog audit,
+        ICircleEmailNotifier email,
         IValidator<CreateInviteRequest> createValidator)
     {
         _db = db;
         _auth = auth;
         _audit = audit;
+        _email = email;
         _createValidator = createValidator;
     }
 
@@ -144,6 +148,23 @@ public class InviteService : IInviteService
         await _db.SaveChangesAsync(cancellationToken);
 
         _ = _audit.LogAsync(invite.CareCircleId, userId, AuditActionType.MemberJoined, AuditResourceType.Membership, userId, $"Ruolo {invite.Role}", CancellationToken.None);
+
+        // Notifico gli Owner del cerchio che una nuova persona è entrata.
+        var circle = await _db.CareCircles.FirstOrDefaultAsync(c => c.Id == invite.CareCircleId, cancellationToken);
+        var circleName = circle?.Name ?? "Cerchio";
+        var newMember = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+        var newMemberName = newMember?.DisplayName ?? "Qualcuno";
+        var ownerIds = await _db.CareCircleMembers
+            .Where(m => m.CareCircleId == invite.CareCircleId && m.Role == CareCircleRole.Owner && m.UserId != userId)
+            .Select(m => m.UserId)
+            .ToListAsync(cancellationToken);
+        foreach (var ownerId in ownerIds)
+        {
+            _ = _email.NotifyUserAsync(ownerId, NotificationTopic.InviteAccepted,
+                $"Nuova persona nel cerchio {circleName}",
+                EmailTemplates.InviteAccepted(circleName, newMemberName),
+                CancellationToken.None);
+        }
 
         return invite.CareCircleId;
     }

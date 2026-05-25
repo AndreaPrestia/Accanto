@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api, extractError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import PushNotificationsSection from '../components/PushNotificationsSection';
+import NotificationPreferencesSection from '../components/NotificationPreferencesSection';
 
 export default function AccountPage() {
   const { user, logout } = useAuth();
@@ -131,6 +132,8 @@ export default function AccountPage() {
       </section>
 
       <PushNotificationsSection />
+
+      <NotificationPreferencesSection />
 
       <section className="space-y-3 border-t border-accanto-100 pt-6">
         <h2 className="text-base font-semibold text-red-800">Elimina account</h2>

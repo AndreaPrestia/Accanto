@@ -21,7 +21,7 @@ public class InviteServiceTests
             new CreateCareCircleRequestValidator(),
             new UpdateCareCircleRequestValidator());
         IValidator<CreateInviteRequest> createV = new CreateInviteRequestValidator();
-        var invites = new InviteService(db, auth, new NoOpAuditLog(), createV);
+        var invites = new InviteService(db, auth, new NoOpAuditLog(), new NoOpCircleEmailNotifier(), createV);
         return (invites, circles, db);
     }
 

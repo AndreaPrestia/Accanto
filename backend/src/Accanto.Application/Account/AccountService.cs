@@ -2,6 +2,7 @@ using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
 using Accanto.Application.Common.Storage;
+using Accanto.Application.Email;
 using Accanto.Domain.Enums;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ public class AccountService : IAccountService
     private readonly IAccantoDbContext _db;
     private readonly IPasswordHasher _hasher;
     private readonly IFileStorage _storage;
+    private readonly ICircleEmailNotifier _email;
     private readonly IValidator<ChangePasswordRequest> _changeValidator;
     private readonly IValidator<DeleteAccountRequest> _deleteValidator;
 
@@ -20,12 +22,14 @@ public class AccountService : IAccountService
         IAccantoDbContext db,
         IPasswordHasher hasher,
         IFileStorage storage,
+        ICircleEmailNotifier email,
         IValidator<ChangePasswordRequest> changeValidator,
         IValidator<DeleteAccountRequest> deleteValidator)
     {
         _db = db;
         _hasher = hasher;
         _storage = storage;
+        _email = email;
         _changeValidator = changeValidator;
         _deleteValidator = deleteValidator;
     }
@@ -43,6 +47,8 @@ public class AccountService : IAccountService
 
         user.PasswordHash = _hasher.Hash(request.NewPassword);
         await _db.SaveChangesAsync(cancellationToken);
+
+        _ = _email.SendSecurityEmailAsync(userId, "Password modificata", EmailTemplates.PasswordChanged(), CancellationToken.None);
     }
 
     public async Task DeleteAsync(Guid userId, DeleteAccountRequest request, CancellationToken cancellationToken = default)

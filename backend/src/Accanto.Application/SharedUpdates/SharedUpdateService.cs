@@ -3,6 +3,7 @@ using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Validation;
+using Accanto.Application.Email;
 using Accanto.Domain.Entities;
 using Accanto.Domain.Enums;
 using FluentValidation;
@@ -15,17 +16,20 @@ public class SharedUpdateService : ISharedUpdateService
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
     private readonly IAuditLog _audit;
+    private readonly ICircleEmailNotifier _email;
     private readonly IValidator<CreateSharedUpdateRequest> _createValidator;
 
     public SharedUpdateService(
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
         IAuditLog audit,
+        ICircleEmailNotifier email,
         IValidator<CreateSharedUpdateRequest> createValidator)
     {
         _db = db;
         _auth = auth;
         _audit = audit;
+        _email = email;
         _createValidator = createValidator;
     }
 
@@ -65,6 +69,15 @@ public class SharedUpdateService : ISharedUpdateService
         await _db.SaveChangesAsync(cancellationToken);
 
         _ = _audit.LogAsync(careCircleId, userId, AuditActionType.UpdateCreated, AuditResourceType.SharedUpdate, u.Id, null, CancellationToken.None);
+
+        var circle = await _db.CareCircles.FirstOrDefaultAsync(c => c.Id == careCircleId, cancellationToken);
+        var circleName = circle?.Name ?? "Cerchio";
+        var author = await _db.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+        var authorName = author?.DisplayName ?? "Qualcuno";
+        _ = _email.NotifyCircleAsync(careCircleId, userId, NotificationTopic.SharedUpdateCreated,
+            $"Nuovo aggiornamento da {circleName}",
+            EmailTemplates.SharedUpdateCreated(circleName, authorName),
+            CancellationToken.None);
 
         return Map(u);
     }

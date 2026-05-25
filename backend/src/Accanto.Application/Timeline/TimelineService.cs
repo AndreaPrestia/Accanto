@@ -3,6 +3,7 @@ using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Validation;
+using Accanto.Application.Email;
 using Accanto.Application.Push;
 using Accanto.Domain.Entities;
 using Accanto.Domain.Enums;
@@ -16,6 +17,7 @@ public class TimelineService : ITimelineService
     private readonly IAccantoDbContext _db;
     private readonly ICareCircleAuthorization _auth;
     private readonly IPushService _push;
+    private readonly ICircleEmailNotifier _email;
     private readonly IAuditLog _audit;
     private readonly IValidator<CreateTimelineEntryRequest> _createValidator;
     private readonly IValidator<UpdateTimelineEntryRequest> _updateValidator;
@@ -24,6 +26,7 @@ public class TimelineService : ITimelineService
         IAccantoDbContext db,
         ICareCircleAuthorization auth,
         IPushService push,
+        ICircleEmailNotifier email,
         IAuditLog audit,
         IValidator<CreateTimelineEntryRequest> createValidator,
         IValidator<UpdateTimelineEntryRequest> updateValidator)
@@ -31,6 +34,7 @@ public class TimelineService : ITimelineService
         _db = db;
         _auth = auth;
         _push = push;
+        _email = email;
         _audit = audit;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
@@ -115,11 +119,17 @@ public class TimelineService : ITimelineService
         {
             var circle = await _db.CareCircles.FirstOrDefaultAsync(c => c.Id == careCircleId, cancellationToken);
             var circleName = circle?.Name ?? "Cerchio";
+            var author = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+            var authorName = author?.DisplayName ?? "Qualcuno";
             var payload = new PushNotificationPayload(
                 Title: circleName,
                 Body: $"Nuova voce nel diario: {entry.Title}",
                 Url: $"/care-circles/{careCircleId}/timeline");
             _ = _push.NotifyCircleAsync(careCircleId, userId, payload, CancellationToken.None);
+            _ = _email.NotifyCircleAsync(careCircleId, userId, NotificationTopic.TimelineEntryCreated,
+                $"Nuova voce nel diario di {circleName}",
+                EmailTemplates.TimelineEntryCreated(circleName, authorName, entry.Title),
+                CancellationToken.None);
         }
 
         _ = _audit.LogAsync(careCircleId, userId, AuditActionType.EntryCreated, AuditResourceType.TimelineEntry, entry.Id, entry.Title, CancellationToken.None);
