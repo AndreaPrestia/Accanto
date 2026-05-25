@@ -42,3 +42,8 @@ storage/*
 
 # Docker
 *.pid
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/.playwright/

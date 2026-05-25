@@ -183,6 +183,19 @@ npm run dev
 
 Imposta `VITE_API_BASE_URL=http://localhost:8080/api` se sviluppi il frontend separato dal backend (o usa un proxy in `vite.config.ts`). In produzione (Docker) il valore di default `/api` funziona già.
 
+### Test end-to-end (Playwright)
+
+Lo stack deve essere in esecuzione (`docker compose up -d`). Poi:
+
+```sh
+cd frontend
+npm run e2e:install   # solo la prima volta: scarica il browser headless
+npm run e2e           # esegue la suite (pagine pubbliche, auth, check-in benessere)
+npm run e2e:ui        # apre la UI interattiva di Playwright
+```
+
+Le specifiche stanno in `frontend/e2e/`. Per puntare a un'istanza diversa imposta `E2E_BASE_URL=https://...`.
+
 ## API e Swagger
 
 - `POST /api/auth/register` — registrazione + login automatico
