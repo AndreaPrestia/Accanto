@@ -163,4 +163,20 @@ public class AccountServiceTests
         db.MedicalDocuments.Any(d => d.CareCircleId == circle.Id).Should().BeFalse();
         storage.Deleted.Should().Contain("blob/x.pdf");
     }
+
+    [Fact]
+    public async Task UpdateLanguage_persists_supported_value_and_rejects_others()
+    {
+        var (account, _, db, hasher, _) = Build();
+        var userId = await SeedUser(db, hasher);
+
+        await account.UpdateLanguageAsync(userId, new UpdateLanguageRequest("EN"));
+        db.Users.Single(u => u.Id == userId).Language.Should().Be("en");
+
+        await account.UpdateLanguageAsync(userId, new UpdateLanguageRequest(null));
+        db.Users.Single(u => u.Id == userId).Language.Should().BeNull();
+
+        var act = async () => await account.UpdateLanguageAsync(userId, new UpdateLanguageRequest("fr"));
+        await act.Should().ThrowAsync<AppValidationException>();
+    }
 }

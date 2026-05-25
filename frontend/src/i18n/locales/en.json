@@ -1,0 +1,59 @@
+{
+  "appName": "Accanto",
+  "nav": {
+    "account": "Account",
+    "logout": "Sign out",
+    "circle": "Circle",
+    "timeline": "Journal",
+    "documents": "Documents",
+    "questions": "Questions",
+    "updates": "Updates"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "language": "Language"
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Accanto is here to help you keep track.",
+    "loggingIn": "Signing in…",
+    "loginCta": "Sign in",
+    "noAccount": "No account yet?",
+    "createSpace": "Create your space",
+    "registerTitle": "Create your space",
+    "registerSubtitle": "Just a few details. Everything stays yours, on your servers or those of your Accanto host.",
+    "registerCta": "Create my space",
+    "creating": "Creating…",
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "yourName": "Your name",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters."
+  },
+  "account": {
+    "title": "Your account",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "passwordHint": "At least 8 characters.",
+    "updatePassword": "Update password",
+    "passwordUpdated": "Password updated.",
+    "passwordsDoNotMatch": "The two new passwords don't match.",
+    "languageSectionTitle": "Language",
+    "languageSectionHint": "The app will use this language on your devices.",
+    "languageSaved": "Language updated.",
+    "deleteTitle": "Delete account",
+    "deleteDescription": "Deletion permanently removes your profile and any circles where you are the only member, along with the related journal, documents, questions and updates. If you share a circle with other people, you must first have them leave or leave the circle yourself.",
+    "deleteConfirmLabel": "Confirm with your password",
+    "deleteUnderstand": "I understand this action is irreversible.",
+    "deleteCta": "Delete my account",
+    "deleting": "Deleting…"
+  }
+}

@@ -49,4 +49,11 @@ public class AccountController : ControllerBase
         var prefs = await _prefs.UpdateAsync(_currentUser.RequireUserId(), request, ct);
         return Ok(prefs);
     }
+
+    [HttpPut("language")]
+    public async Task<IActionResult> UpdateLanguage([FromBody] UpdateLanguageRequest request, CancellationToken ct)
+    {
+        await _svc.UpdateLanguageAsync(_currentUser.RequireUserId(), request, ct);
+        return NoContent();
+    }
 }

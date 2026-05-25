@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import i18n, { SUPPORTED_LANGUAGES } from '../i18n';
 import { api } from '../api/client';
 import { AuthResponse, LoginRequest, RegisterRequest, User } from '../types';
 
@@ -8,6 +9,7 @@ interface AuthCtx {
   login: (req: LoginRequest) => Promise<void>;
   register: (req: RegisterRequest) => Promise<void>;
   logout: () => void;
+  setLanguage: (lang: string) => void;
 }
 
 const Ctx = createContext<AuthCtx | undefined>(undefined);
@@ -22,7 +24,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const raw = localStorage.getItem(USER_KEY);
     if (raw) {
-      try { setUser(JSON.parse(raw)); } catch { /* ignore */ }
+      try {
+        const u: User = JSON.parse(raw);
+        setUser(u);
+        if (u.language && (SUPPORTED_LANGUAGES as readonly string[]).includes(u.language)) {
+          i18n.changeLanguage(u.language);
+        }
+      } catch { /* ignore */ }
     }
     setLoading(false);
   }, []);
@@ -31,6 +39,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(TOKEN_KEY, res.accessToken);
     localStorage.setItem(USER_KEY, JSON.stringify(res.user));
     setUser(res.user);
+    if (res.user.language && (SUPPORTED_LANGUAGES as readonly string[]).includes(res.user.language)) {
+      i18n.changeLanguage(res.user.language);
+    }
   };
 
   const login = async (req: LoginRequest) => {
@@ -49,7 +60,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  return <Ctx.Provider value={{ user, loading, login, register, logout }}>{children}</Ctx.Provider>;
+  const setLanguage = (lang: string) => {
+    if (!(SUPPORTED_LANGUAGES as readonly string[]).includes(lang)) return;
+    i18n.changeLanguage(lang);
+    setUser(prev => {
+      if (!prev) return prev;
+      const next = { ...prev, language: lang };
+      localStorage.setItem(USER_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  return <Ctx.Provider value={{ user, loading, login, register, logout, setLanguage }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {

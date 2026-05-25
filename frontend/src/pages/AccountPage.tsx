@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import PushNotificationsSection from '../components/PushNotificationsSection';
 import NotificationPreferencesSection from '../components/NotificationPreferencesSection';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function AccountPage() {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Cambio password
@@ -31,7 +34,7 @@ export default function AccountPage() {
     setPwdError(null);
 
     if (newPwd !== newPwd2) {
-      setPwdError('Le due nuove password non coincidono.');
+      setPwdError(t('account.passwordsDoNotMatch'));
       return;
     }
 
@@ -41,7 +44,7 @@ export default function AccountPage() {
         currentPassword: currentPwd,
         newPassword: newPwd
       });
-      setPwdMsg('Password aggiornata.');
+      setPwdMsg(t('account.passwordUpdated'));
       setCurrentPwd('');
       setNewPwd('');
       setNewPwd2('');
@@ -57,7 +60,7 @@ export default function AccountPage() {
     setDeleteError(null);
 
     if (!understood) {
-      setDeleteError('Conferma di aver compreso che l\u2019operazione \u00e8 irreversibile.');
+      setDeleteError(t('account.deleteUnderstand'));
       return;
     }
 
@@ -76,15 +79,21 @@ export default function AccountPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-xl font-semibold text-accanto-900">Il tuo account</h1>
+        <h1 className="text-xl font-semibold text-accanto-900">{t('account.title')}</h1>
         <p className="text-sm text-accanto-500 mt-1">{user.email}</p>
       </header>
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold text-accanto-900">Cambia password</h2>
+        <h2 className="text-base font-semibold text-accanto-900">{t('account.languageSectionTitle')}</h2>
+        <p className="text-sm text-accanto-500">{t('account.languageSectionHint')}</p>
+        <LanguageSwitcher />
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold text-accanto-900">{t('account.changePassword')}</h2>
         <form onSubmit={submitPassword} className="space-y-3">
           <div>
-            <label className="block text-sm text-accanto-700 mb-1">Password attuale</label>
+            <label className="block text-sm text-accanto-700 mb-1">{t('account.currentPassword')}</label>
             <input
               type="password"
               value={currentPwd}
@@ -95,7 +104,7 @@ export default function AccountPage() {
             />
           </div>
           <div>
-            <label className="block text-sm text-accanto-700 mb-1">Nuova password</label>
+            <label className="block text-sm text-accanto-700 mb-1">{t('account.newPassword')}</label>
             <input
               type="password"
               value={newPwd}
@@ -105,10 +114,10 @@ export default function AccountPage() {
               autoComplete="new-password"
               className="w-full border border-accanto-200 rounded-lg px-3 py-2"
             />
-            <p className="text-xs text-accanto-500 mt-1">Almeno 8 caratteri.</p>
+            <p className="text-xs text-accanto-500 mt-1">{t('account.passwordHint')}</p>
           </div>
           <div>
-            <label className="block text-sm text-accanto-700 mb-1">Conferma nuova password</label>
+            <label className="block text-sm text-accanto-700 mb-1">{t('account.confirmNewPassword')}</label>
             <input
               type="password"
               value={newPwd2}
@@ -126,7 +135,7 @@ export default function AccountPage() {
             disabled={pwdSubmitting}
             className="w-full sm:w-auto px-4 py-2 rounded-lg bg-accanto-700 text-white disabled:opacity-60"
           >
-            {pwdSubmitting ? 'Salvataggio\u2026' : 'Aggiorna password'}
+            {pwdSubmitting ? t('common.saving') : t('account.updatePassword')}
           </button>
         </form>
       </section>
@@ -136,15 +145,13 @@ export default function AccountPage() {
       <NotificationPreferencesSection />
 
       <section className="space-y-3 border-t border-accanto-100 pt-6">
-        <h2 className="text-base font-semibold text-red-800">Elimina account</h2>
+        <h2 className="text-base font-semibold text-red-800">{t('account.deleteTitle')}</h2>
         <p className="text-sm text-accanto-700">
-          L'eliminazione rimuove definitivamente il tuo profilo e tutti i cerchi di cui sei l'unico membro,
-          insieme a diario, documenti, domande e aggiornamenti collegati.
-          Se condividi un cerchio con altre persone, devi prima farli uscire o uscire tu stesso.
+          {t('account.deleteDescription')}
         </p>
         <form onSubmit={submitDelete} className="space-y-3">
           <div>
-            <label className="block text-sm text-accanto-700 mb-1">Conferma con la password</label>
+            <label className="block text-sm text-accanto-700 mb-1">{t('account.deleteConfirmLabel')}</label>
             <input
               type="password"
               value={deletePwd}
@@ -161,7 +168,7 @@ export default function AccountPage() {
               onChange={(e) => setUnderstood(e.target.checked)}
               className="mt-1"
             />
-            <span>Capisco che l'operazione &egrave; irreversibile.</span>
+            <span>{t('account.deleteUnderstand')}</span>
           </label>
           {deleteError && <p className="text-sm text-red-700">{deleteError}</p>}
           <button
@@ -169,7 +176,7 @@ export default function AccountPage() {
             disabled={deleteSubmitting || !understood}
             className="w-full sm:w-auto px-4 py-2 rounded-lg bg-red-700 text-white disabled:opacity-60"
           >
-            {deleteSubmitting ? 'Eliminazione\u2026' : 'Elimina il mio account'}
+            {deleteSubmitting ? t('account.deleting') : t('account.deleteCta')}
           </button>
         </form>
       </section>

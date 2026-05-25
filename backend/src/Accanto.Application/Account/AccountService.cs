@@ -130,6 +130,25 @@ public class AccountService : IAccountService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
+    private static readonly HashSet<string> SupportedLanguages = new(StringComparer.OrdinalIgnoreCase) { "it", "en", "es" };
+
+    public async Task UpdateLanguageAsync(Guid userId, UpdateLanguageRequest request, CancellationToken cancellationToken = default)
+    {
+        var lang = string.IsNullOrWhiteSpace(request.Language) ? null : request.Language.Trim().ToLowerInvariant();
+        if (lang is not null && !SupportedLanguages.Contains(lang))
+        {
+            throw new AppValidationException(
+                "Lingua non supportata.",
+                new Dictionary<string, string[]> { ["Language"] = new[] { "Lingue ammesse: it, en, es." } });
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken)
+            ?? throw new NotFoundException("Utente non trovato.");
+
+        user.Language = lang;
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
     private static AppValidationException ToValidation(FluentValidation.Results.ValidationResult v) =>
         new("Dati non validi.",
             v.Errors.GroupBy(e => e.PropertyName)

@@ -94,5 +94,5 @@ public class AuthService : IAuthService
         return ToDto(user);
     }
 
-    private static UserDto ToDto(User u) => new(u.Id, u.Email, u.DisplayName, u.CreatedAt);
+    private static UserDto ToDto(User u) => new(u.Id, u.Email, u.DisplayName, u.Language, u.CreatedAt);
 }

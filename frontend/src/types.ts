@@ -20,7 +20,7 @@ export type DoctorQuestionStatus = 'ToAsk' | 'Asked' | 'Answered' | 'Archived';
 
 export type SharedUpdateAudience = 'CloseFamily' | 'ExtendedFamily' | 'Friends' | 'Generic';
 
-export interface User { id: string; email: string; displayName: string; createdAt: string; }
+export interface User { id: string; email: string; displayName: string; language?: string | null; createdAt: string; }
 export interface AuthResponse { accessToken: string; expiresAt: string; user: User; }
 export interface RegisterRequest { email: string; displayName: string; password: string; }
 export interface LoginRequest { email: string; password: string; }

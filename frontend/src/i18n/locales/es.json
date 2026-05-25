@@ -1,0 +1,59 @@
+{
+  "appName": "Accanto",
+  "nav": {
+    "account": "Cuenta",
+    "logout": "Salir",
+    "circle": "Círculo",
+    "timeline": "Diario",
+    "documents": "Documentos",
+    "questions": "Preguntas",
+    "updates": "Novedades"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "loading": "Cargando…",
+    "saving": "Guardando…",
+    "language": "Idioma"
+  },
+  "auth": {
+    "loginTitle": "Bienvenido de nuevo",
+    "loginSubtitle": "Accanto está aquí para ayudarte a no perder el hilo.",
+    "loggingIn": "Iniciando sesión…",
+    "loginCta": "Entrar",
+    "noAccount": "¿Aún no tienes acceso?",
+    "createSpace": "Crea tu espacio",
+    "registerTitle": "Crea tu espacio",
+    "registerSubtitle": "Bastan unos pocos datos. Todo sigue siendo tuyo, en tus servidores o en los de quien aloja Accanto.",
+    "registerCta": "Crear mi espacio",
+    "creating": "Creando…",
+    "hasAccount": "¿Ya tienes una cuenta?",
+    "signIn": "Entrar",
+    "yourName": "Cómo te llamas",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "passwordHint": "Al menos 8 caracteres."
+  },
+  "account": {
+    "title": "Tu cuenta",
+    "changePassword": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmNewPassword": "Confirmar nueva contraseña",
+    "passwordHint": "Al menos 8 caracteres.",
+    "updatePassword": "Actualizar contraseña",
+    "passwordUpdated": "Contraseña actualizada.",
+    "passwordsDoNotMatch": "Las dos contraseñas nuevas no coinciden.",
+    "languageSectionTitle": "Idioma",
+    "languageSectionHint": "La aplicación usará este idioma en tus dispositivos.",
+    "languageSaved": "Idioma actualizado.",
+    "deleteTitle": "Eliminar cuenta",
+    "deleteDescription": "La eliminación borra de forma definitiva tu perfil y todos los círculos en los que eres el único miembro, junto con el diario, los documentos, las preguntas y las novedades vinculadas. Si compartes un círculo con otras personas, primero debes hacer que salgan o salir tú.",
+    "deleteConfirmLabel": "Confirma con tu contraseña",
+    "deleteUnderstand": "Entiendo que la operación es irreversible.",
+    "deleteCta": "Eliminar mi cuenta",
+    "deleting": "Eliminando…"
+  }
+}

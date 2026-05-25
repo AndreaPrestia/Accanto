@@ -1,0 +1,59 @@
+{
+  "appName": "Accanto",
+  "nav": {
+    "account": "Account",
+    "logout": "Esci",
+    "circle": "Cerchio",
+    "timeline": "Diario",
+    "documents": "Documenti",
+    "questions": "Domande",
+    "updates": "Aggiornamenti"
+  },
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "confirm": "Conferma",
+    "loading": "Caricamento…",
+    "saving": "Salvataggio…",
+    "language": "Lingua"
+  },
+  "auth": {
+    "loginTitle": "Bentornato",
+    "loginSubtitle": "Accanto è qui per aiutarti a non perdere il filo.",
+    "loggingIn": "Accesso in corso…",
+    "loginCta": "Entra",
+    "noAccount": "Non hai ancora un accesso?",
+    "createSpace": "Crea il tuo spazio",
+    "registerTitle": "Crea il tuo spazio",
+    "registerSubtitle": "Bastano pochi dati. Tutto rimane tuo, sui tuoi server o su quelli di chi ospita Accanto.",
+    "registerCta": "Crea il mio spazio",
+    "creating": "Creazione…",
+    "hasAccount": "Hai già un accesso?",
+    "signIn": "Entra",
+    "yourName": "Come ti chiami",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "Almeno 8 caratteri."
+  },
+  "account": {
+    "title": "Il tuo account",
+    "changePassword": "Cambia password",
+    "currentPassword": "Password attuale",
+    "newPassword": "Nuova password",
+    "confirmNewPassword": "Conferma nuova password",
+    "passwordHint": "Almeno 8 caratteri.",
+    "updatePassword": "Aggiorna password",
+    "passwordUpdated": "Password aggiornata.",
+    "passwordsDoNotMatch": "Le due nuove password non coincidono.",
+    "languageSectionTitle": "Lingua",
+    "languageSectionHint": "L'app userà questa lingua sui tuoi dispositivi.",
+    "languageSaved": "Lingua aggiornata.",
+    "deleteTitle": "Elimina account",
+    "deleteDescription": "L'eliminazione rimuove definitivamente il tuo profilo e tutti i cerchi di cui sei l'unico membro, insieme a diario, documenti, domande e aggiornamenti collegati. Se condividi un cerchio con altre persone, devi prima farli uscire o uscire tu stesso.",
+    "deleteConfirmLabel": "Conferma con la password",
+    "deleteUnderstand": "Capisco che l'operazione è irreversibile.",
+    "deleteCta": "Elimina il mio account",
+    "deleting": "Eliminazione…"
+  }
+}
