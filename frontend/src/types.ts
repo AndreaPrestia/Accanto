@@ -42,6 +42,31 @@ export interface ActiveSession {
   current: boolean;
 }
 
+export type SecurityAuditEventType =
+  | 'AccountRegistered'
+  | 'LoginSuccess' | 'LoginFailed' | 'LoginLocked'
+  | 'TwoFactorChallengeIssued' | 'TwoFactorSuccess' | 'TwoFactorFailed'
+  | 'TwoFactorEnabled' | 'TwoFactorDisabled'
+  | 'RecoveryCodeUsed' | 'RecoveryCodesRegenerated'
+  | 'PasswordChanged' | 'SessionRevoked' | 'AllSessionsRevoked';
+
+export interface SecurityAuditEntry {
+  id: string;
+  userId?: string | null;
+  eventType: SecurityAuditEventType;
+  summary?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  timestamp: string;
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  total: number;
+  skip: number;
+  take: number;
+}
+
 export interface CareCircle {
   id: string;
   name: string;

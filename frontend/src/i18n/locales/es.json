@@ -92,6 +92,31 @@
     "twoFactorDisableTitle": "Desactivar 2FA",
     "twoFactorDisableCta": "Desactivar",
     "twoFactorRegenTitle": "Regenerar códigos de recuperación",
-    "twoFactorRegenCta": "Generar nuevos códigos"
+    "twoFactorRegenCta": "Generar nuevos códigos",
+    "securityAudit": {
+      "title": "Eventos de seguridad recientes",
+      "hint": "Registro de actividad de inicio de sesión y seguridad de tu cuenta.",
+      "empty": "Ningún evento registrado.",
+      "colWhen": "Cuándo",
+      "colEvent": "Evento",
+      "colDetails": "Detalles",
+      "colWhere": "Desde",
+      "events": {
+        "AccountRegistered": "Cuenta creada",
+        "LoginSuccess": "Inicio de sesión correcto",
+        "LoginFailed": "Intento de inicio de sesión fallido",
+        "LoginLocked": "Inicio de sesión bloqueado (demasiados intentos)",
+        "TwoFactorChallengeIssued": "2FA requerido",
+        "TwoFactorSuccess": "2FA verificado",
+        "TwoFactorFailed": "Código 2FA no válido",
+        "TwoFactorEnabled": "2FA activado",
+        "TwoFactorDisabled": "2FA desactivado",
+        "RecoveryCodeUsed": "Código de recuperación usado",
+        "RecoveryCodesRegenerated": "Códigos de recuperación regenerados",
+        "PasswordChanged": "Contraseña cambiada",
+        "SessionRevoked": "Sesión revocada",
+        "AllSessionsRevoked": "Todas las sesiones revocadas"
+      }
+    }
   }
 }

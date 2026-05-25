@@ -4,6 +4,8 @@ using System.Text.Json;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
+using Accanto.Application.Security;
+using Accanto.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OtpNet;
@@ -16,6 +18,7 @@ public class TwoFactorService : ITwoFactorService
     private readonly IFieldProtector _protector;
     private readonly IPasswordHasher _hasher;
     private readonly IRefreshTokenService _refresh;
+    private readonly ISecurityAuditLog _audit;
     private readonly TwoFactorOptions _opt;
 
     public TwoFactorService(
@@ -23,12 +26,14 @@ public class TwoFactorService : ITwoFactorService
         IFieldProtector protector,
         IPasswordHasher hasher,
         IRefreshTokenService refresh,
+        ISecurityAuditLog audit,
         IOptions<TwoFactorOptions> opt)
     {
         _db = db;
         _protector = protector;
         _hasher = hasher;
         _refresh = refresh;
+        _audit = audit;
         _opt = opt.Value;
     }
 
@@ -86,6 +91,7 @@ public class TwoFactorService : ITwoFactorService
         user.TwoFactorRecoveryCodesJson = JsonSerializer.Serialize(hashes);
         await _db.SaveChangesAsync(cancellationToken);
 
+        await _audit.LogAsync(userId, SecurityAuditEventType.TwoFactorEnabled, cancellationToken: cancellationToken);
         return new EnableTwoFactorResponse(codes);
     }
 
@@ -119,6 +125,8 @@ public class TwoFactorService : ITwoFactorService
         user.TwoFactorRecoveryCodesJson = null;
         await _db.SaveChangesAsync(cancellationToken);
 
+        await _audit.LogAsync(userId, SecurityAuditEventType.TwoFactorDisabled, cancellationToken: cancellationToken);
+
         // Le sessioni attive restano, ma per sicurezza notifichiamo: per ora niente revoca esplicita.
     }
 
@@ -136,6 +144,7 @@ public class TwoFactorService : ITwoFactorService
         var (codes, hashes) = GenerateRecoveryCodes(_opt.RecoveryCodeCount);
         user.TwoFactorRecoveryCodesJson = JsonSerializer.Serialize(hashes);
         await _db.SaveChangesAsync(cancellationToken);
+        await _audit.LogAsync(userId, SecurityAuditEventType.RecoveryCodesRegenerated, cancellationToken: cancellationToken);
         return new EnableTwoFactorResponse(codes);
     }
 

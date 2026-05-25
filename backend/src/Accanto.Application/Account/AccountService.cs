@@ -4,6 +4,7 @@ using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
 using Accanto.Application.Common.Storage;
 using Accanto.Application.Email;
+using Accanto.Application.Security;
 using Accanto.Domain.Enums;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ public class AccountService : IAccountService
     private readonly IFileStorage _storage;
     private readonly ICircleEmailNotifier _email;
     private readonly IRefreshTokenService _refresh;
+    private readonly ISecurityAuditLog _audit;
     private readonly IValidator<ChangePasswordRequest> _changeValidator;
     private readonly IValidator<DeleteAccountRequest> _deleteValidator;
 
@@ -26,6 +28,7 @@ public class AccountService : IAccountService
         IFileStorage storage,
         ICircleEmailNotifier email,
         IRefreshTokenService refresh,
+        ISecurityAuditLog audit,
         IValidator<ChangePasswordRequest> changeValidator,
         IValidator<DeleteAccountRequest> deleteValidator)
     {
@@ -34,11 +37,12 @@ public class AccountService : IAccountService
         _storage = storage;
         _email = email;
         _refresh = refresh;
+        _audit = audit;
         _changeValidator = changeValidator;
         _deleteValidator = deleteValidator;
     }
 
-    public async Task ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken = default)
+    public async Task ChangePasswordAsync(Guid userId, ChangePasswordRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
     {
         var v = await _changeValidator.ValidateAsync(request, cancellationToken);
         if (!v.IsValid) throw ToValidation(v);
@@ -59,6 +63,9 @@ public class AccountService : IAccountService
         // Sicurezza: invalida tutte le altre sessioni attive (refresh token) per impedire che
         // chi conosce la vecchia password mantenga l'accesso tramite un refresh token rubato.
         await _refresh.RevokeAllForUserAsync(userId, cancellationToken);
+
+        await _audit.LogAsync(userId, SecurityAuditEventType.PasswordChanged, client: client, cancellationToken: cancellationToken);
+        await _audit.LogAsync(userId, SecurityAuditEventType.AllSessionsRevoked, "In seguito a cambio password", client: client, cancellationToken: cancellationToken);
 
         _ = _email.SendSecurityEmailAsync(userId, "Password modificata", EmailTemplates.PasswordChanged(), CancellationToken.None);
     }

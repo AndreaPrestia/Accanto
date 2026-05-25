@@ -8,6 +8,7 @@ import NotificationPreferencesSection from '../components/NotificationPreference
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import ActiveSessionsSection from '../components/ActiveSessionsSection';
 import TwoFactorSection from '../components/TwoFactorSection';
+import SecurityAuditSection from '../components/SecurityAuditSection';
 
 export default function AccountPage() {
   const { user, logout } = useAuth();
@@ -179,6 +180,8 @@ export default function AccountPage() {
       <ActiveSessionsSection />
 
       <TwoFactorSection />
+
+      <SecurityAuditSection />
 
       <section className="space-y-3">
         <h2 className="text-base font-semibold text-accanto-900">{t('account.exportTitle')}</h2>

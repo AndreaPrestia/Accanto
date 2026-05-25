@@ -92,6 +92,31 @@
     "twoFactorDisableTitle": "Disable 2FA",
     "twoFactorDisableCta": "Disable",
     "twoFactorRegenTitle": "Regenerate recovery codes",
-    "twoFactorRegenCta": "Generate new codes"
+    "twoFactorRegenCta": "Generate new codes",
+    "securityAudit": {
+      "title": "Recent security events",
+      "hint": "Log of sign-in and security activity on your account.",
+      "empty": "No events recorded.",
+      "colWhen": "When",
+      "colEvent": "Event",
+      "colDetails": "Details",
+      "colWhere": "From",
+      "events": {
+        "AccountRegistered": "Account created",
+        "LoginSuccess": "Sign-in successful",
+        "LoginFailed": "Failed sign-in attempt",
+        "LoginLocked": "Sign-in locked (too many attempts)",
+        "TwoFactorChallengeIssued": "2FA requested",
+        "TwoFactorSuccess": "2FA verified",
+        "TwoFactorFailed": "Invalid 2FA code",
+        "TwoFactorEnabled": "2FA enabled",
+        "TwoFactorDisabled": "2FA disabled",
+        "RecoveryCodeUsed": "Recovery code used",
+        "RecoveryCodesRegenerated": "Recovery codes regenerated",
+        "PasswordChanged": "Password changed",
+        "SessionRevoked": "Session revoked",
+        "AllSessionsRevoked": "All sessions revoked"
+      }
+    }
   }
 }

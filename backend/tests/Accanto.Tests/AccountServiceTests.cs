@@ -29,6 +29,7 @@ public class AccountServiceTests
         var account = new AccountService(
             db, hasher, storage, new NoOpCircleEmailNotifier(),
             new NoOpRefreshTokenService(),
+            new NoOpSecurityAuditLog(),
             new ChangePasswordRequestValidator(),
             new DeleteAccountRequestValidator());
         var auth = new Accanto.Infrastructure.Authorization.CareCircleAuthorization(db);

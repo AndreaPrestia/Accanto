@@ -2,7 +2,9 @@ using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
+using Accanto.Application.Security;
 using Accanto.Domain.Entities;
+using Accanto.Domain.Enums;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -16,6 +18,7 @@ public class AuthService : IAuthService
     private readonly IJwtTokenService _jwt;
     private readonly IRefreshTokenService _refresh;
     private readonly ITwoFactorService _twoFactor;
+    private readonly ISecurityAuditLog _audit;
     private readonly LockoutOptions _lockout;
     private readonly TwoFactorOptions _tfOpt;
     private readonly TimeProvider _time;
@@ -28,6 +31,7 @@ public class AuthService : IAuthService
         IJwtTokenService jwt,
         IRefreshTokenService refresh,
         ITwoFactorService twoFactor,
+        ISecurityAuditLog audit,
         IOptions<LockoutOptions> lockout,
         IOptions<TwoFactorOptions> twoFactorOptions,
         TimeProvider time,
@@ -39,6 +43,7 @@ public class AuthService : IAuthService
         _jwt = jwt;
         _refresh = refresh;
         _twoFactor = twoFactor;
+        _audit = audit;
         _lockout = lockout.Value;
         _tfOpt = twoFactorOptions.Value;
         _time = time;
@@ -77,6 +82,7 @@ public class AuthService : IAuthService
         _db.Users.Add(user);
         await _db.SaveChangesAsync(cancellationToken);
 
+        await _audit.LogAsync(user.Id, SecurityAuditEventType.AccountRegistered, client: client, cancellationToken: cancellationToken);
         return await BuildResponseAsync(user, client, cancellationToken);
     }
 
@@ -97,6 +103,7 @@ public class AuthService : IAuthService
         if (user is null)
         {
             // Niente account → niente lockout da tracciare, ma stesso messaggio per non leakare l'esistenza.
+            await _audit.LogAsync(null, SecurityAuditEventType.LoginFailed, "Email sconosciuta", email, client, cancellationToken);
             throw new ForbiddenException("Email o password non corretti.");
         }
 
@@ -105,6 +112,7 @@ public class AuthService : IAuthService
         if (user.LockoutEndsAt is { } lockedUntil && lockedUntil > now)
         {
             var minutes = (int)Math.Ceiling((lockedUntil - now).TotalMinutes);
+            await _audit.LogAsync(user.Id, SecurityAuditEventType.LoginLocked, $"Account bloccato fino a {lockedUntil:O}", email, client, cancellationToken);
             throw new ForbiddenException(
                 $"Account temporaneamente bloccato per troppi tentativi. Riprova tra {minutes} minuti.");
         }
@@ -126,11 +134,13 @@ public class AuthService : IAuthService
             {
                 user.LockoutEndsAt = now.AddMinutes(_lockout.LockoutMinutes);
                 await _db.SaveChangesAsync(cancellationToken);
+                await _audit.LogAsync(user.Id, SecurityAuditEventType.LoginLocked, $"Lockout dopo {user.FailedLoginAttempts} tentativi", email, client, cancellationToken);
                 throw new ForbiddenException(
                     $"Account temporaneamente bloccato per troppi tentativi. Riprova tra {_lockout.LockoutMinutes} minuti.");
             }
 
             await _db.SaveChangesAsync(cancellationToken);
+            await _audit.LogAsync(user.Id, SecurityAuditEventType.LoginFailed, "Password errata", email, client, cancellationToken);
             throw new ForbiddenException("Email o password non corretti.");
         }
 
@@ -147,10 +157,12 @@ public class AuthService : IAuthService
         if (user.TwoFactorEnabled)
         {
             var challenge = _jwt.IssueTwoFactorChallenge(user.Id, TimeSpan.FromMinutes(Math.Max(1, _tfOpt.ChallengeLifetimeMinutes)));
+            await _audit.LogAsync(user.Id, SecurityAuditEventType.TwoFactorChallengeIssued, client: client, cancellationToken: cancellationToken);
             return new LoginResult(true, challenge.Token, challenge.ExpiresAt, null);
         }
 
         var auth = await BuildResponseAsync(user, client, cancellationToken);
+        await _audit.LogAsync(user.Id, SecurityAuditEventType.LoginSuccess, client: client, cancellationToken: cancellationToken);
         return new LoginResult(false, null, null, auth);
     }
 
@@ -166,6 +178,7 @@ public class AuthService : IAuthService
             throw new ForbiddenException("Challenge 2FA non valido o scaduto.");
 
         var ok = false;
+        var usedRecovery = false;
         if (!string.IsNullOrWhiteSpace(request.Code))
         {
             ok = await _twoFactor.VerifyUserCodeAsync(user.Id, request.Code!, cancellationToken);
@@ -173,10 +186,19 @@ public class AuthService : IAuthService
         if (!ok && !string.IsNullOrWhiteSpace(request.RecoveryCode))
         {
             ok = await _twoFactor.ConsumeRecoveryCodeAsync(user.Id, request.RecoveryCode!, cancellationToken);
+            if (ok) usedRecovery = true;
         }
 
         if (!ok)
+        {
+            await _audit.LogAsync(user.Id, SecurityAuditEventType.TwoFactorFailed, client: client, cancellationToken: cancellationToken);
             throw new ForbiddenException("Codice 2FA non valido.");
+        }
+
+        if (usedRecovery)
+            await _audit.LogAsync(user.Id, SecurityAuditEventType.RecoveryCodeUsed, client: client, cancellationToken: cancellationToken);
+        await _audit.LogAsync(user.Id, SecurityAuditEventType.TwoFactorSuccess, client: client, cancellationToken: cancellationToken);
+        await _audit.LogAsync(user.Id, SecurityAuditEventType.LoginSuccess, client: client, cancellationToken: cancellationToken);
 
         return await BuildResponseAsync(user, client, cancellationToken);
     }

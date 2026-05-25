@@ -3,6 +3,8 @@ using Accanto.Application.Account;
 using Accanto.Application.Auth;
 using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.Notifications;
+using Accanto.Application.Security;
+using Accanto.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -19,6 +21,8 @@ public class AccountController : ControllerBase
     private readonly IGdprExportService _export;
     private readonly IRefreshTokenService _sessions;
     private readonly ITwoFactorService _twoFactor;
+    private readonly ISecurityAuditLog _audit;
+    private readonly ISecurityAuditQueryService _auditQuery;
     private readonly ICurrentUser _currentUser;
 
     public AccountController(
@@ -27,6 +31,8 @@ public class AccountController : ControllerBase
         IGdprExportService export,
         IRefreshTokenService sessions,
         ITwoFactorService twoFactor,
+        ISecurityAuditLog audit,
+        ISecurityAuditQueryService auditQuery,
         ICurrentUser currentUser)
     {
         _svc = svc;
@@ -34,6 +40,8 @@ public class AccountController : ControllerBase
         _export = export;
         _sessions = sessions;
         _twoFactor = twoFactor;
+        _audit = audit;
+        _auditQuery = auditQuery;
         _currentUser = currentUser;
     }
 
@@ -41,7 +49,7 @@ public class AccountController : ControllerBase
     [EnableRateLimiting("auth-sensitive")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken ct)
     {
-        await _svc.ChangePasswordAsync(_currentUser.RequireUserId(), request, ct);
+        await _svc.ChangePasswordAsync(_currentUser.RequireUserId(), request, BuildClientInfo(), ct);
         return NoContent();
     }
 
@@ -93,8 +101,20 @@ public class AccountController : ControllerBase
     [HttpDelete("sessions/{id:guid}")]
     public async Task<IActionResult> RevokeSession(Guid id, CancellationToken ct)
     {
-        await _sessions.RevokeByIdAsync(_currentUser.RequireUserId(), id, ct);
+        var userId = _currentUser.RequireUserId();
+        await _sessions.RevokeByIdAsync(userId, id, ct);
+        await _audit.LogAsync(userId, SecurityAuditEventType.SessionRevoked, $"Sessione {id}", client: BuildClientInfo(), cancellationToken: ct);
         return NoContent();
+    }
+
+    [HttpGet("security-audit")]
+    public async Task<ActionResult<Application.Common.PagedResult<SecurityAuditEntryDto>>> SecurityAudit(
+        [FromQuery] int skip = 0,
+        [FromQuery] int take = 50,
+        CancellationToken ct = default)
+    {
+        var result = await _auditQuery.ListForUserAsync(_currentUser.RequireUserId(), skip, take, ct);
+        return Ok(result);
     }
 
     // ---------- 2FA TOTP ----------
@@ -125,4 +145,11 @@ public class AccountController : ControllerBase
     [EnableRateLimiting("auth-sensitive")]
     public async Task<ActionResult<EnableTwoFactorResponse>> TwoFactorRegenerateCodes([FromBody] RegenerateRecoveryCodesRequest request, CancellationToken ct)
         => Ok(await _twoFactor.RegenerateRecoveryCodesAsync(_currentUser.RequireUserId(), request, ct));
+
+    private ClientInfo BuildClientInfo()
+    {
+        var ua = Request.Headers.UserAgent.ToString();
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        return new ClientInfo(string.IsNullOrWhiteSpace(ua) ? null : ua, ip);
+    }
 }

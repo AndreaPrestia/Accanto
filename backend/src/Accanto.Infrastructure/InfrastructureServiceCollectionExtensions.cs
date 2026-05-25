@@ -6,6 +6,7 @@ using Accanto.Application.Common.Security;
 using Accanto.Application.Common.Storage;
 using Accanto.Application.Export;
 using Accanto.Application.Push;
+using Accanto.Application.Security;
 using Accanto.Infrastructure.Audit;
 using Accanto.Infrastructure.Authorization;
 using Accanto.Infrastructure.Email;
@@ -44,6 +45,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<ICareCircleAuthorization, CareCircleAuthorization>();
         services.AddSingleton<IPushService, PushService>();
         services.AddSingleton<IAuditLog, AuditLog>();
+        services.AddSingleton<ISecurityAuditLog, SecurityAuditLog>();
         services.AddSingleton<IEmailService, EmailService>();
         services.AddSingleton<ICircleEmailNotifier, CircleEmailNotifier>();
         services.AddScoped<ICareCircleExportService, CareCircleExportService>();
