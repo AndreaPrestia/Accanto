@@ -2,6 +2,7 @@ using Accanto.Api.Common;
 using Accanto.Application.Invites;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Accanto.Api.Controllers;
 
@@ -22,6 +23,7 @@ public class InvitesController : ControllerBase
 
     [HttpPost("care-circles/{circleId:guid}/invites")]
     [Authorize]
+    [EnableRateLimiting("invite-create")]
     public async Task<ActionResult<InviteDto>> Create(Guid circleId, [FromBody] CreateInviteRequest request, CancellationToken ct)
     {
         var dto = await _svc.CreateAsync(_currentUser.RequireUserId(), circleId, request, ct);

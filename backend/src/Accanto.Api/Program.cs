@@ -1,11 +1,14 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Accanto.Api.Common;
+using Accanto.Api.Configuration;
 using Accanto.Application;
 using Accanto.Infrastructure;
 using Accanto.Infrastructure.Persistence;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -60,6 +63,40 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+// Rate limiting su endpoint sensibili (login/register/cambio password/invio inviti)
+var rateLimits = builder.Configuration.GetSection("RateLimit").Get<RateLimitOptions>() ?? new RateLimitOptions();
+builder.Services.Configure<RateLimitOptions>(builder.Configuration.GetSection("RateLimit"));
+builder.Services.AddRateLimiter(opt =>
+{
+    opt.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    opt.AddPolicy("auth-login", ctx => BuildPartition(IpKey(ctx, "login"), rateLimits.Login));
+    opt.AddPolicy("auth-register", ctx => BuildPartition(IpKey(ctx, "register"), rateLimits.Register));
+    opt.AddPolicy("auth-sensitive", ctx => BuildPartition(UserOrIpKey(ctx, "sensitive"), rateLimits.Sensitive));
+    opt.AddPolicy("invite-create", ctx => BuildPartition(UserOrIpKey(ctx, "invite"), rateLimits.InviteCreate));
+});
+
+static string IpKey(HttpContext ctx, string scope)
+    => $"{scope}:{ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"}";
+
+static string UserOrIpKey(HttpContext ctx, string scope)
+{
+    var sub = ctx.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+              ?? ctx.User?.FindFirst("sub")?.Value;
+    return sub is { Length: > 0 }
+        ? $"{scope}:user:{sub}"
+        : $"{scope}:ip:{ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"}";
+}
+
+static RateLimitPartition<string> BuildPartition(string key, RateLimitPolicyOptions p)
+    => RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+    {
+        PermitLimit = p.PermitLimit,
+        Window = p.Window,
+        QueueLimit = 0,
+        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+        AutoReplenishment = true,
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -96,6 +133,7 @@ app.UseSwaggerUI();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 app.MapControllers();

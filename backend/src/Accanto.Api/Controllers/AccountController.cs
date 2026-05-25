@@ -3,6 +3,7 @@ using Accanto.Application.Account;
 using Accanto.Application.Notifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Accanto.Api.Controllers;
 
@@ -25,6 +26,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("change-password")]
+    [EnableRateLimiting("auth-sensitive")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken ct)
     {
         await _svc.ChangePasswordAsync(_currentUser.RequireUserId(), request, ct);
@@ -32,6 +34,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpDelete]
+    [EnableRateLimiting("auth-sensitive")]
     public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request, CancellationToken ct)
     {
         await _svc.DeleteAsync(_currentUser.RequireUserId(), request, ct);
