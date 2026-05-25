@@ -50,6 +50,10 @@ public class AccountService : IAccountService
             throw new ForbiddenException("La password attuale non è corretta.");
 
         user.PasswordHash = _hasher.Hash(request.NewPassword);
+        // Sblocca eventuale lockout: l'utente ha appena dimostrato di conoscere la password.
+        user.FailedLoginAttempts = 0;
+        user.LockoutEndsAt = null;
+        user.LastFailedLoginAt = null;
         await _db.SaveChangesAsync(cancellationToken);
 
         // Sicurezza: invalida tutte le altre sessioni attive (refresh token) per impedire che

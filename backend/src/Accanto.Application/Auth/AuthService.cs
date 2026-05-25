@@ -4,6 +4,7 @@ using Accanto.Application.Common.Security;
 using Accanto.Domain.Entities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Accanto.Application.Auth;
 
@@ -13,6 +14,8 @@ public class AuthService : IAuthService
     private readonly IPasswordHasher _hasher;
     private readonly IJwtTokenService _jwt;
     private readonly IRefreshTokenService _refresh;
+    private readonly LockoutOptions _lockout;
+    private readonly TimeProvider _time;
     private readonly IValidator<RegisterRequest> _registerValidator;
     private readonly IValidator<LoginRequest> _loginValidator;
 
@@ -21,6 +24,8 @@ public class AuthService : IAuthService
         IPasswordHasher hasher,
         IJwtTokenService jwt,
         IRefreshTokenService refresh,
+        IOptions<LockoutOptions> lockout,
+        TimeProvider time,
         IValidator<RegisterRequest> registerValidator,
         IValidator<LoginRequest> loginValidator)
     {
@@ -28,6 +33,8 @@ public class AuthService : IAuthService
         _hasher = hasher;
         _jwt = jwt;
         _refresh = refresh;
+        _lockout = lockout.Value;
+        _time = time;
         _registerValidator = registerValidator;
         _loginValidator = loginValidator;
     }
@@ -80,9 +87,53 @@ public class AuthService : IAuthService
 
         var email = request.Email.Trim().ToLowerInvariant();
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
-        if (user is null || !_hasher.Verify(request.Password, user.PasswordHash))
+        if (user is null)
         {
+            // Niente account → niente lockout da tracciare, ma stesso messaggio per non leakare l'esistenza.
             throw new ForbiddenException("Email o password non corretti.");
+        }
+
+        var now = _time.GetUtcNow();
+
+        if (user.LockoutEndsAt is { } lockedUntil && lockedUntil > now)
+        {
+            var minutes = (int)Math.Ceiling((lockedUntil - now).TotalMinutes);
+            throw new ForbiddenException(
+                $"Account temporaneamente bloccato per troppi tentativi. Riprova tra {minutes} minuti.");
+        }
+
+        if (!_hasher.Verify(request.Password, user.PasswordHash))
+        {
+            // Reset del contatore se l'ultimo tentativo è fuori dalla finestra.
+            if (user.LastFailedLoginAt is { } lastFail &&
+                (now - lastFail).TotalMinutes > _lockout.AttemptWindowMinutes)
+            {
+                user.FailedLoginAttempts = 0;
+            }
+
+            user.FailedLoginAttempts += 1;
+            user.LastFailedLoginAt = now;
+
+            if (_lockout.MaxFailedAttempts > 0 &&
+                user.FailedLoginAttempts >= _lockout.MaxFailedAttempts)
+            {
+                user.LockoutEndsAt = now.AddMinutes(_lockout.LockoutMinutes);
+                await _db.SaveChangesAsync(cancellationToken);
+                throw new ForbiddenException(
+                    $"Account temporaneamente bloccato per troppi tentativi. Riprova tra {_lockout.LockoutMinutes} minuti.");
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+            throw new ForbiddenException("Email o password non corretti.");
+        }
+
+        // Login riuscito → reset.
+        if (user.FailedLoginAttempts != 0 || user.LockoutEndsAt is not null || user.LastFailedLoginAt is not null)
+        {
+            user.FailedLoginAttempts = 0;
+            user.LockoutEndsAt = null;
+            user.LastFailedLoginAt = null;
+            await _db.SaveChangesAsync(cancellationToken);
         }
 
         return await BuildResponseAsync(user, client, cancellationToken);

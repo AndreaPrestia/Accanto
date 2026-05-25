@@ -71,6 +71,9 @@ builder.Services.Configure<RefreshTokenOptions>(o =>
     if (days is > 0) o.ExpiryDays = days.Value;
 });
 
+// Lockout dopo N tentativi di login falliti. Configurabile via env Lockout:*.
+builder.Services.Configure<LockoutOptions>(builder.Configuration.GetSection("Lockout"));
+
 // Rate limiting su endpoint sensibili (login/register/cambio password/invio inviti)
 var rateLimits = builder.Configuration.GetSection("RateLimit").Get<RateLimitOptions>() ?? new RateLimitOptions();
 builder.Services.Configure<RateLimitOptions>(builder.Configuration.GetSection("RateLimit"));
