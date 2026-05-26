@@ -2,6 +2,10 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, extractError } from '../api/client';
 import { AudienceLabel, SharedUpdate, SharedUpdateAudience, SharedUpdateTemplate } from '../types';
+import { useTranslation } from 'react-i18next';
+import AiAssistPanel from '../components/AiAssistPanel';
+import { rephrase } from '../api/ai';
+import { useAiContext } from '../hooks/useAiContext';
 
 const AUDIENCES: SharedUpdateAudience[] = ['CloseFamily','ExtendedFamily','Friends','Generic'];
 
@@ -58,6 +62,8 @@ export default function SharedUpdatesPage() {
       </button>
 
       {showForm && <NewForm careCircleId={id!} prefill={prefill} onCreated={() => { setShowForm(false); setPrefill(''); load(); }} />}
+
+      <SharedUpdatesAiSection circleId={id!} />
 
       {templates.length > 0 && (
         <details className="card mb-4">
@@ -132,5 +138,45 @@ function NewForm({ careCircleId, prefill, onCreated }: { careCircleId: string; p
       {error && <div className="text-sm text-red-700">{error}</div>}
       <button className="btn-primary" disabled={busy}>{busy ? 'Salvataggio…' : 'Salva aggiornamento'}</button>
     </form>
+  );
+}
+
+function SharedUpdatesAiSection({ circleId }: { circleId: string }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState('');
+  const [tone, setTone] = useState<'neutral' | 'warm' | 'concise'>('warm');
+  const { systemAvailable, enabledForCircle, loading } = useAiContext(circleId);
+
+  if (loading) return null;
+  const disabled = !systemAvailable || !enabledForCircle;
+  const disabledReason = !systemAvailable ? t('ai.disabledSystem') as string : t('ai.disabledCircle') as string;
+
+  return (
+    <AiAssistPanel
+      title={t('ai.rephrase.title')}
+      description={t('ai.rephrase.description') as string}
+      ctaLabel={t('ai.rephrase.cta')}
+      disabled={disabled}
+      disabledReason={disabledReason}
+      onGenerate={() => rephrase(circleId, text.trim(), tone)}
+    >
+      <label className="text-sm block">
+        <span className="block text-accanto-700 mb-1">{t('ai.rephrase.textLabel')}</span>
+        <textarea
+          className="input w-full"
+          rows={3}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+      </label>
+      <label className="text-sm block">
+        <span className="block text-accanto-700 mb-1">{t('ai.rephrase.toneLabel')}</span>
+        <select className="input" value={tone} onChange={(e) => setTone(e.target.value as any)}>
+          <option value="neutral">{t('ai.rephrase.toneOptions.neutral')}</option>
+          <option value="warm">{t('ai.rephrase.toneOptions.warm')}</option>
+          <option value="concise">{t('ai.rephrase.toneOptions.concise')}</option>
+        </select>
+      </label>
+    </AiAssistPanel>
   );
 }

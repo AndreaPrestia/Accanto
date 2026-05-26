@@ -208,5 +208,56 @@
       "caregiver": "Caregiver",
       "social": "Aiuto sociale"
     }
+  },
+  "ai": {
+    "title": "Assistente",
+    "subtitle": "Funzioni opzionali di intelligenza artificiale. Tutte le risposte sono generate da un modello e non sostituiscono un parere professionale.",
+    "disabledSystem": "Le funzioni AI non sono attive su questo server. Chiedi a chi amministra Accanto di abilitarle.",
+    "disabledCircle": "Le funzioni AI sono disattivate per questo cerchio. Solo l'owner può attivarle dalle impostazioni del cerchio.",
+    "enableToggle": "Abilita assistente AI per questo cerchio",
+    "enableHint": "Le funzioni AI sono opt-in. Puoi disattivarle in qualsiasi momento.",
+    "generate": "Genera",
+    "generating": "Genero…",
+    "copy": "Copia",
+    "copied": "Copiato!",
+    "result": "Risposta",
+    "disclaimer": "Testo generato da AI. Verifica sempre con un professionista.",
+    "timelineSummary": {
+      "title": "Riassumi il diario",
+      "description": "Una sintesi degli ultimi giorni di diario.",
+      "daysLabel": "Giorni da considerare",
+      "cta": "Riassumi"
+    },
+    "doctorQuestionDraft": {
+      "title": "Proponi domande per il medico",
+      "description": "Bozza di 3 domande sull'argomento che indichi.",
+      "topicLabel": "Argomento",
+      "topicPlaceholder": "es. terapia del dolore, controllo neurologico",
+      "notesLabel": "Note (opzionale)",
+      "cta": "Proponi"
+    },
+    "rephrase": {
+      "title": "Riformula con tono gentile",
+      "description": "Riscrivi un breve testo per i familiari.",
+      "textLabel": "Testo originale",
+      "toneLabel": "Tono",
+      "toneOptions": {
+        "neutral": "Neutro",
+        "warm": "Caldo",
+        "concise": "Sintetico"
+      },
+      "cta": "Riformula"
+    },
+    "checkInReflection": {
+      "title": "Riflessione personale",
+      "description": "Una breve riflessione sul tuo benessere recente, basata sui tuoi check-in.",
+      "daysLabel": "Giorni da considerare",
+      "cta": "Rifletti"
+    },
+    "errors": {
+      "notConfigured": "L'assistente AI non è configurato su questo server.",
+      "disabledForCircle": "L'assistente AI è disattivato per questo cerchio.",
+      "generic": "Non sono riuscito a generare una risposta. Riprova tra poco."
+    }
   }
 }

@@ -45,9 +45,8 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton<ISharedUpdateTemplateProvider, StaticSharedUpdateTemplateProvider>();
 
         // AI: il PromptBuilder è stateless. IAiAssistant viene registrato in Infrastructure
-        // tramite factory in base ad AiOptions.Provider. Default (Fase 1): NullAiAssistant.
+        // (factory in base ad AiOptions.Provider: "none" → NullAiAssistant, "ollama" → OllamaAssistant).
         services.AddSingleton<AiPromptBuilder>();
-        services.AddSingleton<IAiAssistant, NullAiAssistant>();
         services.AddScoped<IAiService, AiService>();
 
         return services;

@@ -7,6 +7,7 @@ using Accanto.Application.Auth;
 using Accanto.Application.CareCircles;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Accanto.Tests;
 
@@ -31,9 +32,17 @@ public class AiEndpointTests
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             base.ConfigureWebHost(builder);
-            // Provider configurato + Null assistant registrato di default → endpoint funzionano.
+            // Provider configurato → il gate 503 non scatta.
             builder.UseSetting("Ai:Provider", "ollama");
             builder.UseSetting("Ai:Model", "test-model");
+            // Sostituiamo l'implementazione reale (HTTP verso ollama) con quella null
+            // per evitare chiamate di rete nei test di integrazione.
+            builder.ConfigureServices(services =>
+            {
+                var existing = services.Where(d => d.ServiceType == typeof(IAiAssistant)).ToList();
+                foreach (var d in existing) services.Remove(d);
+                services.AddSingleton<IAiAssistant, NullAiAssistant>();
+            });
         }
     }
 

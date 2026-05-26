@@ -208,5 +208,56 @@
       "caregiver": "Cuidador",
       "social": "Ayuda social"
     }
+  },
+  "ai": {
+    "title": "Asistente",
+    "subtitle": "Funciones opcionales de inteligencia artificial. Todas las respuestas son generadas por un modelo y no sustituyen la opinión profesional.",
+    "disabledSystem": "Las funciones de IA no están activas en este servidor. Pide al administrador de Accanto que las habilite.",
+    "disabledCircle": "Las funciones de IA están desactivadas para este círculo. Solo el propietario puede activarlas en los ajustes.",
+    "enableToggle": "Habilitar asistente IA para este círculo",
+    "enableHint": "Las funciones de IA son opcionales. Puedes desactivarlas en cualquier momento.",
+    "generate": "Generar",
+    "generating": "Generando…",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "result": "Respuesta",
+    "disclaimer": "Texto generado por IA. Verifica siempre con un profesional.",
+    "timelineSummary": {
+      "title": "Resumir el diario",
+      "description": "Un resumen de los últimos días del diario.",
+      "daysLabel": "Días a considerar",
+      "cta": "Resumir"
+    },
+    "doctorQuestionDraft": {
+      "title": "Sugerir preguntas para el médico",
+      "description": "Borrador de 3 preguntas sobre el tema que indiques.",
+      "topicLabel": "Tema",
+      "topicPlaceholder": "p. ej. manejo del dolor, control neurológico",
+      "notesLabel": "Notas (opcional)",
+      "cta": "Sugerir"
+    },
+    "rephrase": {
+      "title": "Reformular con tono amable",
+      "description": "Reescribir un mensaje breve para la familia.",
+      "textLabel": "Texto original",
+      "toneLabel": "Tono",
+      "toneOptions": {
+        "neutral": "Neutro",
+        "warm": "Cálido",
+        "concise": "Conciso"
+      },
+      "cta": "Reformular"
+    },
+    "checkInReflection": {
+      "title": "Reflexión personal",
+      "description": "Una breve reflexión sobre tu bienestar reciente, basada en tus check-ins.",
+      "daysLabel": "Días a considerar",
+      "cta": "Reflexionar"
+    },
+    "errors": {
+      "notConfigured": "El asistente IA no está configurado en este servidor.",
+      "disabledForCircle": "El asistente IA está desactivado para este círculo.",
+      "generic": "No pude generar una respuesta. Inténtalo de nuevo en un momento."
+    }
   }
 }

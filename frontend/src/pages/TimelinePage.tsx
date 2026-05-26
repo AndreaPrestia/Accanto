@@ -2,6 +2,10 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, extractError } from '../api/client';
 import { TimelineEntry, TimelineEntryType, TimelineTypeLabel, TimelineVisibility, VisibilityLabel } from '../types';
+import { useTranslation } from 'react-i18next';
+import AiAssistPanel from '../components/AiAssistPanel';
+import { timelineSummary } from '../api/ai';
+import { useAiContext } from '../hooks/useAiContext';
 
 const TYPES: TimelineEntryType[] = ['MedicalUpdate','Symptom','Medication','Appointment','Decision','PersonalNote','Practical','Other'];
 const VIS: TimelineVisibility[] = ['Circle','Private'];
@@ -87,6 +91,8 @@ export default function TimelinePage() {
       </button>
 
       {showForm && <NewEntryForm careCircleId={id!} onCreated={() => { setShowForm(false); load(); }} />}
+
+      <TimelineAiSection circleId={id!} />
 
       <div className="flex items-center gap-3 mb-3">
         <button
@@ -307,5 +313,38 @@ function NewEntryForm({ careCircleId, onCreated }: { careCircleId: string; onCre
       {error && <div className="text-sm text-red-700">{error}</div>}
       <button className="btn-primary" disabled={busy}>{busy ? 'Salvataggio…' : 'Salva voce'}</button>
     </form>
+  );
+}
+
+function TimelineAiSection({ circleId }: { circleId: string }) {
+  const { t } = useTranslation();
+  const [days, setDays] = useState(7);
+  const { systemAvailable, enabledForCircle, loading } = useAiContext(circleId);
+
+  if (loading) return null;
+  const disabled = !systemAvailable || !enabledForCircle;
+  const disabledReason = !systemAvailable ? t('ai.disabledSystem') as string : t('ai.disabledCircle') as string;
+
+  return (
+    <AiAssistPanel
+      title={t('ai.timelineSummary.title')}
+      description={t('ai.timelineSummary.description') as string}
+      ctaLabel={t('ai.timelineSummary.cta')}
+      disabled={disabled}
+      disabledReason={disabledReason}
+      onGenerate={() => timelineSummary(circleId, days)}
+    >
+      <label className="text-sm">
+        <span className="block text-accanto-700 mb-1">{t('ai.timelineSummary.daysLabel')}</span>
+        <input
+          type="number"
+          min={1}
+          max={60}
+          value={days}
+          onChange={(e) => setDays(Math.max(1, Math.min(60, Number(e.target.value) || 7)))}
+          className="input w-24"
+        />
+      </label>
+    </AiAssistPanel>
   );
 }

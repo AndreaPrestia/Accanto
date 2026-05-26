@@ -2,6 +2,10 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, extractError } from '../api/client';
 import { DoctorQuestion, DoctorQuestionCategory, DoctorQuestionStatus, DoctorQuestionTemplate, QuestionCategoryLabel, QuestionStatusLabel } from '../types';
+import { useTranslation } from 'react-i18next';
+import AiAssistPanel from '../components/AiAssistPanel';
+import { doctorQuestionDraft } from '../api/ai';
+import { useAiContext } from '../hooks/useAiContext';
 
 const CATS: DoctorQuestionCategory[] = ['Diagnosis','Therapy','Pain','Nutrition','Hydration','PalliativeCare','Discharge','HomeCare','Emergency','Prognosis','Practical','Other'];
 const STATUSES: DoctorQuestionStatus[] = ['ToAsk','Asked','Answered','Archived'];
@@ -53,6 +57,8 @@ export default function DoctorQuestionsPage() {
       </button>
 
       {showForm && <NewForm careCircleId={id!} prefill={prefill} onCreated={() => { setShowForm(false); setPrefill(null); load(); }} />}
+
+      <DoctorQuestionsAiSection circleId={id!} />
 
       {templates.length > 0 && (
         <details className="card mb-4">
@@ -133,5 +139,46 @@ function NewForm({ careCircleId, prefill, onCreated }: { careCircleId: string; p
       {error && <div className="text-sm text-red-700">{error}</div>}
       <button className="btn-primary" disabled={busy}>{busy ? 'Salvataggio…' : 'Aggiungi domanda'}</button>
     </form>
+  );
+}
+
+function DoctorQuestionsAiSection({ circleId }: { circleId: string }) {
+  const { t } = useTranslation();
+  const [topic, setTopic] = useState('');
+  const [notes, setNotes] = useState('');
+  const { systemAvailable, enabledForCircle, loading } = useAiContext(circleId);
+
+  if (loading) return null;
+  const disabled = !systemAvailable || !enabledForCircle;
+  const disabledReason = !systemAvailable ? t('ai.disabledSystem') as string : t('ai.disabledCircle') as string;
+
+  return (
+    <AiAssistPanel
+      title={t('ai.doctorQuestionDraft.title')}
+      description={t('ai.doctorQuestionDraft.description') as string}
+      ctaLabel={t('ai.doctorQuestionDraft.cta')}
+      disabled={disabled}
+      disabledReason={disabledReason}
+      onGenerate={() => doctorQuestionDraft(circleId, topic.trim(), notes.trim() || undefined)}
+    >
+      <label className="text-sm block">
+        <span className="block text-accanto-700 mb-1">{t('ai.doctorQuestionDraft.topicLabel')}</span>
+        <input
+          className="input w-full"
+          placeholder={t('ai.doctorQuestionDraft.topicPlaceholder') as string}
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+        />
+      </label>
+      <label className="text-sm block">
+        <span className="block text-accanto-700 mb-1">{t('ai.doctorQuestionDraft.notesLabel')}</span>
+        <textarea
+          className="input w-full"
+          rows={2}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+      </label>
+    </AiAssistPanel>
   );
 }

@@ -46,6 +46,16 @@ services:
       RateLimit__Sensitive__Window: ${RateLimit__Sensitive__Window:-00:01:00}
       RateLimit__InviteCreate__PermitLimit: ${RateLimit__InviteCreate__PermitLimit:-10000}
       RateLimit__InviteCreate__Window: ${RateLimit__InviteCreate__Window:-00:01:00}
+      RateLimit__Ai__PermitLimit: ${RateLimit__Ai__PermitLimit:-10000}
+      RateLimit__Ai__Window: ${RateLimit__Ai__Window:-00:01:00}
+      # Modulo AI: opt-in. Default "none" → endpoint rispondono 503. Per attivare Ollama:
+      #   docker compose --profile ai up -d
+      #   Ai__Provider=ollama in .env (e Ai__Endpoint=http://ollama:11434).
+      Ai__Provider: ${Ai__Provider:-none}
+      Ai__Endpoint: ${Ai__Endpoint:-http://ollama:11434}
+      Ai__Model: ${Ai__Model:-llama3.2:3b}
+      Ai__TimeoutSeconds: ${Ai__TimeoutSeconds:-60}
+      Ai__MaxOutputTokens: ${Ai__MaxOutputTokens:-512}
     volumes:
       - ./storage:/data/storage
     ports:
@@ -68,5 +78,27 @@ services:
     ports:
       - "5173:80"
 
+  # Modulo AI (opzionale, self-hosted). Si avvia solo con profilo "ai":
+  #   docker compose --profile ai up -d
+  # Per usarlo dal backend, impostare in .env:
+  #   Ai__Provider=ollama
+  #   Ai__Endpoint=http://ollama:11434
+  # e fare il pull del modello dopo il primo avvio:
+  #   docker compose exec ollama ollama pull llama3.2:3b
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    profiles: ["ai"]
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 volumes:
   db-data:
+  ollama-data:

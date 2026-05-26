@@ -8,6 +8,7 @@ using Accanto.Application.Export;
 using Accanto.Application.Push;
 using Accanto.Application.Security;
 using Accanto.Application.Ai;
+using Accanto.Infrastructure.Ai;
 using Accanto.Infrastructure.Audit;
 using Accanto.Infrastructure.Authorization;
 using Accanto.Infrastructure.Email;
@@ -51,6 +52,21 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IEmailService, EmailService>();
         services.AddSingleton<ICircleEmailNotifier, CircleEmailNotifier>();
         services.AddScoped<ICareCircleExportService, CareCircleExportService>();
+
+        // IAiAssistant: factory in base ad AiOptions.Provider.
+        // "ollama" → OllamaAssistant con HttpClient dedicato (timeout settato runtime).
+        // qualsiasi altro valore (incluso "none") → NullAiAssistant placeholder.
+        // Nota: il gate 503 nel servizio AI usa AiOptions.IsConfigured prima di chiamare l'assistant.
+        var aiSection = configuration.GetSection("Ai");
+        var provider = aiSection["Provider"];
+        if (string.Equals(provider, "ollama", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHttpClient<IAiAssistant, OllamaAssistant>();
+        }
+        else
+        {
+            services.AddSingleton<IAiAssistant, NullAiAssistant>();
+        }
 
         QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 

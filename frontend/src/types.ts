@@ -84,6 +84,7 @@ export interface CareCircle {
   myRole: CareCircleRole;
   createdAt: string;
   updatedAt?: string | null;
+  aiEnabled: boolean;
 }
 
 export interface TimelineEntry {

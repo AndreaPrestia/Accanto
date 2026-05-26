@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import SelfCareAiSection from '../components/SelfCareAiSection';
 
 // Numero di micro-promemoria: deve coincidere con i18n key selfCare.daily.tips[0..N-1].
 const TIP_COUNT = 10;
@@ -64,6 +65,8 @@ export default function SelfCarePage() {
           {t('selfCare.supportLink')} →
         </Link>
       </p>
+
+      <SelfCareAiSection />
 
       <p className="mt-8 text-xs text-accanto-500">{t('selfCare.disclaimer')}</p>
     </div>

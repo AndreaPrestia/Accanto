@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
 import { CareCircle, RoleLabel } from '../types';
 import InvitesPanel from '../components/InvitesPanel';
+import { setCircleAiEnabled } from '../api/ai';
+import { useAiContext } from '../hooks/useAiContext';
 
 export default function CareCirclePage() {
   const { id } = useParams<{ id: string }>();
@@ -42,6 +45,10 @@ export default function CareCirclePage() {
       </div>
 
       {isOwner && circle.status === 'Active' && <InvitesPanel circleId={circle.id} />}
+
+      {isOwner && circle.status === 'Active' && (
+        <AiCircleSettingsCard circle={circle} onChanged={(aiEnabled) => setCircle({ ...circle, aiEnabled })} />
+      )}
 
       <ExportPdfButton circleId={circle.id} />
 
@@ -147,3 +154,47 @@ function ExportPdfButton({ circleId }: { circleId: string }) {
     </section>
   );
 }
+
+function AiCircleSettingsCard({ circle, onChanged }: { circle: CareCircle; onChanged: (enabled: boolean) => void }) {
+  const { t } = useTranslation();
+  const { systemAvailable, loading } = useAiContext();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const toggle = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const next = !circle.aiEnabled;
+      await setCircleAiEnabled(circle.id, next);
+      onChanged(next);
+    } catch (e) {
+      setError(extractError(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="mt-8 card">
+      <h3 className="font-medium">{t('ai.title')}</h3>
+      <p className="text-sm text-accanto-500 mt-1">{t('ai.subtitle')}</p>
+      {loading ? (
+        <p className="text-sm text-accanto-500 mt-3">{t('common.loading')}</p>
+      ) : !systemAvailable ? (
+        <p className="text-sm text-accanto-500 mt-3">{t('ai.disabledSystem')}</p>
+      ) : (
+        <>
+          <label className="flex items-center gap-2 mt-3 text-sm">
+            <input type="checkbox" checked={circle.aiEnabled} onChange={toggle} disabled={busy} />
+            <span>{t('ai.enableToggle')}</span>
+          </label>
+          <p className="text-xs text-accanto-500 mt-1">{t('ai.enableHint')}</p>
+          {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
+        </>
+      )}
+    </section>
+  );
+}
+
+
