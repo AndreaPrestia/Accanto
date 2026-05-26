@@ -12,5 +12,11 @@ public class CareCircle
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
 
+    /// <summary>
+    /// Se true, le funzioni di assistenza AI sono abilitate per questo cerchio di cura.
+    /// Default false: opt-in esplicito dell'owner.
+    /// </summary>
+    public bool AiEnabled { get; set; } = false;
+
     public List<CareCircleMember> Members { get; set; } = new();
 }

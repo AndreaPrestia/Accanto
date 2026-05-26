@@ -19,5 +19,7 @@ public enum AuditActionType
     QuestionDeleted,
     UpdateCreated,
     UpdateDeleted,
-    DataExported
+    DataExported,
+    AiCall,
+    AiSettingsUpdated
 }

@@ -15,6 +15,7 @@ public class CareCircleConfiguration : IEntityTypeConfiguration<CareCircle>
         b.Property(x => x.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
         b.Property(x => x.CreatedByUserId).IsRequired();
         b.Property(x => x.CreatedAt).IsRequired();
+        b.Property(x => x.AiEnabled).IsRequired().HasDefaultValue(false);
 
         b.HasMany(x => x.Members)
             .WithOne()

@@ -1,4 +1,5 @@
 using Accanto.Application.Account;
+using Accanto.Application.Ai;
 using Accanto.Application.Audit;
 using Accanto.Application.Auth;
 using Accanto.Application.Auth.TwoFactor;
@@ -42,6 +43,12 @@ public static class ApplicationServiceCollectionExtensions
 
         services.AddSingleton<IDoctorQuestionTemplateProvider, StaticDoctorQuestionTemplateProvider>();
         services.AddSingleton<ISharedUpdateTemplateProvider, StaticSharedUpdateTemplateProvider>();
+
+        // AI: il PromptBuilder è stateless. IAiAssistant viene registrato in Infrastructure
+        // tramite factory in base ad AiOptions.Provider. Default (Fase 1): NullAiAssistant.
+        services.AddSingleton<AiPromptBuilder>();
+        services.AddSingleton<IAiAssistant, NullAiAssistant>();
+        services.AddScoped<IAiService, AiService>();
 
         return services;
     }

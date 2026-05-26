@@ -8,5 +8,6 @@ public enum AuditResourceType
     TimelineEntry,
     MedicalDocument,
     DoctorQuestion,
-    SharedUpdate
+    SharedUpdate,
+    Ai
 }

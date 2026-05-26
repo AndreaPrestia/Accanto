@@ -15,5 +15,6 @@ public enum SecurityAuditEventType
     RecoveryCodesRegenerated,
     PasswordChanged,
     SessionRevoked,
-    AllSessionsRevoked
+    AllSessionsRevoked,
+    AiCall
 }

@@ -7,6 +7,7 @@ using Accanto.Application.Common.Storage;
 using Accanto.Application.Export;
 using Accanto.Application.Push;
 using Accanto.Application.Security;
+using Accanto.Application.Ai;
 using Accanto.Infrastructure.Audit;
 using Accanto.Infrastructure.Authorization;
 using Accanto.Infrastructure.Email;
@@ -37,6 +38,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.Configure<EncryptionOptions>(configuration.GetSection("Encryption"));
         services.Configure<PushOptions>(configuration.GetSection("Push"));
         services.Configure<EmailOptions>(configuration.GetSection("Email"));
+        services.Configure<AiOptions>(configuration.GetSection("Ai"));
 
         services.AddSingleton<IFieldProtector, AesGcmFieldProtector>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();

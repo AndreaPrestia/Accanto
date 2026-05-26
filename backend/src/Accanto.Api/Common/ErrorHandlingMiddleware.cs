@@ -38,6 +38,10 @@ public class ErrorHandlingMiddleware
         {
             await Write(context, StatusCodes.Status409Conflict, ex.Message);
         }
+        catch (ServiceUnavailableException ex)
+        {
+            await Write(context, StatusCodes.Status503ServiceUnavailable, ex.Message);
+        }
         catch (UnauthorizedAccessException ex)
         {
             await Write(context, StatusCodes.Status401Unauthorized, ex.Message);

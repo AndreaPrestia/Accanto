@@ -31,3 +31,8 @@ public class ConflictException : Exception
 {
     public ConflictException(string message) : base(message) { }
 }
+
+public class ServiceUnavailableException : Exception
+{
+    public ServiceUnavailableException(string message) : base(message) { }
+}

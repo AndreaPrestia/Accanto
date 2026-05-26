@@ -130,7 +130,7 @@ public class CareCircleService : ICareCircleService
     }
 
     private static CareCircleDto Map(CareCircle c, CareCircleRole role) =>
-        new(c.Id, c.Name, c.Description, c.Status, role, c.CreatedAt, c.UpdatedAt);
+        new(c.Id, c.Name, c.Description, c.Status, role, c.CreatedAt, c.UpdatedAt, c.AiEnabled);
 
     private static AppValidationException ToValidation(FluentValidation.Results.ValidationResult v) =>
         new("Dati non validi.",

@@ -12,5 +12,6 @@ public sealed record CareCircleDto(
     CareCircleStatus Status,
     CareCircleRole MyRole,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? UpdatedAt
+    DateTimeOffset? UpdatedAt,
+    bool AiEnabled
 );

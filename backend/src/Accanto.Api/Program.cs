@@ -87,6 +87,7 @@ builder.Services.AddRateLimiter(opt =>
     opt.AddPolicy("auth-register", ctx => BuildPartition(IpKey(ctx, "register"), rateLimits.Register));
     opt.AddPolicy("auth-sensitive", ctx => BuildPartition(UserOrIpKey(ctx, "sensitive"), rateLimits.Sensitive));
     opt.AddPolicy("invite-create", ctx => BuildPartition(UserOrIpKey(ctx, "invite"), rateLimits.InviteCreate));
+    opt.AddPolicy("ai", ctx => BuildPartition(UserOrIpKey(ctx, "ai"), rateLimits.Ai));
 });
 
 static string IpKey(HttpContext ctx, string scope)
