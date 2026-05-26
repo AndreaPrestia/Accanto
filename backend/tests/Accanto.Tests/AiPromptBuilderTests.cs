@@ -61,6 +61,19 @@ public class AiPromptBuilderTests
     }
 
     [Fact]
+    public void Prefers_italian_when_present_at_any_priority()
+    {
+        // Anche se l'inglese ha priorità maggiore, se "it" è in lista usiamo italiano.
+        _b.ResolveLanguage("en-US,en;q=0.9,it;q=0.5").Should().Be("it");
+    }
+
+    [Fact]
+    public void Returns_english_only_when_italian_absent()
+    {
+        _b.ResolveLanguage("fr-FR,fr;q=0.9,en;q=0.5").Should().Be("en");
+    }
+
+    [Fact]
     public void BuildSystemPrompt_includes_role_and_language()
     {
         var sys = _b.BuildSystemPrompt("it", "Aiuti il caregiver a riassumere.");

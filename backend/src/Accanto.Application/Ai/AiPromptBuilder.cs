@@ -48,24 +48,35 @@ public sealed class AiPromptBuilder
 
     /// <summary>
     /// Restituisce un codice lingua a 2 caratteri (it/en) da un Accept-Language o cultura.
-    /// Default "it".
+    /// Default "it". Politica "italo-tollerante": se "it" compare a qualunque priorità
+    /// nell'header, si usa italiano; si passa a inglese solo quando l'italiano è del tutto assente.
     /// </summary>
     public string ResolveLanguage(string? acceptLanguage)
     {
         if (string.IsNullOrWhiteSpace(acceptLanguage)) return "it";
-        var first = acceptLanguage.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                  .FirstOrDefault()?.Split(';')[0].Trim();
-        if (string.IsNullOrEmpty(first)) return "it";
-        try
+
+        var hasItalian = false;
+        var hasEnglish = false;
+        foreach (var raw in acceptLanguage.Split(',', StringSplitOptions.RemoveEmptyEntries))
         {
-            var culture = CultureInfo.GetCultureInfo(first);
-            var two = culture.TwoLetterISOLanguageName;
-            return string.Equals(two, "en", StringComparison.OrdinalIgnoreCase) ? "en" : "it";
+            var tag = raw.Split(';')[0].Trim();
+            if (string.IsNullOrEmpty(tag) || tag == "*") continue;
+            string two;
+            try
+            {
+                two = CultureInfo.GetCultureInfo(tag).TwoLetterISOLanguageName;
+            }
+            catch (CultureNotFoundException)
+            {
+                continue;
+            }
+            if (string.Equals(two, "it", StringComparison.OrdinalIgnoreCase)) hasItalian = true;
+            else if (string.Equals(two, "en", StringComparison.OrdinalIgnoreCase)) hasEnglish = true;
         }
-        catch (CultureNotFoundException)
-        {
-            return "it";
-        }
+
+        if (hasItalian) return "it";
+        if (hasEnglish) return "en";
+        return "it";
     }
 
     /// <summary>
