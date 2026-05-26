@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const appUrl = import.meta.env.PUBLIC_APP_URL;
+const lang = 'es' as const;
+---
+<BaseLayout
+  title="Precios · Accanto"
+  description="Durante la fase beta Accanto es gratis. Los planes futuros se definirán junto a las familias que lo usan."
+>
+  <section class="container-page">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Precios</p>
+      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Gratis en beta</h1>
+      <p class="text-accanto-600 leading-relaxed">
+        Estamos construyendo Accanto junto a las familias que lo prueban. Por ahora su uso es gratuito.
+        Los planes futuros los definiremos con transparencia, escuchando a quien lo usa de verdad.
+      </p>
+    </div>
+  </section>
+
+  <section class="container-page">
+    <div class="mx-auto grid gap-4 sm:grid-cols-2 max-w-3xl">
+      <div class="card">
+        <p class="eyebrow mb-2">Cloud (beta)</p>
+        <h2 class="text-xl font-semibold mb-2">Gratis</h2>
+        <ul class="text-sm text-accanto-700 space-y-1 mb-4">
+          <li>• Un círculo de cuidado</li>
+          <li>• Invitaciones ilimitadas</li>
+          <li>• Documentos y cronología</li>
+          <li>• Exportación de datos</li>
+        </ul>
+        <a href={`${appUrl}/register`} class="btn-primary w-full">Empieza ahora</a>
+      </div>
+      <div class="card">
+        <p class="eyebrow mb-2">Self-hosted</p>
+        <h2 class="text-xl font-semibold mb-2">Abierto y gratuito</h2>
+        <ul class="text-sm text-accanto-700 space-y-1 mb-4">
+          <li>• Instalación en tu servidor</li>
+          <li>• Los datos permanecen en tu entorno</li>
+          <li>• IA opcional, también local</li>
+          <li>• Soporte de la comunidad</li>
+        </ul>
+        <a href={routeUrl('contact', lang)} class="btn-ghost w-full">Escríbenos</a>
+      </div>
+    </div>
+    <p class="text-center text-sm text-accanto-500 mt-8">Sin tarjeta. Sin publicidad. Sin perfilado.</p>
+  </section>
+</BaseLayout>

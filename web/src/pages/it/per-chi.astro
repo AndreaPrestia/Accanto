@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FeatureCard from '../../components/FeatureCard.astro';
+import { routeUrl } from '../../i18n';
+
+const appUrl = import.meta.env.PUBLIC_APP_URL;
+const lang = 'it' as const;
+---
+<BaseLayout
+  title="Per chi è Accanto"
+  description="Accanto è pensato per chi assiste un familiare: figli che seguono un genitore anziano, partner di una persona con malattia cronica, famiglie che si organizzano insieme."
+>
+  <section class="container-page">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Per chi è</p>
+      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Per chi assiste un familiare, senza essere un professionista</h1>
+      <p class="text-accanto-600 leading-relaxed">
+        Non serve essere infermieri o medici. Accanto è pensato per chi si occupa di un familiare a casa,
+        spesso facendolo da solo, spesso senza che nessuno glielo abbia insegnato.
+      </p>
+    </div>
+  </section>
+
+  <section class="container-page border-t border-accanto-100">
+    <div class="grid gap-4 md:grid-cols-3">
+      <FeatureCard
+        icon="👨‍👩‍👧"
+        title="Figli che seguono un genitore anziano"
+        description="Per mettere d'accordo fratelli e sorelle, condividere le ultime novità del medico e non perdere appuntamenti."
+      />
+      <FeatureCard
+        icon="💞"
+        title="Partner di una persona con malattia cronica"
+        description="Per tenere insieme terapia, sintomi e domande in un solo posto, senza ricominciare da capo ogni volta."
+      />
+      <FeatureCard
+        icon="🏡"
+        title="Famiglie che si organizzano"
+        description="Per coordinare badanti, fisioterapisti e visite. Ognuno vede ciò che gli serve, senza confusione."
+      />
+    </div>
+  </section>
+
+  <section class="container-page border-t border-accanto-100">
+    <div class="mx-auto max-w-2xl">
+      <h2 class="text-2xl font-semibold mb-4 text-center">Cosa non è Accanto</h2>
+      <ul class="space-y-3 text-accanto-700 leading-relaxed">
+        <li>• Non è un dispositivo medico e non sostituisce il medico curante.</li>
+        <li>• Non è un social network: nessuna bacheca pubblica, nessun "amico".</li>
+        <li>• Non è un servizio in cambio dei tuoi dati: niente pubblicità, niente profilazione.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="container-page border-t border-accanto-100 text-center">
+    <a href={`${appUrl}/register`} class="btn-primary">Crea il tuo spazio</a>
+    <p class="mt-3 text-sm text-accanto-500">Gratis in beta. <a href={routeUrl('pricing', lang)} class="underline">Vedi i piani</a></p>
+  </section>
+</BaseLayout>

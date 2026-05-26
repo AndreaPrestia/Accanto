@@ -1,0 +1,48 @@
+---
+import { useT, routeUrl, type Locale } from '../i18n';
+import LangSwitcher from './LangSwitcher.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props as Props;
+const t = useT(locale);
+const appUrl = import.meta.env.PUBLIC_APP_URL;
+
+const navItems: { key: 'features' | 'forWhom' | 'faq' | 'pricing'; label: string }[] = [
+  { key: 'features', label: t('nav.features') },
+  { key: 'forWhom', label: t('nav.forWhom') },
+  { key: 'faq', label: t('nav.faq') },
+  { key: 'pricing', label: t('nav.pricing') }
+];
+---
+<header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-accanto-100">
+  <div class="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between gap-4">
+    <a href={routeUrl('home', locale)} class="font-semibold text-accanto-900 no-underline flex items-center gap-2">
+      <span aria-hidden="true" class="inline-block w-7 h-7 rounded-full bg-accanto-700"></span>
+      <span>Accanto</span>
+    </a>
+
+    <nav aria-label="Principale" class="hidden md:flex items-center gap-5 text-sm">
+      {navItems.map((it) => (
+        <a href={routeUrl(it.key, locale)} class="text-accanto-700 no-underline hover:underline">{it.label}</a>
+      ))}
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <LangSwitcher locale={locale} />
+      <a href={`${appUrl}/login`} class="text-sm text-accanto-700 no-underline hover:underline hidden sm:inline">{t('nav.login')}</a>
+      <a href={`${appUrl}/register`} class="btn-primary text-sm">{t('nav.register')}</a>
+    </div>
+  </div>
+
+  <!-- Nav compatta mobile -->
+  <nav aria-label="Principale (mobile)" class="md:hidden border-t border-accanto-100 bg-white">
+    <div class="mx-auto max-w-5xl px-4 py-2 flex gap-4 overflow-x-auto text-sm">
+      {navItems.map((it) => (
+        <a href={routeUrl(it.key, locale)} class="whitespace-nowrap text-accanto-700 no-underline">{it.label}</a>
+      ))}
+    </div>
+  </nav>
+</header>

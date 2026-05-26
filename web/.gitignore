@@ -1,0 +1,15 @@
+# build output
+dist/
+
+# astro cache
+.astro/
+
+# node
+node_modules/
+
+# env locale
+.env
+.env.local
+
+# editor
+*.log

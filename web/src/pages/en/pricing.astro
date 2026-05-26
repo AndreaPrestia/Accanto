@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const appUrl = import.meta.env.PUBLIC_APP_URL;
+const lang = 'en' as const;
+---
+<BaseLayout
+  title="Pricing · Accanto"
+  description="During the beta phase Accanto is free. Future plans will be defined together with the families who use it."
+>
+  <section class="container-page">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Pricing</p>
+      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Free during beta</h1>
+      <p class="text-accanto-600 leading-relaxed">
+        We are building Accanto together with the families trying it. For now using it is free.
+        Future plans will be defined transparently, listening to those who actually use it.
+      </p>
+    </div>
+  </section>
+
+  <section class="container-page">
+    <div class="mx-auto grid gap-4 sm:grid-cols-2 max-w-3xl">
+      <div class="card">
+        <p class="eyebrow mb-2">Cloud (beta)</p>
+        <h2 class="text-xl font-semibold mb-2">Free</h2>
+        <ul class="text-sm text-accanto-700 space-y-1 mb-4">
+          <li>• One care circle</li>
+          <li>• Unlimited invites</li>
+          <li>• Documents and timeline</li>
+          <li>• Data export</li>
+        </ul>
+        <a href={`${appUrl}/register`} class="btn-primary w-full">Start now</a>
+      </div>
+      <div class="card">
+        <p class="eyebrow mb-2">Self-hosted</p>
+        <h2 class="text-xl font-semibold mb-2">Open & free</h2>
+        <ul class="text-sm text-accanto-700 space-y-1 mb-4">
+          <li>• Install on your own server</li>
+          <li>• Data stays in your environment</li>
+          <li>• Optional AI, also local</li>
+          <li>• Community support</li>
+        </ul>
+        <a href={routeUrl('contact', lang)} class="btn-ghost w-full">Reach out for details</a>
+      </div>
+    </div>
+    <p class="text-center text-sm text-accanto-500 mt-8">No card required. No ads. No profiling.</p>
+  </section>
+</BaseLayout>

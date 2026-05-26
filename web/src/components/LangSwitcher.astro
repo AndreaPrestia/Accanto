@@ -1,0 +1,46 @@
+---
+import { LOCALES, routeKeyFromPath, ROUTES, useT, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+  /** "horizontal" (default): pill compatto; "vertical": lista per footer. */
+  variant?: 'horizontal' | 'vertical';
+}
+
+const { locale, variant = 'horizontal' } = Astro.props as Props;
+const t = useT(locale);
+const routeKey = routeKeyFromPath(Astro.url.pathname);
+
+function urlFor(target: Locale): string {
+  if (!routeKey) return `/${target}`;
+  const slug = ROUTES[routeKey][target];
+  return slug ? `/${target}/${slug}` : `/${target}`;
+}
+---
+{variant === 'horizontal' ? (
+  <div role="group" aria-label={t('lang.label')} class="inline-flex items-center rounded-lg border border-accanto-200 bg-white text-xs overflow-hidden">
+    {LOCALES.map((loc, i) => (
+      <a
+        href={urlFor(loc)}
+        aria-current={loc === locale ? 'true' : undefined}
+        class={`px-2.5 py-1 no-underline ${loc === locale ? 'bg-accanto-700 text-white' : 'text-accanto-700 hover:bg-accanto-100'} ${i > 0 ? 'border-l border-accanto-200' : ''}`}
+      >
+        {loc.toUpperCase()}
+      </a>
+    ))}
+  </div>
+) : (
+  <ul class="space-y-2">
+    {LOCALES.map((loc) => (
+      <li>
+        <a
+          href={urlFor(loc)}
+          aria-current={loc === locale ? 'true' : undefined}
+          class={`no-underline ${loc === locale ? 'text-accanto-900 font-medium' : 'text-accanto-700'}`}
+        >
+          {t(`lang.${loc}`)}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}

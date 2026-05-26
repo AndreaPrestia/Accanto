@@ -1,0 +1,50 @@
+---
+import { useT, routeUrl, type Locale } from '../i18n';
+import LangSwitcher from './LangSwitcher.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props as Props;
+const t = useT(locale);
+const year = new Date().getFullYear();
+---
+<footer class="mt-16 border-t border-accanto-100 bg-white">
+  <div class="mx-auto max-w-5xl px-4 py-10 grid gap-8 md:grid-cols-4 text-sm">
+    <div>
+      <div class="font-semibold text-accanto-900 mb-2">Accanto</div>
+      <p class="text-accanto-500">{t('footer.tagline')}</p>
+    </div>
+
+    <div>
+      <div class="eyebrow mb-3">{t('footer.sections.product')}</div>
+      <ul class="space-y-2">
+        <li><a href={routeUrl('features', locale)} class="text-accanto-700 no-underline">{t('nav.features')}</a></li>
+        <li><a href={routeUrl('forWhom', locale)} class="text-accanto-700 no-underline">{t('nav.forWhom')}</a></li>
+        <li><a href={routeUrl('pricing', locale)} class="text-accanto-700 no-underline">{t('nav.pricing')}</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="eyebrow mb-3">{t('footer.sections.info')}</div>
+      <ul class="space-y-2">
+        <li><a href={routeUrl('privacy', locale)} class="text-accanto-700 no-underline">{t('nav.privacy')}</a></li>
+        <li><a href={routeUrl('faq', locale)} class="text-accanto-700 no-underline">{t('nav.faq')}</a></li>
+        <li><a href={routeUrl('contact', locale)} class="text-accanto-700 no-underline">{t('nav.contact')}</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="eyebrow mb-3">{t('footer.sections.language')}</div>
+      <LangSwitcher locale={locale} variant="vertical" />
+    </div>
+  </div>
+
+  <div class="border-t border-accanto-100">
+    <div class="mx-auto max-w-5xl px-4 py-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs text-accanto-500">
+      <p>© {year} Accanto. {t('footer.rightsReserved')}</p>
+      <p class="max-w-md sm:text-right">{t('footer.notMedicalDevice')}</p>
+    </div>
+  </div>
+</footer>

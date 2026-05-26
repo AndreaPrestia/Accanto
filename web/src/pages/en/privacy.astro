@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'en' as const;
+---
+<BaseLayout
+  title="Privacy · Accanto"
+  description="How Accanto handles your data: minimum necessary, no profiling, full export, self-hosting option."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Privacy</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-6">Your data, your rules</h1>
+
+    <p>Accanto handles sensitive information about the health of the person you care for.
+    That is why we chose a "privacy by design" approach from day one.</p>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li>The information you enter (notes, symptoms, documents, contacts).</li>
+      <li>The data strictly required for the account to work (email, password hash, essential logs).</li>
+    </ul>
+
+    <h2>What we don't do</h2>
+    <ul>
+      <li>We do not sell your data.</li>
+      <li>We do not run advertising profiling.</li>
+      <li>We do not embed third-party trackers for commercial purposes.</li>
+    </ul>
+
+    <h2>Self-hosting</h2>
+    <p>Accanto can be installed on your own server. In that case the data stays physically in your environment.
+    AI mode is optional and can be connected to a local model (for example via Ollama).</p>
+
+    <h2>Your rights</h2>
+    <p>You can export your data or request deletion at any time from your personal area.
+    For specific requests reach us via the <a href={routeUrl('contact', lang)}>contact</a> page.</p>
+
+    <h2>Security</h2>
+    <p>Passwords are stored only as hashes. Sessions are signed and revocable. Connections use HTTPS.
+    We work to keep the attack surface small and well watched.</p>
+
+    <h2>Medical notice</h2>
+    <p>Accanto is not a medical device. The information in the application does not replace qualified medical advice.</p>
+
+    <p class="text-sm text-accanto-500 mt-10">This page is an orientation summary, not a complete privacy notice — that can be requested via the contact page.</p>
+  </article>
+</BaseLayout>

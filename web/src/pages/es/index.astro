@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import FeatureCard from '../../components/FeatureCard.astro';
+import { routeUrl } from '../../i18n';
+
+const appUrl = import.meta.env.PUBLIC_APP_URL;
+const lang = 'es' as const;
+
+const features = [
+  { icon: '🌿', title: 'Círculos de cuidado', description: 'Un círculo por persona cuidada: invitas a quien quieres y decides qué compartir.' },
+  { icon: '🗓️', title: 'Cronología compartida', description: 'Notas, síntomas, episodios: los hechos en orden cronológico, accesibles al círculo.' },
+  { icon: '📄', title: 'Documentos en un solo lugar', description: 'Recetas, informes y formularios, organizados y disponibles cuando hacen falta.' },
+  { icon: '🩺', title: 'Preguntas para el médico', description: 'Prepara la próxima visita recopilando dudas y observaciones a lo largo del tiempo.' },
+  { icon: '✉️', title: 'Avisos a la familia', description: 'Una forma amable de mantener informada a la familia sin chats interminables.' },
+  { icon: '💛', title: 'Cuidarte a ti', description: 'Espacios de reflexión para reconocer tu propia carga.' }
+];
+---
+<BaseLayout
+  title="Accanto · Una habitación tranquila para quien cuida a un familiar"
+  description="Accanto reúne información, documentos y avisos para quien cuida a un familiar. Self-hosted, privacy by design, IA opcional."
+>
+  <Hero
+    eyebrow="Para familiares cuidadores"
+    title="Una habitación tranquila para quien cuida a un familiar"
+    subtitle="Accanto reúne información, documentos y avisos en un solo sitio. Invitas a quien quieres y decides qué compartir. Sin publicidad, sin perfilado."
+    ctaPrimary={{ label: 'Empieza gratis', href: `${appUrl}/register` }}
+    ctaSecondary={{ label: 'Ver funcionalidades', href: routeUrl('features', lang) }}
+  />
+
+  <section class="container-page">
+    <h2 class="text-2xl font-semibold mb-2 text-center">Tres cosas que cambian el día</h2>
+    <p class="text-accanto-600 text-center max-w-2xl mx-auto mb-10">Lo que más nos han contado quienes cuidan, resumido en tres ideas.</p>
+    <div class="grid gap-4 sm:grid-cols-3">
+      <FeatureCard icon="🧠" title="No más 'ya lo recordaré yo'" description="Toda la información en un único lugar, siempre disponible — también de noche o en urgencias." />
+      <FeatureCard icon="🤝" title="Familia alineada" description="Un círculo en el que los avisos llegan a quien hace falta, de forma adecuada, sin inundar chats." />
+      <FeatureCard icon="🫶" title="También espacio para ti" description="Recordatorios amables sobre tu bienestar: quien cuida también necesita cuidado." />
+    </div>
+  </section>
+
+  <section class="container-page bg-white border-y border-accanto-100">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Funcionalidades principales</p>
+      <h2 class="text-2xl font-semibold mb-6">Todo lo que hace falta, nada más</h2>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {features.map((f) => (
+        <FeatureCard icon={f.icon} title={f.title} description={f.description} />
+      ))}
+    </div>
+    <div class="text-center mt-8">
+      <a href={routeUrl('features', lang)} class="btn-ghost">Ver todas las funcionalidades</a>
+    </div>
+  </section>
+
+  <section class="container-page">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Confianza</p>
+      <h2 class="text-2xl font-semibold mb-4">Tus datos son tuyos</h2>
+      <p class="text-accanto-600 leading-relaxed">
+        Accanto está pensado para poder instalarse incluso en tu propia casa. La inteligencia artificial es
+        opcional, está desactivada por defecto y, cuando se activa, puede ejecutarse en un modelo self-hosted.
+        Sin publicidad, sin perfilado, exportación completa de datos en cualquier momento.
+      </p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <a href={routeUrl('privacy', lang)} class="btn-ghost">Cómo tratamos los datos</a>
+        <a href={`${appUrl}/register`} class="btn-primary">Crea tu espacio</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

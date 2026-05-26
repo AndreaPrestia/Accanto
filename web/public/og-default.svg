@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(120,180)">
+    <rect width="80" height="80" rx="18" fill="#334155"/>
+    <circle cx="40" cy="34" r="14" fill="#f1f5f9"/>
+    <path d="M14 64c0-14 12-24 26-24s26 10 26 24" stroke="#f1f5f9" stroke-width="6" stroke-linecap="round" fill="none"/>
+  </g>
+  <text x="120" y="370" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="700" fill="#0f172a">Accanto</text>
+  <text x="120" y="430" font-family="Inter, system-ui, sans-serif" font-size="34" fill="#334155">Una stanza tranquilla per chi assiste un familiare.</text>
+  <text x="120" y="540" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#64748b">accanto · self-hosted · privacy by design</text>
+</svg>

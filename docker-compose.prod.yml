@@ -1,16 +1,23 @@
 # docker-compose.prod.yml
 #
 # Override per deploy in produzione: rimuove l'esposizione pubblica di Postgres e backend,
-# mette Caddy davanti al frontend con TLS automatico da Let's Encrypt.
+# mette Caddy davanti ai due frontend (sito vetrina + SPA) con TLS automatico da Let's Encrypt.
 #
 # Uso:
 #   ACCANTO_DOMAIN=accanto.example.com \
+#   ACCANTO_APP_DOMAIN=app.accanto.example.com \
 #   ACCANTO_TLS_EMAIL=tu@example.com \
 #   ASPNETCORE_ENVIRONMENT=Production \
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 #
+# Topologia HTTPS:
+#  - https://${ACCANTO_DOMAIN}     → sito vetrina (Astro statico, container "web")
+#  - https://${ACCANTO_APP_DOMAIN} → applicazione SPA + API (/api/*, /health)
+#
+# Se ACCANTO_APP_DOMAIN non è impostato, viene calcolato come "app.${ACCANTO_DOMAIN}".
+#
 # Prerequisiti:
-#  - DNS A/AAAA di ACCANTO_DOMAIN punta al server.
+#  - DNS A/AAAA di ACCANTO_DOMAIN e ACCANTO_APP_DOMAIN puntano al server.
 #  - Porte 80 e 443 raggiungibili da internet (necessarie per ACME HTTP/TLS challenge).
 #  - File .env locale con i segreti veri (Encryption__MasterKey, Jwt__Key, POSTGRES_PASSWORD).
 
@@ -24,7 +31,7 @@ services:
     ports: !reset []
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
-      Cors__AllowedOrigins: ${Cors__AllowedOrigins:-https://${ACCANTO_DOMAIN}}
+      Cors__AllowedOrigins: ${Cors__AllowedOrigins:-https://${ACCANTO_APP_DOMAIN:-app.${ACCANTO_DOMAIN}}}
 
   frontend:
     # Non esporre il frontend direttamente: ci arriva solo Caddy.
@@ -32,17 +39,29 @@ services:
     expose:
       - "80"
 
+  web:
+    # Sito vetrina solo dietro Caddy.
+    ports: !reset []
+    expose:
+      - "80"
+    build:
+      args:
+        SITE_URL: https://${ACCANTO_DOMAIN}
+        PUBLIC_APP_URL: https://${ACCANTO_APP_DOMAIN:-app.${ACCANTO_DOMAIN}}
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
     depends_on:
       - frontend
+      - web
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
     environment:
       ACCANTO_DOMAIN: ${ACCANTO_DOMAIN:?ACCANTO_DOMAIN richiesto (es. accanto.example.com)}
+      ACCANTO_APP_DOMAIN: ${ACCANTO_APP_DOMAIN:-app.${ACCANTO_DOMAIN}}
       ACCANTO_TLS_EMAIL: ${ACCANTO_TLS_EMAIL:?ACCANTO_TLS_EMAIL richiesto per Let's Encrypt}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro

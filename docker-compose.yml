@@ -78,6 +78,19 @@ services:
     ports:
       - "5173:80"
 
+  # Sito vetrina statico (Astro). Indipendente dalla SPA: pensato per il dominio apex
+  # mentre la SPA vive su un sottodominio "app.". In locale è esposto sulla 4321.
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        SITE_URL: ${WEB_SITE_URL:-http://localhost:4321}
+        PUBLIC_APP_URL: ${WEB_PUBLIC_APP_URL:-http://localhost:5173}
+    restart: unless-stopped
+    ports:
+      - "4321:80"
+
   # Modulo AI (opzionale, self-hosted). Si avvia solo con profilo "ai":
   #   docker compose --profile ai up -d
   # Per usarlo dal backend, impostare in .env:

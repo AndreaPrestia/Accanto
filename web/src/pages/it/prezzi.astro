@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const appUrl = import.meta.env.PUBLIC_APP_URL;
+const lang = 'it' as const;
+---
+<BaseLayout
+  title="Prezzi · Accanto"
+  description="Durante la fase beta Accanto è gratis. I piani futuri verranno definiti insieme alle famiglie che lo usano."
+>
+  <section class="container-page">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Prezzi</p>
+      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Gratis in beta</h1>
+      <p class="text-accanto-600 leading-relaxed">
+        Stiamo costruendo Accanto insieme alle famiglie che lo provano. Per ora l'utilizzo è gratuito.
+        I piani futuri li definiremo con trasparenza, ascoltando chi lo usa davvero.
+      </p>
+    </div>
+  </section>
+
+  <section class="container-page">
+    <div class="mx-auto grid gap-4 sm:grid-cols-2 max-w-3xl">
+      <div class="card">
+        <p class="eyebrow mb-2">Cloud (beta)</p>
+        <h2 class="text-xl font-semibold mb-2">Gratis</h2>
+        <ul class="text-sm text-accanto-700 space-y-1 mb-4">
+          <li>• Un cerchio di cura</li>
+          <li>• Inviti illimitati</li>
+          <li>• Documenti e timeline</li>
+          <li>• Esportazione dati</li>
+        </ul>
+        <a href={`${appUrl}/register`} class="btn-primary w-full">Inizia ora</a>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow mb-2">Self-hosted</p>
+        <h2 class="text-xl font-semibold mb-2">Open & gratuito</h2>
+        <ul class="text-sm text-accanto-700 space-y-1 mb-4">
+          <li>• Installazione sul tuo server</li>
+          <li>• I dati restano nel tuo ambiente</li>
+          <li>• AI opzionale, anche locale</li>
+          <li>• Supporto community</li>
+        </ul>
+        <a href={routeUrl('contact', lang)} class="btn-ghost w-full">Scrivici per i dettagli</a>
+      </div>
+    </div>
+
+    <p class="text-center text-sm text-accanto-500 mt-8">Nessuna carta richiesta. Nessuna pubblicità. Nessuna profilazione.</p>
+  </section>
+</BaseLayout>

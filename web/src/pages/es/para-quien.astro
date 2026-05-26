@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FeatureCard from '../../components/FeatureCard.astro';
+import { routeUrl } from '../../i18n';
+
+const appUrl = import.meta.env.PUBLIC_APP_URL;
+const lang = 'es' as const;
+---
+<BaseLayout
+  title="Para quién es Accanto"
+  description="Accanto está pensado para quienes cuidan a un familiar: hijos que acompañan a un padre mayor, parejas de personas con enfermedad crónica, familias que se organizan."
+>
+  <section class="container-page">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Para quién es</p>
+      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Para quien cuida a un familiar, sin ser profesional</h1>
+      <p class="text-accanto-600 leading-relaxed">
+        No hace falta ser enfermero o médico. Accanto está pensado para quien cuida a un familiar en casa,
+        muchas veces en solitario y sin que nadie le haya enseñado cómo.
+      </p>
+    </div>
+  </section>
+
+  <section class="container-page border-t border-accanto-100">
+    <div class="grid gap-4 md:grid-cols-3">
+      <FeatureCard icon="👨‍👩‍👧" title="Hijos que acompañan a un padre mayor" description="Para coordinar a hermanos, compartir las novedades del médico y no perder citas." />
+      <FeatureCard icon="💞" title="Parejas de personas con enfermedad crónica" description="Para tener juntos terapia, síntomas y dudas, sin empezar de cero cada vez." />
+      <FeatureCard icon="🏡" title="Familias que se organizan" description="Para coordinar cuidadores, fisioterapeutas y visitas. Cada quien ve lo que necesita." />
+    </div>
+  </section>
+
+  <section class="container-page border-t border-accanto-100">
+    <div class="mx-auto max-w-2xl">
+      <h2 class="text-2xl font-semibold mb-4 text-center">Qué no es Accanto</h2>
+      <ul class="space-y-3 text-accanto-700 leading-relaxed">
+        <li>• No es un dispositivo médico y no sustituye al médico de cabecera.</li>
+        <li>• No es una red social: sin muro público, sin "amigos".</li>
+        <li>• No es un servicio a cambio de tus datos: sin publicidad, sin perfilado.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="container-page border-t border-accanto-100 text-center">
+    <a href={`${appUrl}/register`} class="btn-primary">Crea tu espacio</a>
+    <p class="mt-3 text-sm text-accanto-500">Gratis en beta. <a href={routeUrl('pricing', lang)} class="underline">Ver planes</a></p>
+  </section>
+</BaseLayout>

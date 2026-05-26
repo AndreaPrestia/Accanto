@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import FeatureCard from '../../components/FeatureCard.astro';
+import { routeUrl } from '../../i18n';
+
+const appUrl = import.meta.env.PUBLIC_APP_URL;
+const lang = 'en' as const;
+
+const features = [
+  { icon: '🌿', title: 'Care circles', description: 'A circle per person you care for. You invite who you want and decide what to share.' },
+  { icon: '🗓️', title: 'Shared timeline', description: 'Notes, symptoms, episodes: facts in chronological order, accessible to the circle.' },
+  { icon: '📄', title: 'Documents in one place', description: 'Prescriptions, reports and forms, organized and accessible when you need them.' },
+  { icon: '🩺', title: 'Questions for the doctor', description: 'Prepare the next visit by collecting doubts and observations over time.' },
+  { icon: '✉️', title: 'Family updates', description: 'A kind way to keep family informed without endless chats.' },
+  { icon: '💛', title: 'Caring for yourself', description: 'Reflection spaces to acknowledge your own workload.' }
+];
+---
+<BaseLayout
+  title="Accanto · A quiet room for family caregivers"
+  description="Accanto brings together information, documents and updates for those caring for a family member. Self-hosted, privacy by design, optional AI."
+>
+  <Hero
+    eyebrow="For family caregivers"
+    title="A quiet room for those caring for a family member"
+    subtitle="Accanto gathers information, documents and updates in one place. You invite who you want, you decide what to share. No ads, no profiling."
+    ctaPrimary={{ label: 'Start free', href: `${appUrl}/register` }}
+    ctaSecondary={{ label: 'See features', href: routeUrl('features', lang) }}
+  />
+
+  <section class="container-page">
+    <h2 class="text-2xl font-semibold mb-2 text-center">Three things that change the day</h2>
+    <p class="text-accanto-600 text-center max-w-2xl mx-auto mb-10">What family caregivers told us most often, distilled into three ideas.</p>
+    <div class="grid gap-4 sm:grid-cols-3">
+      <FeatureCard icon="🧠" title="No more 'I'll remember it'" description="All the information in one place, always available — even at night or in the ER." />
+      <FeatureCard icon="🤝" title="Family on the same page" description="A circle where updates reach the right people, the right way, without flooding chats." />
+      <FeatureCard icon="🫶" title="Room for you too" description="Gentle reminders about your own wellbeing: caregivers need care too." />
+    </div>
+  </section>
+
+  <section class="container-page bg-white border-y border-accanto-100">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Main features</p>
+      <h2 class="text-2xl font-semibold mb-6">Everything you need, nothing more</h2>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {features.map((f) => (
+        <FeatureCard icon={f.icon} title={f.title} description={f.description} />
+      ))}
+    </div>
+    <div class="text-center mt-8">
+      <a href={routeUrl('features', lang)} class="btn-ghost">See all features</a>
+    </div>
+  </section>
+
+  <section class="container-page">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Trust</p>
+      <h2 class="text-2xl font-semibold mb-4">Your data stays yours</h2>
+      <p class="text-accanto-600 leading-relaxed">
+        Accanto is built to be self-hosted, even at home. AI features are optional, off by default,
+        and when on they can run on a self-hosted model. No ads, no profiling, full data export anytime.
+      </p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <a href={routeUrl('privacy', lang)} class="btn-ghost">How we handle data</a>
+        <a href={`${appUrl}/register`} class="btn-primary">Create your space</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

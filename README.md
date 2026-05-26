@@ -105,6 +105,15 @@ Decisioni esplicite:
 - axios
 - `vite-plugin-pwa` (manifest + service worker)
 
+**Sito vetrina** (cartella [`web/`](web/))
+
+- Astro 4 (output statico, zero JS di default)
+- Tailwind CSS (stessa palette `accanto-*` della SPA)
+- Trilingua: italiano (canonical), inglese, spagnolo
+- Pagine: home, funzioni, per chi è, privacy, FAQ, prezzi, contatti
+- SEO: hreflang, canonical, OpenGraph, sitemap, robots.txt
+- Indipendente dalla SPA; pensato per essere servito sul dominio apex (es. `accanto.example`) mentre la SPA vive su `app.accanto.example`. Vedi [`web/README.md`](web/README.md).
+
 **Infrastruttura**
 
 - Docker / docker-compose (db + backend + frontend dietro nginx)
@@ -125,10 +134,11 @@ Decisioni esplicite:
 
 3. Apri il browser:
    - Frontend (PWA): http://localhost:5173
+   - Sito vetrina:   http://localhost:4321
    - Backend health: http://localhost:8080/health
    - Swagger: http://localhost:8080/swagger
 
-Il frontend è servito da **nginx** e fa da reverse proxy a `/api/` verso il backend, quindi tutto passa per `localhost:5173`.
+Il frontend è servito da **nginx** e fa da reverse proxy a `/api/` verso il backend, quindi tutto passa per `localhost:5173`. Il sito vetrina (cartella [`web/`](web/)) è un sito statico Astro indipendente, esposto su `localhost:4321`: non chiama il backend e non condivide stato con la SPA.
 
 I file caricati vivono in `./storage/` sul filesystem host (volume montato in `/data/storage` dentro il container). Il database vive nel volume `db-data`.
 
@@ -136,18 +146,34 @@ I file caricati vivono in `./storage/` sul filesystem host (volume montato in `/
 
 Per esporre Accanto su un dominio pubblico con HTTPS automatico (Let's Encrypt):
 
-1. Punta il DNS (`A`/`AAAA`) del dominio al server e apri le porte **80** e **443**.
+1. Decidi i due domini:
+   - **apex** (`ACCANTO_DOMAIN`, es. `accanto.example.com`) → sito vetrina
+   - **sottodominio app** (`ACCANTO_APP_DOMAIN`, default `app.${ACCANTO_DOMAIN}`) → SPA + API
+
+   Punta DNS (`A`/`AAAA`) di **entrambi** al server e apri le porte **80** e **443**. Caddy gestisce un singolo certificato SAN per i due hostname.
 2. Compila `.env` con segreti veri (`Encryption__MasterKey`, `Jwt__Key`, `POSTGRES_PASSWORD`).
 3. Avvia con il file di override:
 
    ```sh
    ACCANTO_DOMAIN=accanto.example.com \
+   ACCANTO_APP_DOMAIN=app.accanto.example.com \
    ACCANTO_TLS_EMAIL=tu@example.com \
    ASPNETCORE_ENVIRONMENT=Production \
    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
    ```
 
 In produzione né Postgres né il backend sono esposti su internet: solo Caddy ascolta su 80/443 e fa da reverse proxy. La configurazione vive in [deploy/Caddyfile](deploy/Caddyfile).
+
+Topologia HTTPS finale:
+
+| URL                                         | Container | Contenuto                  |
+|---------------------------------------------|-----------|----------------------------|
+| `https://${ACCANTO_DOMAIN}`                 | `web`     | Sito vetrina (Astro)       |
+| `https://${ACCANTO_APP_DOMAIN}`             | `frontend`| SPA React                  |
+| `https://${ACCANTO_APP_DOMAIN}/api/*`       | `backend` | API REST                   |
+| `https://${ACCANTO_APP_DOMAIN}/health`      | `backend` | Health check               |
+
+La CORS del backend (`Cors__AllowedOrigins`) è preconfigurata per accettare solo `https://${ACCANTO_APP_DOMAIN}`: se in dev ti serve includere altre origini, sovrascrivi la variabile in `.env`.
 
 ## Sviluppo locale (senza Docker)
 

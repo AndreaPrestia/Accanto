@@ -4,10 +4,8 @@
 	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 }
 
-{$ACCANTO_DOMAIN} {
-	encode zstd gzip
-
-	# Header di sicurezza base
+# Header di sicurezza comuni a entrambi i siti.
+(security_headers) {
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
@@ -16,6 +14,21 @@
 		Permissions-Policy "geolocation=(), microphone=(), camera=()"
 		-Server
 	}
+}
+
+# --- Sito vetrina (dominio apex) ---
+{$ACCANTO_DOMAIN} {
+	encode zstd gzip
+	import security_headers
+
+	# Servito da nginx nel container web (Astro statico)
+	reverse_proxy web:80
+}
+
+# --- Applicazione (sottodominio app.) ---
+{$ACCANTO_APP_DOMAIN} {
+	encode zstd gzip
+	import security_headers
 
 	# Le API vanno al backend (mantenendo il path /api/...)
 	reverse_proxy /api/* backend:8080

@@ -1,0 +1,28 @@
+{
+  "nav": {
+    "features": "Funcionalidades",
+    "forWhom": "Para quién",
+    "privacy": "Privacidad",
+    "faq": "Preguntas",
+    "pricing": "Precios",
+    "contact": "Contacto",
+    "login": "Entrar",
+    "register": "Registrarse"
+  },
+  "footer": {
+    "tagline": "Un espacio tranquilo para quien cuida a un familiar.",
+    "sections": {
+      "product": "Producto",
+      "info": "Información",
+      "language": "Idioma"
+    },
+    "rightsReserved": "Todos los derechos reservados.",
+    "notMedicalDevice": "Accanto no es un dispositivo médico y no sustituye el consejo profesional."
+  },
+  "lang": {
+    "label": "Idioma",
+    "it": "Italiano",
+    "en": "English",
+    "es": "Español"
+  }
+}

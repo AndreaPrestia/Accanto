@@ -1,0 +1,28 @@
+{
+  "nav": {
+    "features": "Funzioni",
+    "forWhom": "Per chi è",
+    "privacy": "Privacy",
+    "faq": "FAQ",
+    "pricing": "Prezzi",
+    "contact": "Contatti",
+    "login": "Accedi",
+    "register": "Registrati"
+  },
+  "footer": {
+    "tagline": "Una stanza tranquilla per chi assiste un familiare.",
+    "sections": {
+      "product": "Prodotto",
+      "info": "Informazioni",
+      "language": "Lingua"
+    },
+    "rightsReserved": "Tutti i diritti riservati.",
+    "notMedicalDevice": "Accanto non è un dispositivo medico e non sostituisce il parere di un professionista."
+  },
+  "lang": {
+    "label": "Lingua",
+    "it": "Italiano",
+    "en": "English",
+    "es": "Español"
+  }
+}

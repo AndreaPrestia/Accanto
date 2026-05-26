@@ -1,0 +1,28 @@
+{
+  "nav": {
+    "features": "Features",
+    "forWhom": "Who it's for",
+    "privacy": "Privacy",
+    "faq": "FAQ",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "login": "Sign in",
+    "register": "Sign up"
+  },
+  "footer": {
+    "tagline": "A quiet room for those caring for a family member.",
+    "sections": {
+      "product": "Product",
+      "info": "Information",
+      "language": "Language"
+    },
+    "rightsReserved": "All rights reserved.",
+    "notMedicalDevice": "Accanto is not a medical device and does not replace professional advice."
+  },
+  "lang": {
+    "label": "Language",
+    "it": "Italiano",
+    "en": "English",
+    "es": "Español"
+  }
+}

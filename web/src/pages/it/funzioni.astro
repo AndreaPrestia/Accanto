@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FeatureCard from '../../components/FeatureCard.astro';
+import { routeUrl } from '../../i18n';
+
+const appUrl = import.meta.env.PUBLIC_APP_URL;
+const lang = 'it' as const;
+
+const groups = [
+  {
+    title: 'Organizza',
+    items: [
+      { icon: '🌿', title: 'Cerchi di cura', description: 'Uno spazio per persona assistita, con inviti per familiari, badanti e professionisti.' },
+      { icon: '👥', title: 'Ruoli e permessi', description: 'Decidi cosa ciascuno può vedere o modificare. Cambia idea quando vuoi.' },
+      { icon: '📁', title: 'Documenti', description: 'Ricette, referti, moduli: caricabili con un clic, ritrovabili in pochi secondi.' }
+    ]
+  },
+  {
+    title: 'Comunica',
+    items: [
+      { icon: '🗓️', title: 'Timeline', description: 'Note, sintomi ed episodi su un\'unica linea del tempo condivisa.' },
+      { icon: '✉️', title: 'Aggiornamenti', description: 'Un riepilogo gentile per la famiglia, su richiesta, senza chat infinite.' },
+      { icon: '🩺', title: 'Domande per il medico', description: 'Raccogli dubbi tra una visita e l\'altra, stampali quando serve.' }
+    ]
+  },
+  {
+    title: 'Cura te stesso',
+    items: [
+      { icon: '💛', title: 'Riflessioni', description: 'Brevi annotazioni private per riconoscere come stai oggi.' },
+      { icon: '🧭', title: 'Promemoria gentili', description: 'Suggerimenti che ricordano pause, riposo e contatti utili.' },
+      { icon: '🛟', title: 'Risorse locali', description: 'Spazio per i tuoi contatti di emergenza e i servizi del territorio.' }
+    ]
+  }
+];
+---
+<BaseLayout
+  title="Funzioni · Accanto"
+  description="Tutte le funzioni di Accanto: cerchi di cura, timeline, documenti, aggiornamenti per la famiglia, attenzione anche al caregiver."
+>
+  <section class="container-page">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="eyebrow mb-3">Le funzioni</p>
+      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Tutto quello che serve per assistere un familiare</h1>
+      <p class="text-accanto-600 leading-relaxed">Strumenti semplici, pensati con chi assiste ogni giorno. Niente complicazioni, niente passaggi superflui.</p>
+    </div>
+  </section>
+
+  {groups.map((g) => (
+    <section class="container-page border-t border-accanto-100">
+      <h2 class="text-2xl font-semibold mb-6 text-center">{g.title}</h2>
+      <div class="grid gap-4 sm:grid-cols-3">
+        {g.items.map((it) => (
+          <FeatureCard icon={it.icon} title={it.title} description={it.description} />
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <section class="container-page border-t border-accanto-100 text-center">
+    <h2 class="text-2xl font-semibold mb-3">E l'intelligenza artificiale?</h2>
+    <p class="max-w-2xl mx-auto text-accanto-600 leading-relaxed">
+      È opzionale e spenta di default. Quando attiva può girare anche su un modello self-hosted, in modo che le informazioni
+      della persona assistita non lascino il tuo ambiente. La usi solo se ti aiuta davvero.
+    </p>
+    <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <a href={routeUrl('privacy', lang)} class="btn-ghost">Privacy e dati</a>
+      <a href={`${appUrl}/register`} class="btn-primary">Provala gratis</a>
+    </div>
+  </section>
+</BaseLayout>
