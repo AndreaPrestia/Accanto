@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import i18n from '../i18n';
 
 const TOKEN_KEY = 'accanto.token';
 const REFRESH_KEY = 'accanto.refreshToken';
@@ -14,6 +15,9 @@ api.interceptors.request.use((cfg) => {
     cfg.headers = cfg.headers ?? {};
     cfg.headers['Authorization'] = `Bearer ${token}`;
   }
+  const lang = i18n.language || 'it';
+  cfg.headers = cfg.headers ?? {};
+  cfg.headers['Accept-Language'] = lang;
   return cfg;
 });
 

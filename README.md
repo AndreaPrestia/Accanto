@@ -284,9 +284,22 @@ Di default l'AI è **spenta** a livello di sistema (`Ai__Provider=none`) e di si
 
 4. Nelle impostazioni del singolo cerchio, l'owner può ora attivare il toggle "Abilita assistente AI per questo cerchio".
 
+### Scelta del modello e qualità in italiano
+
+Il frontend invia l'header `Accept-Language` (dalla lingua UI corrente) e il backend genera un system prompt che impone esplicitamente la lingua di risposta. Tuttavia i modelli piccoli possono occasionalmente rispondere in inglese: è un comportamento del modello, non un bug.
+
+Modelli consigliati (da modificare in `Ai__Model` nel `.env`, poi `docker compose exec ollama ollama pull <modello>` e `docker compose up -d backend`):
+
+| Modello | Dimensione | RAM | Italiano | Note |
+|---|---|---|---|---|
+| `llama3.2:3b` | ~2 GB | ~3-4 GB | discreto | default, veloce, ok su CPU |
+| `llama3.1:8b` | ~4.7 GB | ~8 GB | buono | qualità nettamente migliore in italiano |
+| `qwen2.5:7b` | ~4.4 GB | ~7 GB | buono | ottimo multilingua, sintesi pulita |
+| `qwen2.5:1.5b` | ~1 GB | ~2 GB | scarso | per VPS minimali, solo prototipi |
+
 ### Requisiti hardware
 
-`llama3.2:3b` richiede ~3-4 GB di RAM e risponde in 1-3 secondi su CPU moderna. Su VPS economici puoi usare modelli più piccoli (es. `qwen2.5:1.5b`) impostando `Ai__Model`.
+`llama3.2:3b` richiede ~3-4 GB di RAM e risponde in 1-3 secondi su CPU moderna. Modelli da 7-8B richiedono ~8 GB di RAM libera e rispondono in 5-15 secondi su CPU; con GPU il tempo crolla.
 
 ### Garanzie
 

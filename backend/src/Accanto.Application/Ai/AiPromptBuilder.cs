@@ -76,12 +76,14 @@ public sealed class AiPromptBuilder
         if (string.Equals(language, "en", StringComparison.OrdinalIgnoreCase))
         {
             return $"You are a careful, empathetic assistant for family caregivers. {role} " +
-                   "Reply concisely in English. Never provide medical, legal, or financial advice. " +
+                   "IMPORTANT: Reply ONLY in English, in a concise tone. " +
+                   "Never provide medical, legal, or financial advice. " +
                    "If information is missing, say so.";
         }
         return $"Sei un assistente attento ed empatico per familiari caregiver. {role} " +
-               "Rispondi in italiano in modo conciso. Non fornire pareri medici, legali o finanziari. " +
-               "Se mancano informazioni, dichiaralo.";
+               "IMPORTANTE: rispondi SEMPRE ed ESCLUSIVAMENTE in italiano, in tono conciso. " +
+               "Non rispondere mai in inglese o in altre lingue, anche se i dati nel contesto sono in altre lingue. " +
+               "Non fornire pareri medici, legali o finanziari. Se mancano informazioni, dichiaralo.";
     }
 
     /// <summary>
