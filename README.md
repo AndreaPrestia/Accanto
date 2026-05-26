@@ -246,21 +246,63 @@ openssl rand -base64 32
 
 **Disclaimer**: Accanto non è un dispositivo medico, non sostituisce nessuna figura sanitaria, non offre diagnosi né consigli terapeutici. È uno strumento di **organizzazione personale**.
 
+## Modulo AI (opzionale, self-hosted)
+
+Da v0.2 è disponibile un **assistente AI opzionale**, completamente self-hosted tramite [Ollama](https://ollama.com). Niente provider esterni, niente API key, niente dati che lasciano il tuo server.
+
+### Cosa fa
+
+Tutte le funzioni sono attivabili una per una e producono testo **sempre editabile** prima di essere salvato. Il disclaimer "non sostituisce un medico" accompagna ogni risposta.
+
+- **Riassunto del diario** — sintesi degli ultimi N giorni di voci, per prepararsi a una visita.
+- **Bozza di domande per il medico** — 3 proposte a partire da un argomento.
+- **Riformulazione gentile** di un aggiornamento per i familiari (tono neutro/caldo/sintetico).
+- **Riflessione personale** sui propri check-in di benessere (solo per te, mai condivisa col cerchio).
+
+### Come si attiva
+
+Di default l'AI è **spenta** a livello di sistema (`Ai__Provider=none`) e di singolo cerchio (`CareCircle.AiEnabled=false`). Per abilitarla:
+
+1. Avvia lo stack con il profilo `ai`:
+   ```bash
+   docker compose --profile ai up -d
+   ```
+   Questo aggiunge il servizio `ollama` (immagine `ollama/ollama:latest`, volume persistente `ollama-data`).
+
+2. Scarica il modello al primo avvio (~2 GB):
+   ```bash
+   docker compose exec ollama ollama pull llama3.2:3b
+   ```
+
+3. Nel file `.env` imposta:
+   ```env
+   Ai__Provider=ollama
+   Ai__Endpoint=http://ollama:11434
+   Ai__Model=llama3.2:3b
+   ```
+   e ricrea il backend: `docker compose up -d backend`.
+
+4. Nelle impostazioni del singolo cerchio, l'owner può ora attivare il toggle "Abilita assistente AI per questo cerchio".
+
+### Requisiti hardware
+
+`llama3.2:3b` richiede ~3-4 GB di RAM e risponde in 1-3 secondi su CPU moderna. Su VPS economici puoi usare modelli più piccoli (es. `qwen2.5:1.5b`) impostando `Ai__Model`.
+
+### Garanzie
+
+- **Audit log dedicato**: ogni chiamata AI viene registrata (funzione, provider, durata, token approssimati) **senza contenuto**.
+- **Rate limit dedicato** (bucket `ai`, default 20 chiamate/ora per utente).
+- **Nessuna persistenza** delle risposte: sono effimere, l'utente sceglie se salvarle a mano.
+- **Best-effort redazione** di email/telefono/codici fiscali nel prompt come difesa in profondità.
+- Lo stack base (`docker compose up`) **non** avvia Ollama: profilo opzionale.
+
 ## Modulo AI futuro
 
-Una direzione esplorata per le versioni future è un modulo AI **opzionale e disattivabile** che aiuti il caregiver con:
+Sui prossimi passi possibili (non in roadmap immediata):
 
-- riassunti di una settimana di diario, per prepararsi a una visita;
-- suggerimenti di domande per il medico, a partire dalle voci recenti;
-- riformulazione di un aggiornamento per famigliari, con il tono giusto per il pubblico scelto.
-
-Vincoli che ci diamo già da ora:
-
-- nessuna chiamata AI senza un'azione esplicita dell'utente;
-- backend pluggabile: provider locale (es. Ollama) o esterno scelto dall'amministratore dell'istanza;
-- nessun invio di dati medici a fornitori AI senza un consenso informato esplicito.
-
-Non è incluso nella versione 0.1.
+- supporto per altri provider locali (es. llama.cpp diretto, vllm) tramite la stessa astrazione `IAiAssistant`;
+- supporto opzionale per provider esterni con consenso informato esplicito;
+- estrazione di entità strutturate (date, farmaci) dai testi liberi del diario.
 
 ## Roadmap
 
