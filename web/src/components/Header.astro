@@ -32,6 +32,15 @@ const navItems: { key: 'features' | 'forWhom' | 'faq' | 'pricing'; label: string
 
     <div class="flex items-center gap-3">
       <LangSwitcher locale={locale} />
+      <a
+        href="https://github.com/AndreaPrestia/Accanto/releases/latest"
+        target="_blank"
+        rel="noopener noreferrer"
+        title={t('nav.downloadTitle')}
+        class="text-sm text-accanto-700 no-underline hover:underline hidden sm:inline-flex items-center gap-1"
+      >
+        <span aria-hidden="true">↓</span>{t('nav.download')}
+      </a>
       <a href={`${appUrl}/login`} class="text-sm text-accanto-700 no-underline hover:underline hidden sm:inline">{t('nav.login')}</a>
       <a href={`${appUrl}/register`} class="btn-primary text-sm">{t('nav.register')}</a>
     </div>

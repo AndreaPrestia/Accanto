@@ -7,7 +7,9 @@
     "pricing": "Precios",
     "contact": "Contacto",
     "login": "Entrar",
-    "register": "Registrarse"
+    "register": "Registrarse",
+    "download": "Descargar",
+    "downloadTitle": "Descarga Accanto para instalarlo en tu servidor (GitHub)"
   },
   "footer": {
     "tagline": "Un espacio tranquilo para quien cuida a un familiar.",

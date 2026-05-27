@@ -7,7 +7,9 @@
     "pricing": "Pricing",
     "contact": "Contact",
     "login": "Sign in",
-    "register": "Sign up"
+    "register": "Sign up",
+    "download": "Download",
+    "downloadTitle": "Download Accanto to self-host on your server (GitHub)"
   },
   "footer": {
     "tagline": "A quiet room for those caring for a family member.",

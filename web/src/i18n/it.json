@@ -7,7 +7,9 @@
     "pricing": "Prezzi",
     "contact": "Contatti",
     "login": "Accedi",
-    "register": "Registrati"
+    "register": "Registrati",
+    "download": "Scarica",
+    "downloadTitle": "Scarica Accanto per installarlo sul tuo server (GitHub)"
   },
   "footer": {
     "tagline": "Una stanza tranquilla per chi assiste un familiare.",
