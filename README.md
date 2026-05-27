@@ -175,6 +175,25 @@ Topologia HTTPS finale:
 
 La CORS del backend (`Cors__AllowedOrigins`) è preconfigurata per accettare solo `https://${ACCANTO_APP_DOMAIN}`: se in dev ti serve includere altre origini, sovrascrivi la variabile in `.env`.
 
+### Immagini Docker pubblicate (GHCR)
+
+Ogni tag versione (`v*.*.*`) builda e pubblica tre immagini multi-tag su GitHub Container Registry tramite il workflow [.github/workflows/release.yml](.github/workflows/release.yml):
+
+- `ghcr.io/andreaprestia/accanto-backend:<tag>` (+ `:latest`)
+- `ghcr.io/andreaprestia/accanto-frontend:<tag>` (+ `:latest`)
+- `ghcr.io/andreaprestia/accanto-web:<tag>` (+ `:latest`)
+
+Per il sito vetrina, gli URL pubblici (`SITE_URL`, `PUBLIC_APP_URL`) sono "baked in" al build time perché Astro è statico: configurali una volta su GitHub → *Settings → Secrets and variables → Actions → Variables* come `WEB_SITE_URL` e `WEB_PUBLIC_APP_URL`. Senza variabili, il build usa i default localhost (immagine inutile in prod, ok per smoke test).
+
+Per rilasciare una nuova versione:
+
+```sh
+git tag v0.7.1
+git push --tags
+```
+
+Per fare deploy dalle immagini invece che con `--build`, basta sostituire i blocchi `build:` del compose con `image: ghcr.io/andreaprestia/accanto-<servizio>:<tag>` (utile per separare nettamente build e deploy quando aggiungeremo il workflow CD su SSH).
+
 ## Sviluppo locale (senza Docker)
 
 ### Backend
