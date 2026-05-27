@@ -332,7 +332,7 @@ Modelli consigliati (da modificare in `Ai__Model` nel `.env`, poi `docker compos
 - **Tre livelli di guardrail**:
   1. *Input* — pattern regex + FluentValidation rifiutano tentativi di prompt injection ("ignora le istruzioni…", "act as DAN", ecc.), argomenti fuori scope (politica, trading, codice) e individuano segnali di autolesionismo per rispondere con i contatti di supporto.
   2. *Prompt hardening* — system prompt che fissa l'ambito caregiving + sandwich di "regola finale" ripetuta dopo l'input utente; ogni risposta fuori scope deve essere la sentinella `fuori_scopo`.
-  3. *Output* — sentinella + cap di lunghezza + redazione PII; con `Ai__SelfCheckEnabled=true` (default) il modello viene interrogato una seconda volta per dichiarare "questa risposta è coerente?".
+  3. *Output* — sentinella + cap di lunghezza + redazione PII; con `Ai__SelfCheckEnabled=true` il modello viene interrogato una seconda volta per dichiarare "questa risposta è coerente?". Disabilitato di default: su modelli piccoli (3B) il reviewer tende a bloccare risposte legittime; abilitare solo con modelli 8B+.
 - **Persistenza cifrata** di ogni interazione (`AiInteraction`, AES-256-GCM via `IFieldProtector`): l'utente può rileggere input + output dal proprio storico ("Cronologia AI" in Account), l'owner del cerchio vede le interazioni di cerchio degli altri membri (escluse le riflessioni personali).
 - **Feedback** 👍 / 👎 / 🚩 su ogni risposta, salvato come parte dell'interazione (utile per migliorare prompt e modello).
 - **Cache idempotency 1 h** per input identici nello stesso scope (utente+cerchio+funzione): risparmia chiamate e mostra `X-AI-Cache: hit` nella risposta.

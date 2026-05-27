@@ -38,8 +38,12 @@ public class AiOptions
     /// <summary>Cap finale sul testo della risposta (post-self-check). Taglio + ellipsis.</summary>
     public int MaxOutputChars { get; set; } = 2000;
 
-    /// <summary>Abilita il secondo passaggio LLM di verifica on-topic + safety.</summary>
-    public bool SelfCheckEnabled { get; set; } = true;
+    /// <summary>
+    /// Abilita il secondo passaggio LLM di verifica on-topic + safety.
+    /// Default false: su modelli piccoli (3B) il reviewer tende a marcare come fuori-tema
+    /// risposte legittime di caregiving. Attivare solo con modelli 8B+ ben istruiti.
+    /// </summary>
+    public bool SelfCheckEnabled { get; set; } = false;
 
     /// <summary>TTL (in minuti) della cache idempotency. 0 = disabilitata.</summary>
     public int CacheTtlMinutes { get; set; } = 60;
