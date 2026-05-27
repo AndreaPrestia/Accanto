@@ -411,6 +411,30 @@ curl -sI https://app.accanto.example.com/ | grep -iE 'strict-transport|content-s
 
 oppure usa il grader online [securityheaders.com](https://securityheaders.com). Target realistico: **grade A**.
 
+### Smoke test post-deploy
+
+Lo script [`deploy/smoke.sh`](deploy/smoke.sh) verifica in pochi secondi che dopo un deploy:
+
+1. il backend risponde e ha il DB raggiungibile (`/health/ready` → 200 con `status:ok`, `checks.db:ok`);
+2. il sito vetrina risponde (200 sulla home);
+3. (opzionale, se passi credenziali) login + endpoint autenticato funzionano end-to-end.
+
+```sh
+# Smoke base (solo health pubblici)
+./deploy/smoke.sh https://app.accanto.example.com https://accanto.example.com
+
+# Smoke completo (login + /api/auth/me + /api/care-circles)
+export SMOKE_EMAIL='smoke@accanto.example.com'
+export SMOKE_PASSWORD='...'   # gestito da 1Password / Bitwarden / GitHub Actions secret
+./deploy/smoke.sh https://app.accanto.example.com https://accanto.example.com
+```
+
+Crea l'utente smoke una volta sola via `POST /api/auth/register` e archivia la password in un secret manager. Non abilitare 2FA per quell'account (lo script fa una login diretta).
+
+Exit code: `0` se tutto passa, `1` al primo errore con messaggio chiaro. Pensato per essere chiamato dal tuo runner di deploy (post `docker compose up -d`), da un cron orario di canary, o da un job futuro di GitHub Actions su `workflow_dispatch`.
+
+Dipendenze: `bash`, `curl`, `jq` (`apt install jq` sui server Debian/Ubuntu, già disponibili nei runner GitHub Actions).
+
 **Disclaimer**: Accanto non è un dispositivo medico, non sostituisce nessuna figura sanitaria, non offre diagnosi né consigli terapeutici. È uno strumento di **organizzazione personale**.
 
 ## Modulo AI (opzionale, self-hosted)

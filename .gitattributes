@@ -1,0 +1,4 @@
+* text=auto
+
+# Bash scripts must keep LF endings to be executable on Linux even when committed from Windows.
+*.sh text eol=lf
