@@ -23,6 +23,9 @@ public sealed class NullAiAssistant : IAiAssistant
     public Task<AiResponse> ReflectCheckInAsync(string prompt, string language, CancellationToken cancellationToken = default)
         => Task.FromResult(Build(language));
 
+    public Task<AiResponse> GenerateAsync(string prompt, string language, int? maxTokens = null, CancellationToken cancellationToken = default)
+        => Task.FromResult(Build(language));
+
     private static AiResponse Build(string language)
     {
         var disclaimer = string.Equals(language, "en", StringComparison.OrdinalIgnoreCase)

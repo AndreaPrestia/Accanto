@@ -44,7 +44,10 @@ public sealed class OllamaAssistant : IAiAssistant
     public Task<AiResponse> ReflectCheckInAsync(string prompt, string language, CancellationToken cancellationToken = default)
         => GenerateAsync(prompt, cancellationToken);
 
-    private async Task<AiResponse> GenerateAsync(string prompt, CancellationToken cancellationToken)
+    public Task<AiResponse> GenerateAsync(string prompt, string language, int? maxTokens = null, CancellationToken cancellationToken = default)
+        => GenerateAsync(prompt, cancellationToken, maxTokens);
+
+    private async Task<AiResponse> GenerateAsync(string prompt, CancellationToken cancellationToken, int? maxTokens = null)
     {
         var sw = Stopwatch.StartNew();
         var body = new OllamaGenerateRequest
@@ -52,7 +55,7 @@ public sealed class OllamaAssistant : IAiAssistant
             Model = _options.Model,
             Prompt = prompt,
             Stream = false,
-            Options = new OllamaGenerateOptions { NumPredict = _options.MaxOutputTokens }
+            Options = new OllamaGenerateOptions { NumPredict = maxTokens ?? _options.MaxOutputTokens }
         };
 
         try

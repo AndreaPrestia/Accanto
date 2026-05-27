@@ -257,7 +257,32 @@
     "errors": {
       "notConfigured": "El asistente IA no está configurado en este servidor.",
       "disabledForCircle": "El asistente IA está desactivado para este círculo.",
-      "generic": "No pude generar una respuesta. Inténtalo de nuevo en un momento."
+      "generic": "No pude generar una respuesta. Inténtalo de nuevo en un momento.",
+      "inputRejected": "La solicitud no se puede procesar. Reformúlala centrándote en el cuidado."
+    },
+    "feedback": {
+      "label": "¿Te resultó útil?",
+      "up": "Respuesta útil",
+      "down": "No útil",
+      "flag": "Reportar como problemática",
+      "thanks": "Gracias por el comentario."
+    },
+    "cacheHit": "en caché",
+    "cacheHitTitle": "Respuesta servida desde caché (1h)",
+    "history": {
+      "title": "Historial IA",
+      "subtitle": "Todas tus interacciones con el asistente. Están cifradas y solo visibles para ti (y para el propietario del círculo en las funciones del círculo).",
+      "empty": "Sin interacciones aún.",
+      "open": "Abrir",
+      "function": "Función",
+      "verdict": "Resultado",
+      "when": "Cuándo",
+      "model": "Modelo",
+      "feedback": "Comentario",
+      "input": "Entrada",
+      "output": "Respuesta",
+      "circleSection": "IA del círculo",
+      "circleSectionHint": "Como propietario puedes revisar todas las interacciones IA de este círculo (excluidas las reflexiones personales de los miembros)."
     }
   }
 }

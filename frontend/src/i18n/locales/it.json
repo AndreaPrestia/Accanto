@@ -257,7 +257,32 @@
     "errors": {
       "notConfigured": "L'assistente AI non è configurato su questo server.",
       "disabledForCircle": "L'assistente AI è disattivato per questo cerchio.",
-      "generic": "Non sono riuscito a generare una risposta. Riprova tra poco."
+      "generic": "Non sono riuscito a generare una risposta. Riprova tra poco.",
+      "inputRejected": "La richiesta non può essere elaborata. Riformulala concentrandoti sulla gestione del caregiving."
+    },
+    "feedback": {
+      "label": "Ti è stata utile?",
+      "up": "Risposta utile",
+      "down": "Risposta non utile",
+      "flag": "Segnala come problematica",
+      "thanks": "Grazie del riscontro."
+    },
+    "cacheHit": "in cache",
+    "cacheHitTitle": "Risposta servita dalla cache (1h)",
+    "history": {
+      "title": "Cronologia AI",
+      "subtitle": "Tutte le tue interazioni con l'assistente. Sono cifrate e visibili solo a te (e all'owner del cerchio per le funzioni di cerchio).",
+      "empty": "Nessuna interazione registrata.",
+      "open": "Apri",
+      "function": "Funzione",
+      "verdict": "Esito",
+      "when": "Quando",
+      "model": "Modello",
+      "feedback": "Feedback",
+      "input": "Input",
+      "output": "Risposta",
+      "circleSection": "AI del cerchio",
+      "circleSectionHint": "Come owner puoi consultare tutte le interazioni AI legate a questo cerchio (escluse le riflessioni personali dei membri)."
     }
   }
 }

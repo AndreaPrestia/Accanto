@@ -329,10 +329,15 @@ Modelli consigliati (da modificare in `Ai__Model` nel `.env`, poi `docker compos
 
 ### Garanzie
 
-- **Audit log dedicato**: ogni chiamata AI viene registrata (funzione, provider, durata, token approssimati) **senza contenuto**.
+- **Tre livelli di guardrail**:
+  1. *Input* — pattern regex + FluentValidation rifiutano tentativi di prompt injection ("ignora le istruzioni…", "act as DAN", ecc.), argomenti fuori scope (politica, trading, codice) e individuano segnali di autolesionismo per rispondere con i contatti di supporto.
+  2. *Prompt hardening* — system prompt che fissa l'ambito caregiving + sandwich di "regola finale" ripetuta dopo l'input utente; ogni risposta fuori scope deve essere la sentinella `fuori_scopo`.
+  3. *Output* — sentinella + cap di lunghezza + redazione PII; con `Ai__SelfCheckEnabled=true` (default) il modello viene interrogato una seconda volta per dichiarare "questa risposta è coerente?".
+- **Persistenza cifrata** di ogni interazione (`AiInteraction`, AES-256-GCM via `IFieldProtector`): l'utente può rileggere input + output dal proprio storico ("Cronologia AI" in Account), l'owner del cerchio vede le interazioni di cerchio degli altri membri (escluse le riflessioni personali).
+- **Feedback** 👍 / 👎 / 🚩 su ogni risposta, salvato come parte dell'interazione (utile per migliorare prompt e modello).
+- **Cache idempotency 1 h** per input identici nello stesso scope (utente+cerchio+funzione): risparmia chiamate e mostra `X-AI-Cache: hit` nella risposta.
+- **Audit log dedicato**: ogni chiamata AI viene registrata (funzione, provider, durata, verdetto del guardrail) **senza contenuto** in chiaro.
 - **Rate limit dedicato** (bucket `ai`, default 20 chiamate/ora per utente).
-- **Nessuna persistenza** delle risposte: sono effimere, l'utente sceglie se salvarle a mano.
-- **Best-effort redazione** di email/telefono/codici fiscali nel prompt come difesa in profondità.
 - Lo stack base (`docker compose up`) **non** avvia Ollama: profilo opzionale.
 
 ## Modulo AI futuro

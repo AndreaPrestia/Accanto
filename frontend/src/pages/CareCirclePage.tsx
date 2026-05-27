@@ -44,6 +44,14 @@ export default function CareCirclePage() {
         </Link>
       </div>
 
+      {isOwner && circle.status === 'Active' && circle.aiEnabled && (
+        <div className="mt-2">
+          <Link to={`/care-circles/${circle.id}/ai/history`} className="text-sm text-accanto-500 hover:underline">
+            AI del cerchio
+          </Link>
+        </div>
+      )}
+
       {isOwner && circle.status === 'Active' && <InvitesPanel circleId={circle.id} />}
 
       {isOwner && circle.status === 'Active' && (

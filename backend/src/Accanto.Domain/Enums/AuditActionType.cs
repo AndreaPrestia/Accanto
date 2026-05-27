@@ -21,5 +21,7 @@ public enum AuditActionType
     UpdateDeleted,
     DataExported,
     AiCall,
-    AiSettingsUpdated
+    AiSettingsUpdated,
+    AiFeedbackSubmitted,
+    AiInteractionViewed
 }

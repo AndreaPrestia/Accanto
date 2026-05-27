@@ -1,5 +1,6 @@
 using Accanto.Application.Account;
 using Accanto.Application.Ai;
+using Accanto.Application.Ai.Guardrails;
 using Accanto.Application.Audit;
 using Accanto.Application.Auth;
 using Accanto.Application.Auth.TwoFactor;
@@ -47,6 +48,10 @@ public static class ApplicationServiceCollectionExtensions
         // AI: il PromptBuilder è stateless. IAiAssistant viene registrato in Infrastructure
         // (factory in base ad AiOptions.Provider: "none" → NullAiAssistant, "ollama" → OllamaAssistant).
         services.AddSingleton<AiPromptBuilder>();
+        services.AddSingleton<InputGuardrail>();
+        services.AddSingleton<OutputGuardrail>();
+        services.AddSingleton<AiIdempotencyCache>();
+        services.AddScoped<IAiInteractionStore, AiInteractionStore>();
         services.AddScoped<IAiService, AiService>();
 
         return services;

@@ -257,7 +257,32 @@
     "errors": {
       "notConfigured": "The AI assistant is not configured on this server.",
       "disabledForCircle": "The AI assistant is disabled for this circle.",
-      "generic": "I couldn't generate a response. Please try again shortly."
+      "generic": "I couldn't generate a response. Please try again shortly.",
+      "inputRejected": "Your request cannot be processed. Please rephrase it focusing on caregiving."
+    },
+    "feedback": {
+      "label": "Was this helpful?",
+      "up": "Helpful response",
+      "down": "Not helpful",
+      "flag": "Flag as problematic",
+      "thanks": "Thanks for the feedback."
+    },
+    "cacheHit": "cached",
+    "cacheHitTitle": "Response served from cache (1h)",
+    "history": {
+      "title": "AI history",
+      "subtitle": "All your interactions with the assistant. They are encrypted and visible only to you (and to the circle owner for circle features).",
+      "empty": "No interactions yet.",
+      "open": "Open",
+      "function": "Function",
+      "verdict": "Verdict",
+      "when": "When",
+      "model": "Model",
+      "feedback": "Feedback",
+      "input": "Input",
+      "output": "Response",
+      "circleSection": "Circle AI",
+      "circleSectionHint": "As owner you can review all AI interactions linked to this circle (members' personal reflections are excluded)."
     }
   }
 }

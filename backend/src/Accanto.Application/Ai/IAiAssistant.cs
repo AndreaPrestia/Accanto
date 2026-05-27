@@ -15,4 +15,10 @@ public interface IAiAssistant
     Task<AiResponse> RephraseSharedUpdateAsync(string prompt, string language, CancellationToken cancellationToken = default);
 
     Task<AiResponse> ReflectCheckInAsync(string prompt, string language, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Chiamata generica per prompt brevi (es. self-check guardrail). <paramref name="maxTokens"/>
+    /// permette di ridurre la latenza quando ci si aspetta una risposta minima (SI/NO).
+    /// </summary>
+    Task<AiResponse> GenerateAsync(string prompt, string language, int? maxTokens = null, CancellationToken cancellationToken = default);
 }

@@ -30,6 +30,7 @@ public class AccantoDbContext : DbContext, IAccantoDbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<SecurityAuditLogEntry> SecurityAuditLogEntries => Set<SecurityAuditLogEntry>();
     public DbSet<CaregiverCheckIn> CaregiverCheckIns => Set<CaregiverCheckIn>();
+    public DbSet<AiInteraction> AiInteractions => Set<AiInteraction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,5 +56,7 @@ public class AccantoDbContext : DbContext, IAccantoDbContext
         modelBuilder.Entity<DoctorQuestion>().Property(x => x.Question).HasConversion(converter, comparer);
         modelBuilder.Entity<DoctorQuestion>().Property(x => x.AnswerNotes).HasConversion(converter!, comparer);
         modelBuilder.Entity<SharedUpdate>().Property(x => x.Content).HasConversion(converter, comparer);
+        modelBuilder.Entity<AiInteraction>().Property(x => x.InputJsonEncrypted).HasConversion(converter, comparer);
+        modelBuilder.Entity<AiInteraction>().Property(x => x.OutputEncrypted).HasConversion(converter, comparer);
     }
 }

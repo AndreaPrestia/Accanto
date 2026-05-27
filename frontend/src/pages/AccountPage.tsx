@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
@@ -121,6 +121,12 @@ export default function AccountPage() {
         <h2 className="text-base font-semibold text-accanto-900">{t('account.languageSectionTitle')}</h2>
         <p className="text-sm text-accanto-500">{t('account.languageSectionHint')}</p>
         <LanguageSwitcher />
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-base font-semibold text-accanto-900">{t('ai.history.title')}</h2>
+        <p className="text-sm text-accanto-500">{t('ai.history.subtitle')}</p>
+        <Link to="/ai/history" className="text-sm text-accanto-700 hover:underline">→ {t('ai.history.open')}</Link>
       </section>
 
       <section className="space-y-3">

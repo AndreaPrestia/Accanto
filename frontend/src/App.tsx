@@ -16,6 +16,7 @@ import AccountPage from './pages/AccountPage';
 import AuditPage from './pages/AuditPage';
 import SupportPage from './pages/SupportPage';
 import SelfCarePage from './pages/SelfCarePage';
+import AiHistoryPage from './pages/AiHistoryPage';
 
 export default function App() {
   return (
@@ -36,6 +37,8 @@ export default function App() {
         <Route path="/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/self-care" element={<SelfCarePage />} />
+        <Route path="/ai/history" element={<RequireAuth><AiHistoryPage /></RequireAuth>} />
+        <Route path="/care-circles/:circleId/ai/history" element={<RequireAuth><AiHistoryPage /></RequireAuth>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

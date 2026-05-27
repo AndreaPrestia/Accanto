@@ -9,7 +9,10 @@ public record AiResponse(
     string Text,
     string Model,
     long TookMs,
-    string Disclaimer
+    string Disclaimer,
+    Guid InteractionId = default,
+    string Verdict = "passed",
+    bool CacheHit = false
 );
 
 /// <summary>Richiesta per generare un riassunto della timeline di un cerchio.</summary>
@@ -26,3 +29,46 @@ public record CheckInReflectionRequest(int Days = 14);
 
 /// <summary>Stato del modulo AI lato server.</summary>
 public record AiStatusResponse(bool Available, string Provider, string Model);
+
+// ------------------------ Cronologia ------------------------
+
+/// <summary>Riepilogo di una interazione AI (lista cronologia).</summary>
+public record AiInteractionSummary(
+    Guid Id,
+    Guid UserId,
+    Guid? CareCircleId,
+    string Function,
+    string Verdict,
+    string? Feedback,
+    string Model,
+    string Language,
+    int TookMs,
+    DateTimeOffset CreatedAt
+);
+
+/// <summary>Dettaglio completo di una interazione AI (input + output in chiaro).</summary>
+public record AiInteractionDetail(
+    Guid Id,
+    Guid UserId,
+    Guid? CareCircleId,
+    string Function,
+    string Verdict,
+    string? Feedback,
+    string Model,
+    string PromptVersion,
+    string Language,
+    int TookMs,
+    bool CacheHit,
+    DateTimeOffset CreatedAt,
+    string Input,
+    string Output
+);
+
+public record AiInteractionListResponse(
+    IReadOnlyList<AiInteractionSummary> Items,
+    int Page,
+    int PageSize,
+    int Total
+);
+
+public record SubmitAiFeedbackRequest(string Value);
