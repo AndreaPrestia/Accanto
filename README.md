@@ -276,8 +276,60 @@ openssl rand -base64 32
 
 - cifratura del disco (LUKS, BitLocker, dm-crypt sul volume Postgres e sul volume dei documenti);
 - terminazione TLS (reverse proxy: Caddy, Traefik, nginx) — il `docker-compose` di esempio espone solo HTTP in locale;
-- backup cifrati del database e della directory `storage/`, includendo SEPARATAMENTE la chiave master;
+- backup cifrati del database e della directory `storage/`, includendo SEPARATAMENTE la chiave master (vedi sotto);
 - politiche di accesso al server e rotazione delle credenziali Postgres.
+
+### Backup e recovery
+
+Tre cose vanno salvate **insieme** per poter ricostruire un'istanza, ma conservate **in posti diversi**:
+
+| Cosa | Dove vive | Perché | Frequenza minima |
+|---|---|---|---|
+| **Dump Postgres** (`db-data`) | volume `db-data` | tutti i metadati: utenti, cerchi, voci diario, audit, interazioni AI cifrate | giornaliera |
+| **Directory `storage/`** | bind mount `./storage` → `/data/storage` | blob documenti **cifrati** (AES-GCM) | giornaliera |
+| **Master key** (`Encryption__MasterKey` + eventuali `Encryption__Keys__*`) | `.env` sul server | senza, i punti sopra sono ciphertext inutilizzabile | una volta sola, copia off-line in vault |
+
+> ⚠️ Master key e backup devono vivere in **luoghi separati**: chi accede al backup senza la chiave vede solo ciphertext; chi accede alla chiave senza il backup non ha nulla. Se finiscono nella stessa cartella il livello di sicurezza torna a zero.
+
+Esempio minimo con [restic](https://restic.net/) verso un bucket esterno (Backblaze B2, Wasabi, S3, SFTP):
+
+```bash
+# .env del backup (file separato, mode 600) — NON nella stessa repo
+export RESTIC_REPOSITORY="b2:accanto-backup:/server-1"
+export RESTIC_PASSWORD="…32+ caratteri random, separato dal master key…"
+export B2_ACCOUNT_ID="…" B2_ACCOUNT_KEY="…"
+
+# Prima volta
+restic init
+
+# Backup notturno (cron)
+docker compose exec -T db pg_dump -U accanto accanto | gzip > /tmp/accanto.sql.gz
+restic backup /tmp/accanto.sql.gz ./storage
+rm /tmp/accanto.sql.gz
+restic forget --keep-daily 14 --keep-weekly 8 --keep-monthly 12 --prune
+```
+
+Verifica periodica (mensile): `restic check` + restore di prova in una directory temporanea.
+
+**Restore da zero** su un server nuovo:
+
+```bash
+# 1. Stack su, ma SENZA backend (lascia che il db si inizializzi vuoto)
+docker compose up -d db
+
+# 2. Reimporta il dump nel volume db-data
+restic restore latest --target /tmp/restore
+gunzip -c /tmp/restore/accanto.sql.gz | docker compose exec -T db psql -U accanto -d accanto
+
+# 3. Ripristina i blob cifrati
+cp -r /tmp/restore/storage/* ./storage/
+
+# 4. Imposta nel .env la STESSA Encryption__MasterKey originale (dal vault!),
+#    poi avvia il resto:
+docker compose up -d
+```
+
+Se la master key non corrisponde, il backend si avvia ma ogni decifratura fallisce con `AuthenticationTagMismatchException`: è il segnale che hai recuperato dati ma con la chiave sbagliata.
 
 **Disclaimer**: Accanto non è un dispositivo medico, non sostituisce nessuna figura sanitaria, non offre diagnosi né consigli terapeutici. È uno strumento di **organizzazione personale**.
 
