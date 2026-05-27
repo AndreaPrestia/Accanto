@@ -385,6 +385,32 @@ Se la master key non corrisponde, il backend si avvia ma ogni decifratura fallis
 
   La UI di Seq è raggiungibile su `http://localhost:5341`. **Non esporla mai su internet senza auth**: usa SSH tunnel (`ssh -L 5341:localhost:5341 user@server`) o mettila dietro Caddy con basic auth. Il `docker-compose.prod.yml` rimuove già la port mapping in produzione.
 
+### Hardening del reverse proxy (Caddy)
+
+Il `Caddyfile` in [deploy/Caddyfile](deploy/Caddyfile) applica per default:
+
+| Header | Valore | Cosa fa |
+|---|---|---|
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | 2 anni di HTTPS-only, **eligibile per** [hstspreload.org](https://hstspreload.org). Submitta solo quando sei certo che HTTPS resti attivo: rimuovere il dominio dal preload list richiede mesi. |
+| `Content-Security-Policy` | allow-list per sito vetrina (Google Fonts) e per SPA (tutto self) | Blocca XSS e iniezioni di asset esterni non previsti. |
+| `X-Frame-Options` + `frame-ancestors 'none'` | DENY | Nessuno può incorporare Accanto in `<iframe>` (anti-clickjacking). |
+| `X-Content-Type-Options` | `nosniff` | Il browser non "indovina" il MIME. |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Non perde path di URL ai siti esterni. |
+| `Permissions-Policy` | `geolocation=(), microphone=(), camera=(), payment=(), usb=()` | Disabilita feature browser non usate. |
+| `Cross-Origin-Opener-Policy` | `same-origin` | Isolamento di processo lato browser. |
+
+Le due policy CSP sono distinte perché hanno bisogni diversi: il sito vetrina deve poter caricare CSS/font da `fonts.googleapis.com`/`fonts.gstatic.com`, la SPA parla **solo** con `/api` sulla stessa origin. Se aggiungi un servizio esterno (CDN, analytics, font extra) **devi aggiornare il CSP corrispondente**: in caso contrario il browser blocca la risorsa e lo segnala in console (`Refused to load … because it violates …`).
+
+**Edge rate limit**: Caddy v2 base non ha un modulo di rate limit (servirebbe ricompilare l'immagine col plugin [caddy-ratelimit](https://github.com/mholt/caddy-ratelimit)). Per ora il rate limit applicativo (5/min login, 10/h register, 20/h AI) è considerato sufficiente. In aggiunta puoi installare [fail2ban](https://github.com/fail2ban/fail2ban) sull'host puntandolo ai log JSON di Caddy (filtro su `status >= 429` ripetuti dallo stesso IP) per bloccare gli abusi a livello di firewall.
+
+**Test rapido degli header** dopo il deploy:
+
+```sh
+curl -sI https://app.accanto.example.com/ | grep -iE 'strict-transport|content-security|x-frame|referrer|permissions'
+```
+
+oppure usa il grader online [securityheaders.com](https://securityheaders.com). Target realistico: **grade A**.
+
 **Disclaimer**: Accanto non è un dispositivo medico, non sostituisce nessuna figura sanitaria, non offre diagnosi né consigli terapeutici. È uno strumento di **organizzazione personale**.
 
 ## Modulo AI (opzionale, self-hosted)

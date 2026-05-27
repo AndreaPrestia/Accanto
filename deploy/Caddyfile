@@ -2,40 +2,73 @@
 	email {$ACCANTO_TLS_EMAIL}
 	# Decommenta per testare contro lo staging di Let's Encrypt (evita rate-limit):
 	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+
+	# Log strutturati JSON su stdout (catturati da `docker compose logs caddy`).
+	log {
+		output stdout
+		format json
+	}
+
+	# Niente Server header in chiaro, niente versione di Caddy.
+	servers {
+		strict_sni_host
+	}
 }
 
 # Header di sicurezza comuni a entrambi i siti.
+# Nota: il CSP è definito separatamente per sito vetrina (statico, usa Google Fonts)
+# e per SPA (talk only to /api self-origin) perché hanno bisogni diversi.
 (security_headers) {
 	header {
-		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		# HSTS 2 anni + preload (eligibile per https://hstspreload.org).
+		# ATTENZIONE: una volta nel preload list rimuoverlo richiede mesi.
+		# Submit solo quando sei sicuro che HTTPS resti per sempre.
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
 		X-Content-Type-Options "nosniff"
 		X-Frame-Options "DENY"
 		Referrer-Policy "strict-origin-when-cross-origin"
-		Permissions-Policy "geolocation=(), microphone=(), camera=()"
+		Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Resource-Policy "same-site"
 		-Server
+		-X-Powered-By
 	}
 }
 
 # --- Sito vetrina (dominio apex) ---
+# Statico Astro. Usa Google Fonts: CSP allow-list esplicito per fonts.googleapis/gstatic.
 {$ACCANTO_DOMAIN} {
 	encode zstd gzip
 	import security_headers
+
+	header {
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+	}
 
 	# Servito da nginx nel container web (Astro statico)
 	reverse_proxy web:80
 }
 
 # --- Applicazione (sottodominio app.) ---
+# SPA React + API .NET, stessa origin via /api/*. Tutto self-hosted: CSP molto stretto.
+# blob: e data: in img-src per supportare anteprime di documenti caricati lato client.
 {$ACCANTO_APP_DOMAIN} {
 	encode zstd gzip
 	import security_headers
 
+	header {
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
+	}
+
 	# Le API vanno al backend (mantenendo il path /api/...)
 	reverse_proxy /api/* backend:8080
 
-	# Health check pubblico (utile per uptime monitor esterni)
+	# Health checks pubblici. /health è retrocompat, /health/ready include il check DB
+	# ed è l'endpoint da puntare con uptime monitor esterni.
 	reverse_proxy /health backend:8080
+	reverse_proxy /health/* backend:8080
 
-	# Tutto il resto è la SPA servita da nginx nel container frontend
+	# Tutto il resto è la SPA servita da nginx nel container frontend.
 	reverse_proxy frontend:80
 }
+
