@@ -350,6 +350,41 @@ docker compose up -d
 
 Se la master key non corrisponde, il backend si avvia ma ogni decifratura fallisce con `AuthenticationTagMismatchException`: è il segnale che hai recuperato dati ma con la chiave sbagliata.
 
+### Monitoring e logging
+
+**Healthcheck endpoint** (tutti senza auth):
+
+| Endpoint | Cosa controlla | Uso tipico |
+|---|---|---|
+| `GET /health` | Solo che il processo risponda (200 fisso). | `HEALTHCHECK` del Dockerfile. |
+| `GET /health/live` | Alias di `/health`. | Probe Kubernetes "liveness". |
+| `GET /health/ready` | Processo **+ Postgres raggiungibile**. 200 se il DB risponde, 503 altrimenti. Restituisce `version`, `uptimeSeconds`, `checks.db`. | Probe Kubernetes "readiness" **e** uptime check esterno. |
+
+**Uptime check esterno** — configurabile in 2 minuti, gratis fino a 50 monitor:
+
+- [UptimeRobot](https://uptimerobot.com) o [Healthchecks.io](https://healthchecks.io) o [Better Stack](https://betterstack.com/uptime).
+- Crea due monitor HTTP(S):
+  - `https://${ACCANTO_APP_DOMAIN}/health/ready` (atteso: 200 con `"status":"ok"`).
+  - `https://${ACCANTO_DOMAIN}/` (atteso: 200, sito vetrina).
+- Intervallo consigliato: 5 minuti. Alert su email/Telegram quando 2 check consecutivi falliscono (evita falsi positivi su deploy).
+
+**Log strutturati** — il backend usa [Serilog](https://serilog.net):
+
+- **In dev** stampa log human-readable su stdout (`docker compose logs -f backend`).
+- **In prod** stampa JSON compatto su stdout (un evento per riga, parsabile da Loki/CloudWatch/Vector senza filtri). Ogni richiesta HTTP produce una riga riassuntiva (path, status, latenza, user).
+- Sink opzionale verso [Seq](https://datalust.co/seq) (UI di ricerca/aggregazione log), attivato passando `Logging__SeqUrl` come variabile d'ambiente. Seq è in compose dietro profilo `observability`:
+
+  ```sh
+  # Avvia stack + Seq
+  docker compose --profile observability up -d
+  # Nel .env del backend
+  Logging__SeqUrl=http://seq:5341
+  # opzionale, generato dalla UI di Seq:
+  Logging__SeqApiKey=...
+  ```
+
+  La UI di Seq è raggiungibile su `http://localhost:5341`. **Non esporla mai su internet senza auth**: usa SSH tunnel (`ssh -L 5341:localhost:5341 user@server`) o mettila dietro Caddy con basic auth. Il `docker-compose.prod.yml` rimuove già la port mapping in produzione.
+
 **Disclaimer**: Accanto non è un dispositivo medico, non sostituisce nessuna figura sanitaria, non offre diagnosi né consigli terapeutici. È uno strumento di **organizzazione personale**.
 
 ## Modulo AI (opzionale, self-hosted)

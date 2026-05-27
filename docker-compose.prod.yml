@@ -57,6 +57,12 @@ services:
     ports: !reset []
     # Niente expose pubblico: solo i container nella stessa rete Docker possono raggiungerlo.
 
+  # Log aggregator (profilo "observability"): in produzione la UI di Seq NON va mai esposta
+  # su internet. Raggiungila in SSH tunnel (`ssh -L 5341:localhost:5341 ...`) o mettila
+  # dietro Caddy con auth basic se proprio devi.
+  seq:
+    ports: !reset []
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped

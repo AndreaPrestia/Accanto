@@ -104,6 +104,24 @@ services:
       timeout: 10s
       retries: 5
 
+  # Log aggregator (Seq). Opt-in con profilo "observability":
+  #   docker compose --profile observability up -d
+  # Per spedirgli i log dal backend, abilita in .env:
+  #   Logging__SeqUrl=http://seq:5341
+  #   Logging__SeqApiKey=<facoltativo: lo configuri dalla UI di Seq>
+  # UI Seq raggiungibile su http://localhost:5341 (in prod metterla dietro VPN o auth).
+  seq:
+    image: datalust/seq:latest
+    restart: unless-stopped
+    profiles: ["observability"]
+    environment:
+      ACCEPT_EULA: "Y"
+    volumes:
+      - seq-data:/data
+    ports:
+      - "5341:80"
+
 volumes:
   db-data:
   ollama-data:
+  seq-data:

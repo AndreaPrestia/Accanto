@@ -13,8 +13,38 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --- Logging (Serilog) -------------------------------------------------------
+// Console in dev = human-readable, in prod = JSON (CompactJsonFormatter), facile
+// da indicizzare da Loki/Seq/CloudWatch. Sink Seq opt-in via env Logging:SeqUrl
+// (es. http://seq:5341 quando si avvia il profilo "observability" del compose).
+builder.Host.UseSerilog((ctx, services, logger) =>
+{
+    logger
+        .MinimumLevel.Information()
+        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+        .Enrich.FromLogContext()
+        .Enrich.WithProperty("Application", "accanto-api")
+        .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName);
+
+    if (ctx.HostingEnvironment.IsDevelopment())
+        logger.WriteTo.Console();
+    else
+        logger.WriteTo.Console(new CompactJsonFormatter());
+
+    var seqUrl = ctx.Configuration["Logging:SeqUrl"];
+    if (!string.IsNullOrWhiteSpace(seqUrl))
+    {
+        var apiKey = ctx.Configuration["Logging:SeqApiKey"];
+        logger.WriteTo.Seq(seqUrl, apiKey: string.IsNullOrWhiteSpace(apiKey) ? null : apiKey);
+    }
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
@@ -143,6 +173,9 @@ if (!app.Environment.IsEnvironment("Testing"))
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
+// Una riga strutturata per richiesta HTTP (metodo, path, status, latenza, user agent).
+app.UseSerilogRequestLogging();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -151,7 +184,41 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 
+// Health endpoints:
+//   GET /health         → liveness (process is up). Sempre 200 se l'app risponde. Usato dal HEALTHCHECK del Dockerfile.
+//   GET /health/live    → alias di /health.
+//   GET /health/ready   → readiness (process + DB). 200 se Postgres risponde, 503 altrimenti.
+//                         È l'endpoint da puntare con UptimeRobot/Healthchecks.io perché
+//                         distingue "il container è vivo" da "il servizio è in grado di servire traffico".
+var startedAt = DateTimeOffset.UtcNow;
+var appVersion = typeof(Program).Assembly.GetName().Version?.ToString(3) ?? "unknown";
+
 app.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
+app.MapGet("/health/live", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
+app.MapGet("/health/ready", async (AccantoDbContext db, CancellationToken ct) =>
+{
+    var uptime = (DateTimeOffset.UtcNow - startedAt).TotalSeconds;
+    bool dbOk;
+    string? dbError = null;
+    try
+    {
+        dbOk = await db.Database.CanConnectAsync(ct);
+    }
+    catch (Exception ex)
+    {
+        dbOk = false;
+        dbError = ex.GetType().Name;
+    }
+    var payload = new
+    {
+        status = dbOk ? "ok" : "degraded",
+        version = appVersion,
+        uptimeSeconds = (int)uptime,
+        checks = new { db = dbOk ? "ok" : "down", dbError }
+    };
+    return dbOk ? Results.Ok(payload) : Results.Json(payload, statusCode: StatusCodes.Status503ServiceUnavailable);
+}).AllowAnonymous();
+
 app.MapControllers();
 
 app.Run();
