@@ -3,8 +3,19 @@ import { useTranslation } from 'react-i18next';
 import AiAssistPanel from './AiAssistPanel';
 import { checkInReflection } from '../api/ai';
 import { useAiContext } from '../hooks/useAiContext';
+import { useAuth } from '../auth/AuthContext';
 
+// /self-care è una pagina pubblica ma `/api/ai/status` è `[Authorize]`:
+// se montassimo SelfCareAiSectionInner per gli anonimi, l'interceptor
+// axios reagirebbe al 401 con un redirect forzato a /login. Mostriamo
+// la sezione AI solo dopo che AuthContext ha confermato un utente.
 export default function SelfCareAiSection() {
+  const { user, loading } = useAuth();
+  if (loading || !user) return null;
+  return <SelfCareAiSectionInner />;
+}
+
+function SelfCareAiSectionInner() {
   const { t } = useTranslation();
   const [days, setDays] = useState(14);
   const { systemAvailable, loading } = useAiContext();
