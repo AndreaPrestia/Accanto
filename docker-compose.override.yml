@@ -1,0 +1,26 @@
+# docker-compose.override.yml
+#
+# Override automatico per SVILUPPO LOCALE.
+# Caricato implicitamente da `docker compose up` quando NON si specificano -f.
+# In produzione il comando esplicito
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# NON include questo file, quindi i default sicuri di RateLimitOptions (vedi
+# Accanto.Api/Configuration/RateLimitOptions.cs) vengono rispettati.
+#
+# Lo scopo qui è UNICO: rendere i rate limit innocui per i test E2E Playwright
+# che fanno burst di login/register/invite ben oltre i limiti di produzione.
+
+services:
+  backend:
+    environment:
+      # Bucket molto larghi: in prod questi NON vengono applicati.
+      RateLimit__Login__PermitLimit: ${RateLimit__Login__PermitLimit:-10000}
+      RateLimit__Login__Window: ${RateLimit__Login__Window:-00:01:00}
+      RateLimit__Register__PermitLimit: ${RateLimit__Register__PermitLimit:-10000}
+      RateLimit__Register__Window: ${RateLimit__Register__Window:-00:01:00}
+      RateLimit__Sensitive__PermitLimit: ${RateLimit__Sensitive__PermitLimit:-10000}
+      RateLimit__Sensitive__Window: ${RateLimit__Sensitive__Window:-00:01:00}
+      RateLimit__InviteCreate__PermitLimit: ${RateLimit__InviteCreate__PermitLimit:-10000}
+      RateLimit__InviteCreate__Window: ${RateLimit__InviteCreate__Window:-00:01:00}
+      RateLimit__Ai__PermitLimit: ${RateLimit__Ai__PermitLimit:-10000}
+      RateLimit__Ai__Window: ${RateLimit__Ai__Window:-00:01:00}
