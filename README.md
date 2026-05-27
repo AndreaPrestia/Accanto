@@ -24,7 +24,7 @@ Il progetto è in **italiano** per scelta: la maggior parte dei caregiver italia
 7. [Sviluppo locale (senza Docker)](#sviluppo-locale-senza-docker)
 8. [API e Swagger](#api-e-swagger)
 9. [Privacy e dati](#privacy-e-dati)
-10. [Modulo AI futuro](#modulo-ai-futuro)
+10. [Modulo AI (opzionale, self-hosted)](#modulo-ai-opzionale-self-hosted)
 11. [Roadmap](#roadmap)
 12. [Licenza](#licenza)
 
@@ -224,16 +224,23 @@ Le specifiche stanno in `frontend/e2e/`. Per puntare a un'istanza diversa impost
 
 ## API e Swagger
 
-- `POST /api/auth/register` — registrazione + login automatico
-- `POST /api/auth/login` — login con email + password
-- `GET  /api/auth/me`
-- `GET/POST/PUT/DELETE /api/care-circles[/{id}]`
-- `GET/POST/PUT/DELETE /api/care-circles/{id}/timeline`
-- `GET/POST/DELETE /api/care-circles/{id}/documents` + `/download`
-- `GET/POST/PUT/DELETE /api/care-circles/{id}/doctor-questions`
-- `GET /api/doctor-question-templates`
-- `GET/POST/DELETE /api/care-circles/{id}/shared-updates`
-- `GET /api/shared-update-templates`
+Elenco non esaustivo (per i dettagli completi vedi Swagger):
+
+**Auth & account** — `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/2fa/*`, `POST /api/auth/refresh`, `POST /api/auth/logout`, `GET/POST/DELETE /api/account/sessions`, `GET /api/account/audit`, `POST /api/account/wellness-checkins`, `GET /api/account/export` (GDPR).
+
+**Cerchi di cura** — `GET/POST/PUT/DELETE /api/care-circles[/{id}]`, `POST /api/care-circles/{id}/archive`, `GET /api/care-circles/{id}/export` (PDF/ZIP).
+
+**Inviti** — `GET/POST/DELETE /api/care-circles/{id}/invites`, `POST /api/invites/{token}/accept`.
+
+**Contenuti del cerchio** — `GET/POST/PUT/DELETE /api/care-circles/{id}/timeline`, `…/documents` + `/download`, `…/doctor-questions`, `…/shared-updates`.
+
+**Template** — `GET /api/doctor-question-templates`, `GET /api/shared-update-templates`.
+
+**Audit & registro** — `GET /api/care-circles/{id}/audit`.
+
+**Notifiche push** — `GET/POST/DELETE /api/push/subscriptions`, preferenze topic.
+
+**AI (opzionale)** — `GET /api/ai/status`, `PUT /api/care-circles/{id}/ai/settings`, `POST /api/care-circles/{id}/ai/timeline-summary`, `…/doctor-question-draft`, `…/rephrase`, `POST /api/me/ai/checkin-reflection`, `GET /api/ai/interactions[/{id}]`, `POST /api/ai/interactions/{id}/feedback`.
 
 Swagger UI: `http://localhost:8080/swagger`.
 
@@ -261,7 +268,9 @@ La chiave master è una stringa **base64 da 32 byte** fornita via variabile d'am
 openssl rand -base64 32
 ```
 
-> ⚠️ **Attenzione**: se perdi la chiave perdi i dati cifrati. Conservala in un gestore di segreti (vault) o almeno in un backup separato dal database. Non ruotare la chiave in v0.1: non è ancora supportata la migrazione automatica del ciphertext.
+> ⚠️ **Attenzione**: se perdi la chiave perdi i dati cifrati. Conservala in un gestore di segreti (vault) o almeno in un backup separato dal database.
+
+**Rotazione chiave (opzionale)**. È supportato un formato a più chiavi: imposta `Encryption__Keys__<keyId>=<base64-32B>` per ogni chiave e `Encryption__ActiveKeyId=<keyId>` per scegliere quella attiva (le nuove scritture usano il formato `v2.<keyId>.…`; le letture restano retrocompatibili con il formato `v1.` della `MasterKey`). Il `KeyRotationService` riscrive in background i record esistenti con la chiave attiva.
 
 **Restano a carico di chi fa il deploy**:
 
@@ -340,49 +349,30 @@ Modelli consigliati (da modificare in `Ai__Model` nel `.env`, poi `docker compos
 - **Rate limit dedicato** (bucket `ai`, default 20 chiamate/ora per utente).
 - Lo stack base (`docker compose up`) **non** avvia Ollama: profilo opzionale.
 
-## Modulo AI futuro
-
-Sui prossimi passi possibili (non in roadmap immediata):
-
-- supporto per altri provider locali (es. llama.cpp diretto, vllm) tramite la stessa astrazione `IAiAssistant`;
-- supporto opzionale per provider esterni con consenso informato esplicito;
-- estrazione di entità strutturate (date, farmaci) dai testi liberi del diario.
-
 ## Roadmap
 
-**v0.1 (questa release)**
-Cerchi di cura, diario, documenti, domande per il medico, aggiornamenti pronti da copiare, giornata difficile. Autenticazione email+password, PWA installabile.
+### Rilasciato
 
-**v0.2**
-- Invito di altri caregiver via link a un cerchio esistente.
-- Promemoria visite (notifiche push PWA).
-- Esportazione del cerchio in PDF (per portare un riassunto al medico).
-- Filtri data nel diario.
+**v0.1** — Cerchi di cura, diario, documenti, domande per il medico, aggiornamenti pronti da copiare, giornata difficile. Autenticazione email+password, PWA installabile.
 
-**v0.3**
-- Registro azioni per cerchio (audit log) visibile a tutti i membri.
-- Notifiche email opzionali per topic (con preferenze utente) — MailKit/SMTP, no-op se non configurato.
-- Editing in massa del diario (tag e visibilità).
-- Multilingua: italiano, inglese, spagnolo (backend + frontend, email + PDF localizzati su `PreferredLanguage`).
-- Esportazione GDPR: ZIP con tutti i dati dell'utente + documenti decifrati.
-- Rotazione delle chiavi di cifratura (token `v2.{keyId}.…`, retrocompat `v1.`) + CLI `Accanto.Cli` (`generate-key`, `rotate-keys`).
+**v0.2** — Inviti via link, promemoria visite con notifiche push (Web Push/VAPID), esportazione PDF del cerchio, filtri data nel diario.
 
-**v0.4 — Sicurezza & account**
-- Rate limiting per endpoint sensibili (login, register, change-password, delete, invite-create) configurabile via env.
-- Refresh token con rotation + reuse detection. Sessioni attive visibili e revocabili da `/account`.
-- Lockout temporaneo dopo N tentativi di login falliti (configurabile).
-- 2FA TOTP con codici di recupero (Otp.NET) — setup via QR code, integrato nel login a 2 step.
-- Audit log eventi auth per utente (registrazione, login, lockout, 2FA, cambio password, revoca sessione) visibile in `/account`.
+**v0.3** — Registro azioni di cerchio (audit log), email opzionali via SMTP/MailKit, editing in massa del diario, trilingua `it`/`en`/`es` (backend + frontend + email + PDF su `PreferredLanguage`), esportazione GDPR (ZIP utente + documenti decifrati), rotazione chiavi di cifratura (`v2.<keyId>.…`, retrocompat `v1.`).
 
-**v0.5 — Cura di chi cura**
-- Check-in emotivo privato del caregiver da `/account` (umore, energia, stress 1-5 + nota), con grafico di trend a 30 giorni. I dati sono privati, mai condivisi col cerchio, ed inclusi nell'export GDPR.
-- Pagina `/support` con contatti italiani di supporto (emergenza, ascolto, demenze, cure palliative, associazioni caregiver, supporto sociale) filtrabili per categoria.
-- Pagina `/self-care` con micro-promemoria del giorno, segnali di burnout, riposo e confini.
+**v0.4 — Sicurezza & account** — Rate limiting per endpoint sensibili, refresh token con rotation + reuse detection, sessioni attive revocabili da `/account`, lockout temporaneo, 2FA TOTP + codici di recupero (Otp.NET), audit log eventi auth.
 
-**v0.6 (idea)**
-- Modulo AI opzionale (riassunti, suggerimenti) con provider configurabile.
-- Backup/restore guidato dell'istanza.
-- Estensione test E2E ai flussi cerchio/documenti/aggiornamenti, audit a11y, traduzioni complete `en` / `es`.
+**v0.5 — Cura di chi cura** — Check-in emotivo privato del caregiver (umore/energia/stress + nota) con trend 30 giorni, pagina `/support` con contatti italiani, pagina `/self-care` con micro-promemoria e segnali di burnout.
+
+**v0.6** — Sito vetrina trilingua ([`web/`](web/)), deploy in produzione con Caddy + TLS automatico, estensione test E2E (Playwright) e a11y.
+
+**v0.7 — Modulo AI (Ollama) end-to-end** — Provider locale via Ollama, 4 funzioni (riassunto diario, bozza domande, riformulazione, riflessione check-in), guardrail a 3 livelli (input/prompt/output) con sentinella `fuori_scopo`, cache idempotency 1 h, rate limit dedicato per utente, persistenza cifrata di ogni interazione (`AiInteraction`, AES-256-GCM), cronologia AI personale + visibilità owner sul cerchio, feedback 👍 / 👎 / 🚩, self-check disabilitabile per modelli piccoli (default off).
+
+### Idee future
+
+- Backup/restore guidato dell'istanza con verifica della chiave di cifratura.
+- Estrazione di entità strutturate (date, farmaci, dosaggi) dai testi liberi del diario.
+- Supporto per altri provider locali (llama.cpp diretto, vLLM) tramite l'astrazione `IAiAssistant`.
+- Supporto opzionale per provider esterni con consenso informato esplicito (off di default).
 
 ## Licenza
 
