@@ -45,6 +45,11 @@
 		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 	}
 
+	# Root → default locale (302). Evita la pagina di meta-refresh generata
+	# da Astro.redirect() in modalità statica. /it /en /es restano serviti
+	# normalmente dal container web.
+	redir / /it 302
+
 	# Servito da nginx nel container web (Astro statico)
 	reverse_proxy web:80
 }
