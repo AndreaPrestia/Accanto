@@ -9,7 +9,7 @@
 #   ACCANTO_DOMAIN=accanto.care \
 #   ACCANTO_APP_DOMAIN=app.accanto.care \
 #   ACCANTO_API_DOMAIN=api.accanto.care \
-#   ACCANTO_TLS_EMAIL=tu@accanto.care \
+#   ACCANTO_TLS_EMAIL=andrea.prestia@accanto.care \
 #   ACCANTO_VERSION=v0.7.2 \
 #   ASPNETCORE_ENVIRONMENT=Production \
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml pull

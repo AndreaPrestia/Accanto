@@ -112,7 +112,7 @@ Decisioni esplicite:
 - Trilingua: italiano (canonical), inglese, spagnolo
 - Pagine: home, funzioni, per chi è, privacy, FAQ, prezzi, contatti
 - SEO: hreflang, canonical, OpenGraph, sitemap, robots.txt
-- Indipendente dalla SPA; pensato per essere servito sul dominio apex (es. `accanto.example`) mentre la SPA vive su `app.accanto.example`. Vedi [`web/README.md`](web/README.md).
+- Indipendente dalla SPA; pensato per essere servito sul dominio apex (es. `accanto.care`) mentre la SPA vive su `app.accanto.care`. Vedi [`web/README.md`](web/README.md).
 
 **Infrastruttura**
 
@@ -159,7 +159,7 @@ Per esporre Accanto su un dominio pubblico con HTTPS automatico (Let's Encrypt):
    ACCANTO_DOMAIN=accanto.care \
    ACCANTO_APP_DOMAIN=app.accanto.care \
    ACCANTO_API_DOMAIN=api.accanto.care \
-   ACCANTO_TLS_EMAIL=admin@accanto.care \
+   ACCANTO_TLS_EMAIL=andrea.prestia@accanto.care \
    ACCANTO_VERSION=v0.7.2 \
    ASPNETCORE_ENVIRONMENT=Production \
    docker compose -f docker-compose.yml -f docker-compose.prod.yml pull

@@ -19,8 +19,8 @@ Copia `.env.example` in `.env` (in locale) o impostale al momento della build:
 
 | Variabile         | Default                          | Uso                                                          |
 |-------------------|----------------------------------|--------------------------------------------------------------|
-| `SITE_URL`        | `https://accanto.example`        | URL pubblico del sito vetrina, usato per canonical e sitemap |
-| `PUBLIC_APP_URL`  | `https://app.accanto.example`    | URL della SPA, usato dalle CTA "Accedi" / "Registrati"       |
+| `SITE_URL`        | `https://accanto.care`           | URL pubblico del sito vetrina, usato per canonical e sitemap |
+| `PUBLIC_APP_URL`  | `https://app.accanto.care`       | URL della SPA, usato dalle CTA "Accedi" / "Registrati"       |
 
 `PUBLIC_APP_URL` deve iniziare per `PUBLIC_` per essere esposto al codice client (`import.meta.env.PUBLIC_APP_URL`).
 

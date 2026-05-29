@@ -19,7 +19,7 @@ Usa il canale privato di GitHub:
 2. Compila il report con descrizione, impatto, passi per riprodurre, eventuale proof of concept.
 3. Riceverai una risposta entro **7 giorni** con conferma di presa in carico.
 
-In alternativa, se preferisci e-mail, scrivi al maintainer principale (vedi profilo GitHub `AndreaPrestia`) — apri prima una Issue vuota con titolo `security: richiesta di contatto privato` se non hai modo di trovare l'indirizzo, così possiamo coordinarci.
+In alternativa, se preferisci e-mail, scrivi a **andrea.prestia@accanto.care** (oggetto consigliato: `security: <breve descrizione>`). Per scambiare una chiave PGP / canale cifrato, indicalo nel primo messaggio.
 
 ## Cosa aspettarsi
 
