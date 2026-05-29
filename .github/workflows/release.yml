@@ -69,10 +69,13 @@ jobs:
         id: tag
         run: |
           if [ -n "${{ github.event.inputs.tag }}" ]; then
-            echo "value=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+            RAW="${{ github.event.inputs.tag }}"
           else
-            echo "value=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            RAW="${GITHUB_REF_NAME}"
           fi
+          echo "value=${RAW}" >> "$GITHUB_OUTPUT"
+          # version numerica (strip leading 'v') per /p:Version del backend .NET.
+          echo "version=${RAW#v}" >> "$GITHUB_OUTPUT"
 
       - name: Docker meta
         id: meta
@@ -93,6 +96,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            APP_VERSION=${{ steps.tag.outputs.version }}
             VITE_API_BASE_URL=${{ vars.WEB_API_BASE_URL || '/api' }}
             SITE_URL=${{ vars.WEB_SITE_URL || 'http://localhost:4321' }}
             PUBLIC_APP_URL=${{ vars.WEB_PUBLIC_APP_URL || 'http://localhost:5173' }}

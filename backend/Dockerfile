@@ -11,7 +11,9 @@ COPY backend/tests/Accanto.Tests/Accanto.Tests.csproj ./tests/Accanto.Tests/
 RUN dotnet restore ./src/Accanto.Api/Accanto.Api.csproj
 
 COPY backend/ ./
-RUN dotnet publish ./src/Accanto.Api/Accanto.Api.csproj -c Release -o /app/publish /p:UseAppHost=false
+# APP_VERSION arriva dal workflow (tag git, es. "0.7.2"). Default 0.0.0 per build locale.
+ARG APP_VERSION=0.0.0
+RUN dotnet publish ./src/Accanto.Api/Accanto.Api.csproj -c Release -o /app/publish /p:UseAppHost=false /p:Version=${APP_VERSION}
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app

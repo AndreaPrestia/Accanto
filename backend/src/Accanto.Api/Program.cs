@@ -193,6 +193,18 @@ app.UseRateLimiter();
 var startedAt = DateTimeOffset.UtcNow;
 var appVersion = typeof(Program).Assembly.GetName().Version?.ToString(3) ?? "unknown";
 
+// Root API: identifica il servizio + versione.
+// Esposto su https://api.accanto.care/ (Caddy riscrive in /api/) — utile per probe veloci.
+var rootInfo = Results.Ok(new
+{
+    name = "accanto-api",
+    version = appVersion,
+    docs = "/swagger",
+    health = "/health/ready"
+});
+app.MapGet("/api", () => rootInfo).AllowAnonymous();
+app.MapGet("/api/", () => rootInfo).AllowAnonymous();
+
 app.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 app.MapGet("/health/live", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 app.MapGet("/health/ready", async (AccantoDbContext db, CancellationToken ct) =>
