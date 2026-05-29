@@ -82,7 +82,9 @@
 	# (controllati da UptimeRobot/Healthchecks.io e dal HEALTHCHECK Docker).
 	# Tutte le altre rotte vengono riscritte aggiungendo /api perché il
 	# backend espone i controller sotto quel prefisso (route attribute).
-	@notHealth not path /health /health/*
+	@notHealth {
+		not path /health /health/*
+	}
 	rewrite @notHealth /api{uri}
 	reverse_proxy backend:8080
 }
