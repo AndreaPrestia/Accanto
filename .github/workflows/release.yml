@@ -6,10 +6,11 @@ name: Release (build & push images)
 #   ghcr.io/andreaprestia/accanto-frontend:<tag>  (+ :latest)
 #   ghcr.io/andreaprestia/accanto-web:<tag>       (+ :latest)
 #
-# Per il sito vetrina (web), gli URL pubblici sono baked at build time.
+# Per il sito vetrina (web) e la SPA (frontend), gli URL pubblici sono baked at build time.
 # Configurali su GitHub → Settings → Secrets and variables → Actions → Variables:
-#   WEB_SITE_URL        es. https://accanto.app
-#   WEB_PUBLIC_APP_URL  es. https://app.accanto.app
+#   WEB_SITE_URL          es. https://accanto.care
+#   WEB_PUBLIC_APP_URL    es. https://app.accanto.care
+#   WEB_API_BASE_URL      es. https://api.accanto.care (URL pubblico API per la SPA)
 # Se assenti, vengono usati i default localhost (utili solo per smoke test).
 
 on:
@@ -92,7 +93,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VITE_API_BASE_URL=/api
+            VITE_API_BASE_URL=${{ vars.WEB_API_BASE_URL || '/api' }}
             SITE_URL=${{ vars.WEB_SITE_URL || 'http://localhost:4321' }}
             PUBLIC_APP_URL=${{ vars.WEB_PUBLIC_APP_URL || 'http://localhost:5173' }}
           cache-from: type=gha,scope=${{ matrix.image.name }}

@@ -50,25 +50,38 @@
 }
 
 # --- Applicazione (sottodominio app.) ---
-# SPA React + API .NET, stessa origin via /api/*. Tutto self-hosted: CSP molto stretto.
-# blob: e data: in img-src per supportare anteprime di documenti caricati lato client.
+# SPA React. Le chiamate API vanno su {$ACCANTO_API_DOMAIN} (cross-origin, CORS gestito dal backend).
+# Connect-src include il dominio API per consentire fetch/XHR dalla SPA.
 {$ACCANTO_APP_DOMAIN} {
 	encode zstd gzip
 	import security_headers
 
 	header {
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://{$ACCANTO_API_DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
 	}
 
-	# Le API vanno al backend (mantenendo il path /api/...)
-	reverse_proxy /api/* backend:8080
+	# SPA servita da nginx nel container frontend. Nessun proxy verso il backend qui:
+	# le chiamate API partono dal browser e vanno direttamente a https://{$ACCANTO_API_DOMAIN}.
+	reverse_proxy frontend:80
+}
 
-	# Health checks pubblici. /health è retrocompat, /health/ready include il check DB
-	# ed è l'endpoint da puntare con uptime monitor esterni.
+# --- API (sottodominio api.) ---
+# Backend .NET esposto come API JSON pura. CORS gestito dal backend (Cors__AllowedOrigins).
+# Path pubblico: https://api.accanto.care/auth/login → backend riceve /api/auth/login.
+# Niente CSP (non serve HTML), gli header di sicurezza vengono da security_headers.
+{$ACCANTO_API_DOMAIN} {
+	encode zstd gzip
+	import security_headers
+
+	# Health checks (uptime monitor esterni puntano qui).
 	reverse_proxy /health backend:8080
 	reverse_proxy /health/* backend:8080
 
-	# Tutto il resto è la SPA servita da nginx nel container frontend.
-	reverse_proxy frontend:80
+	# Tutto il resto viene riscritto con prefisso /api/ perché i controller .NET
+	# usano [Route("api/...")]. Così il path pubblico resta pulito (senza /api).
+	handle {
+		rewrite * /api{uri}
+		reverse_proxy backend:8080
+	}
 }
 

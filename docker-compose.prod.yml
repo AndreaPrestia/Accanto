@@ -1,25 +1,30 @@
 # docker-compose.prod.yml
 #
-# Override per deploy in produzione: rimuove l'esposizione pubblica di Postgres e backend,
-# mette Caddy davanti ai due frontend (sito vetrina + SPA) con TLS automatico da Let's Encrypt.
+# Override per deploy in produzione: usa le immagini pubblicate su GHCR
+# (build skippato), rimuove l'esposizione pubblica di Postgres e backend,
+# mette Caddy davanti ai 3 host pubblici (vetrina + SPA + API) con TLS
+# automatico da Let's Encrypt.
 #
 # Uso:
-#   ACCANTO_DOMAIN=accanto.example.com \
-#   ACCANTO_APP_DOMAIN=app.accanto.example.com \
-#   ACCANTO_TLS_EMAIL=tu@example.com \
+#   ACCANTO_DOMAIN=accanto.care \
+#   ACCANTO_APP_DOMAIN=app.accanto.care \
+#   ACCANTO_API_DOMAIN=api.accanto.care \
+#   ACCANTO_TLS_EMAIL=tu@accanto.care \
+#   ACCANTO_VERSION=v0.7.2 \
 #   ASPNETCORE_ENVIRONMENT=Production \
-#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
 # Topologia HTTPS:
 #  - https://${ACCANTO_DOMAIN}     → sito vetrina (Astro statico, container "web")
-#  - https://${ACCANTO_APP_DOMAIN} → applicazione SPA + API (/api/*, /health)
-#
-# Se ACCANTO_APP_DOMAIN non è impostato, viene calcolato come "app.${ACCANTO_DOMAIN}".
+#  - https://${ACCANTO_APP_DOMAIN} → SPA React (solo statico, niente API)
+#  - https://${ACCANTO_API_DOMAIN} → API .NET (anche /health, /health/ready)
 #
 # Prerequisiti:
-#  - DNS A/AAAA di ACCANTO_DOMAIN e ACCANTO_APP_DOMAIN puntano al server.
-#  - Porte 80 e 443 raggiungibili da internet (necessarie per ACME HTTP/TLS challenge).
+#  - DNS A/AAAA dei 3 host puntano al server.
+#  - Porte 80 e 443 raggiungibili da internet (necessarie per ACME challenge).
 #  - File .env locale con i segreti veri (Encryption__MasterKey, Jwt__Key, POSTGRES_PASSWORD).
+#  - Login a GHCR sul server (`docker login ghcr.io`) solo se le immagini sono private.
 
 services:
   db:
@@ -27,27 +32,29 @@ services:
     ports: !reset []
 
   backend:
+    # In prod usa l'immagine pubblicata su GHCR (build skippato).
+    image: ghcr.io/andreaprestia/accanto-backend:${ACCANTO_VERSION:-latest}
     # Non esporre il backend direttamente: ci arriva solo Caddy via rete interna.
     ports: !reset []
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      # CORS: la SPA gira su https://app.accanto.care e chiama https://api.accanto.care.
+      # Il backend deve consentire l'origine SPA. Override via .env se servono più origini.
       Cors__AllowedOrigins: ${Cors__AllowedOrigins:-https://${ACCANTO_APP_DOMAIN:-app.${ACCANTO_DOMAIN}}}
 
   frontend:
+    image: ghcr.io/andreaprestia/accanto-frontend:${ACCANTO_VERSION:-latest}
     # Non esporre il frontend direttamente: ci arriva solo Caddy.
     ports: !reset []
     expose:
       - "80"
 
   web:
+    image: ghcr.io/andreaprestia/accanto-web:${ACCANTO_VERSION:-latest}
     # Sito vetrina solo dietro Caddy.
     ports: !reset []
     expose:
       - "80"
-    build:
-      args:
-        SITE_URL: https://${ACCANTO_DOMAIN}
-        PUBLIC_APP_URL: https://${ACCANTO_APP_DOMAIN:-app.${ACCANTO_DOMAIN}}
 
   # Modulo AI (profilo "ai"): in produzione NON va mai esposto su internet.
   # Il backend lo raggiunge via rete Docker interna come http://ollama:11434.
@@ -67,6 +74,7 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     depends_on:
+      - backend
       - frontend
       - web
     ports:
@@ -74,8 +82,9 @@ services:
       - "443:443"
       - "443:443/udp"
     environment:
-      ACCANTO_DOMAIN: ${ACCANTO_DOMAIN:?ACCANTO_DOMAIN richiesto (es. accanto.example.com)}
+      ACCANTO_DOMAIN: ${ACCANTO_DOMAIN:?ACCANTO_DOMAIN richiesto (es. accanto.care)}
       ACCANTO_APP_DOMAIN: ${ACCANTO_APP_DOMAIN:-app.${ACCANTO_DOMAIN}}
+      ACCANTO_API_DOMAIN: ${ACCANTO_API_DOMAIN:-api.${ACCANTO_DOMAIN}}
       ACCANTO_TLS_EMAIL: ${ACCANTO_TLS_EMAIL:?ACCANTO_TLS_EMAIL richiesto per Let's Encrypt}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro

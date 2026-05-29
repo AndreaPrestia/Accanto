@@ -146,34 +146,38 @@ I file caricati vivono in `./storage/` sul filesystem host (volume montato in `/
 
 Per esporre Accanto su un dominio pubblico con HTTPS automatico (Let's Encrypt):
 
-1. Decidi i due domini:
-   - **apex** (`ACCANTO_DOMAIN`, es. `accanto.example.com`) → sito vetrina
-   - **sottodominio app** (`ACCANTO_APP_DOMAIN`, default `app.${ACCANTO_DOMAIN}`) → SPA + API
+1. Decidi i tre domini:
+   - **apex** (`ACCANTO_DOMAIN`, es. `accanto.care`) → sito vetrina
+   - **sottodominio app** (`ACCANTO_APP_DOMAIN`, default `app.${ACCANTO_DOMAIN}`) → SPA React (solo statico)
+   - **sottodominio api** (`ACCANTO_API_DOMAIN`, default `api.${ACCANTO_DOMAIN}`) → API .NET (anche health)
 
-   Punta DNS (`A`/`AAAA`) di **entrambi** al server e apri le porte **80** e **443**. Caddy gestisce un singolo certificato SAN per i due hostname.
+   Punta DNS (`A`/`AAAA`) di **tutti e tre** al server e apri le porte **80** e **443**. Caddy gestisce un singolo certificato SAN per i tre hostname.
 2. Compila `.env` con segreti veri (`Encryption__MasterKey`, `Jwt__Key`, `POSTGRES_PASSWORD`).
-3. Avvia con il file di override:
+3. Pulla le immagini GHCR e avvia con il file di override:
 
    ```sh
-   ACCANTO_DOMAIN=accanto.example.com \
-   ACCANTO_APP_DOMAIN=app.accanto.example.com \
-   ACCANTO_TLS_EMAIL=tu@example.com \
+   ACCANTO_DOMAIN=accanto.care \
+   ACCANTO_APP_DOMAIN=app.accanto.care \
+   ACCANTO_API_DOMAIN=api.accanto.care \
+   ACCANTO_TLS_EMAIL=admin@accanto.care \
+   ACCANTO_VERSION=v0.7.2 \
    ASPNETCORE_ENVIRONMENT=Production \
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
    ```
 
 In produzione né Postgres né il backend sono esposti su internet: solo Caddy ascolta su 80/443 e fa da reverse proxy. La configurazione vive in [deploy/Caddyfile](deploy/Caddyfile).
 
 Topologia HTTPS finale:
 
-| URL                                         | Container | Contenuto                  |
-|---------------------------------------------|-----------|----------------------------|
-| `https://${ACCANTO_DOMAIN}`                 | `web`     | Sito vetrina (Astro)       |
-| `https://${ACCANTO_APP_DOMAIN}`             | `frontend`| SPA React                  |
-| `https://${ACCANTO_APP_DOMAIN}/api/*`       | `backend` | API REST                   |
-| `https://${ACCANTO_APP_DOMAIN}/health`      | `backend` | Health check               |
+| URL                                          | Container | Contenuto                            |
+|----------------------------------------------|-----------|--------------------------------------|
+| `https://${ACCANTO_DOMAIN}`                  | `web`     | Sito vetrina (Astro statico)         |
+| `https://${ACCANTO_APP_DOMAIN}`              | `frontend`| SPA React (solo statico, no API)     |
+| `https://${ACCANTO_API_DOMAIN}`              | `backend` | API REST (rewrite → `/api/*` interno)|
+| `https://${ACCANTO_API_DOMAIN}/health/ready` | `backend` | Health check (uptime monitor target) |
 
-La CORS del backend (`Cors__AllowedOrigins`) è preconfigurata per accettare solo `https://${ACCANTO_APP_DOMAIN}`: se in dev ti serve includere altre origini, sovrascrivi la variabile in `.env`.
+La SPA chiama le API **cross-origin** (`https://app.accanto.care` → `https://api.accanto.care`). Auth è JWT Bearer in header (niente cookie), quindi nessun problema di SameSite. La CORS del backend (`Cors__AllowedOrigins`) è preconfigurata per accettare solo `https://${ACCANTO_APP_DOMAIN}`: aggiungi altre origini in `.env` se servono.
 
 ### Immagini Docker pubblicate (GHCR)
 
@@ -183,16 +187,22 @@ Ogni tag versione (`v*.*.*`) builda e pubblica tre immagini multi-tag su GitHub 
 - `ghcr.io/andreaprestia/accanto-frontend:<tag>` (+ `:latest`)
 - `ghcr.io/andreaprestia/accanto-web:<tag>` (+ `:latest`)
 
-Per il sito vetrina, gli URL pubblici (`SITE_URL`, `PUBLIC_APP_URL`) sono "baked in" al build time perché Astro è statico: configurali una volta su GitHub → *Settings → Secrets and variables → Actions → Variables* come `WEB_SITE_URL` e `WEB_PUBLIC_APP_URL`. Senza variabili, il build usa i default localhost (immagine inutile in prod, ok per smoke test).
+Per il sito vetrina e per la SPA, gli URL pubblici sono "baked in" al build time (Astro statico e Vite). Configurali una volta su GitHub → *Settings → Secrets and variables → Actions → Variables*:
+
+- `WEB_SITE_URL` → es. `https://accanto.care`
+- `WEB_PUBLIC_APP_URL` → es. `https://app.accanto.care`
+- `WEB_API_BASE_URL` → es. `https://api.accanto.care`
+
+Senza variabili, il build usa i default localhost (immagine inutile in prod, ok per smoke test).
 
 Per rilasciare una nuova versione:
 
 ```sh
-git tag v0.7.1
+git tag v0.7.2
 git push --tags
 ```
 
-Per fare deploy dalle immagini invece che con `--build`, basta sostituire i blocchi `build:` del compose con `image: ghcr.io/andreaprestia/accanto-<servizio>:<tag>` (utile per separare nettamente build e deploy quando aggiungeremo il workflow CD su SSH).
+Il `docker-compose.prod.yml` usa già `image: ghcr.io/andreaprestia/accanto-<servizio>:${ACCANTO_VERSION:-latest}` per i tre container: in produzione basta `docker compose pull && up -d` senza ricompilare nulla.
 
 ## Sviluppo locale (senza Docker)
 
@@ -364,7 +374,7 @@ Se la master key non corrisponde, il backend si avvia ma ogni decifratura fallis
 
 - [UptimeRobot](https://uptimerobot.com) o [Healthchecks.io](https://healthchecks.io) o [Better Stack](https://betterstack.com/uptime).
 - Crea due monitor HTTP(S):
-  - `https://${ACCANTO_APP_DOMAIN}/health/ready` (atteso: 200 con `"status":"ok"`).
+  - `https://${ACCANTO_API_DOMAIN}/health/ready` (atteso: 200 con `"status":"ok"`).
   - `https://${ACCANTO_DOMAIN}/` (atteso: 200, sito vetrina).
 - Intervallo consigliato: 5 minuti. Alert su email/Telegram quando 2 check consecutivi falliscono (evita falsi positivi su deploy).
 
@@ -406,7 +416,8 @@ Le due policy CSP sono distinte perché hanno bisogni diversi: il sito vetrina d
 **Test rapido degli header** dopo il deploy:
 
 ```sh
-curl -sI https://app.accanto.example.com/ | grep -iE 'strict-transport|content-security|x-frame|referrer|permissions'
+curl -sI https://app.accanto.care/ | grep -iE 'strict-transport|content-security|x-frame|referrer|permissions'
+curl -sI https://api.accanto.care/health/ready | grep -iE 'strict-transport|content-security|x-frame|referrer|permissions'
 ```
 
 oppure usa il grader online [securityheaders.com](https://securityheaders.com). Target realistico: **grade A**.
@@ -421,15 +432,15 @@ Lo script [`deploy/smoke.sh`](deploy/smoke.sh) verifica in pochi secondi che dop
 
 ```sh
 # Smoke base (solo health pubblici)
-./deploy/smoke.sh https://app.accanto.example.com https://accanto.example.com
+./deploy/smoke.sh https://api.accanto.care https://accanto.care https://app.accanto.care
 
-# Smoke completo (login + /api/auth/me + /api/care-circles)
-export SMOKE_EMAIL='smoke@accanto.example.com'
+# Smoke completo (login + /auth/me + /care-circles)
+export SMOKE_EMAIL='smoke@accanto.care'
 export SMOKE_PASSWORD='...'   # gestito da 1Password / Bitwarden / GitHub Actions secret
-./deploy/smoke.sh https://app.accanto.example.com https://accanto.example.com
+./deploy/smoke.sh https://api.accanto.care https://accanto.care https://app.accanto.care
 ```
 
-Crea l'utente smoke una volta sola via `POST /api/auth/register` e archivia la password in un secret manager. Non abilitare 2FA per quell'account (lo script fa una login diretta).
+Crea l'utente smoke una volta sola via `POST https://api.accanto.care/auth/register` e archivia la password in un secret manager. Non abilitare 2FA per quell'account (lo script fa una login diretta).
 
 Exit code: `0` se tutto passa, `1` al primo errore con messaggio chiaro. Pensato per essere chiamato dal tuo runner di deploy (post `docker compose up -d`), da un cron orario di canary, o da un job futuro di GitHub Actions su `workflow_dispatch`.
 
