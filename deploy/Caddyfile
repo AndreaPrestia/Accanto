@@ -70,24 +70,22 @@
 # Path pubblico: https://api.accanto.care/auth/login → backend riceve /api/auth/login.
 # Niente CSP (non serve HTML), gli header di sicurezza vengono da security_headers.
 #
-# Tutti i blocchi `handle` sono mutuamente esclusivi: Caddy sceglie il primo
-# che matcha. Senza `handle` espliciti il catch-all con rewrite cattura anche
-# /health → 404 sul backend.
+# Usiamo `route {}` (ordering esplicito) invece di `handle {}` perché un
+# `handle` senza path matcher diventa un route senza filtro e nella JSON
+# generata precede gli altri, catturando anche /health/* prima del check
+# di specificità.
 {$ACCANTO_API_DOMAIN} {
 	encode zstd gzip
 	import security_headers
 
-	# Health checks pass-through (uptime monitor esterni puntano qui).
-	handle /health {
-		reverse_proxy backend:8080
-	}
-	handle /health/* {
-		reverse_proxy backend:8080
-	}
+	route {
+		# Health checks pass-through (uptime monitor esterni puntano qui).
+		# Match esplicito: se il path inizia con /health, proxa al backend e termina.
+		reverse_proxy /health backend:8080
+		reverse_proxy /health/* backend:8080
 
-	# Catch-all: aggiunge il prefisso /api/ perché i controller .NET usano
-	# [Route("api/...")]. Così il path pubblico resta pulito (senza /api).
-	handle {
+		# Tutto il resto: prefissa /api/ (i controller .NET usano [Route("api/...")])
+		# e proxa al backend. Così il path pubblico resta pulito senza /api.
 		rewrite * /api{uri}
 		reverse_proxy backend:8080
 	}
