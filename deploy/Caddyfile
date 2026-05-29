@@ -78,21 +78,12 @@
 	encode zstd gzip
 	import security_headers
 
-	# `route` forza l'ordine di valutazione (no riordino per specificità).
-	# `handle` annidati garantiscono mutua esclusione: solo uno matcha,
-	# le altre direttive vengono saltate (così il rewrite del catch-all
-	# non viene applicato anche alle richieste /health/*).
-	route {
-		handle /health {
-			reverse_proxy backend:8080
-		}
-		handle /health/* {
-			reverse_proxy backend:8080
-		}
-		handle {
-			rewrite * /api{uri}
-			reverse_proxy backend:8080
-		}
-	}
+	# /health e /health/* sono esposti dal backend SENZA il prefisso /api
+	# (controllati da UptimeRobot/Healthchecks.io e dal HEALTHCHECK Docker).
+	# Tutte le altre rotte vengono riscritte aggiungendo /api perché il
+	# backend espone i controller sotto quel prefisso (route attribute).
+	@notHealth not path /health /health/*
+	rewrite @notHealth /api{uri}
+	reverse_proxy backend:8080
 }
 
