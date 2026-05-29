@@ -69,16 +69,24 @@
 # Backend .NET esposto come API JSON pura. CORS gestito dal backend (Cors__AllowedOrigins).
 # Path pubblico: https://api.accanto.care/auth/login → backend riceve /api/auth/login.
 # Niente CSP (non serve HTML), gli header di sicurezza vengono da security_headers.
+#
+# Tutti i blocchi `handle` sono mutuamente esclusivi: Caddy sceglie il primo
+# che matcha. Senza `handle` espliciti il catch-all con rewrite cattura anche
+# /health → 404 sul backend.
 {$ACCANTO_API_DOMAIN} {
 	encode zstd gzip
 	import security_headers
 
-	# Health checks (uptime monitor esterni puntano qui).
-	reverse_proxy /health backend:8080
-	reverse_proxy /health/* backend:8080
+	# Health checks pass-through (uptime monitor esterni puntano qui).
+	handle /health {
+		reverse_proxy backend:8080
+	}
+	handle /health/* {
+		reverse_proxy backend:8080
+	}
 
-	# Tutto il resto viene riscritto con prefisso /api/ perché i controller .NET
-	# usano [Route("api/...")]. Così il path pubblico resta pulito (senza /api).
+	# Catch-all: aggiunge il prefisso /api/ perché i controller .NET usano
+	# [Route("api/...")]. Così il path pubblico resta pulito (senza /api).
 	handle {
 		rewrite * /api{uri}
 		reverse_proxy backend:8080
