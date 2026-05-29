@@ -78,16 +78,21 @@
 	encode zstd gzip
 	import security_headers
 
+	# `route` forza l'ordine di valutazione (no riordino per specificità).
+	# `handle` annidati garantiscono mutua esclusione: solo uno matcha,
+	# le altre direttive vengono saltate (così il rewrite del catch-all
+	# non viene applicato anche alle richieste /health/*).
 	route {
-		# Health checks pass-through (uptime monitor esterni puntano qui).
-		# Match esplicito: se il path inizia con /health, proxa al backend e termina.
-		reverse_proxy /health backend:8080
-		reverse_proxy /health/* backend:8080
-
-		# Tutto il resto: prefissa /api/ (i controller .NET usano [Route("api/...")])
-		# e proxa al backend. Così il path pubblico resta pulito senza /api.
-		rewrite * /api{uri}
-		reverse_proxy backend:8080
+		handle /health {
+			reverse_proxy backend:8080
+		}
+		handle /health/* {
+			reverse_proxy backend:8080
+		}
+		handle {
+			rewrite * /api{uri}
+			reverse_proxy backend:8080
+		}
 	}
 }
 
