@@ -18,7 +18,10 @@ export default defineConfig({
     locales: ['it', 'en', 'es'],
     routing: {
       prefixDefaultLocale: true,
-      redirectToDefaultLocale: true
+      // Il redirect / -> /it lo fa Caddy in edge (deploy/Caddyfile) con un vero
+      // HTTP 302. Disabilitato qui per evitare la pagina meta-refresh che Astro
+      // genera in modalità statica (e che richiederebbe un index.astro root).
+      redirectToDefaultLocale: false
     }
   },
   integrations: [
