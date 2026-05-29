@@ -203,7 +203,6 @@ var rootInfo = Results.Ok(new
     health = "/health/ready"
 });
 app.MapGet("/api", () => rootInfo).AllowAnonymous();
-app.MapGet("/api/", () => rootInfo).AllowAnonymous();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 app.MapGet("/health/live", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
