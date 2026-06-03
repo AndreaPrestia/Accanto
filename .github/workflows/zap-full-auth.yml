@@ -85,6 +85,10 @@ jobs:
           ZAP_BEARER: ${{ steps.auth.outputs.token }}
         run: |
           mkdir -p zap-work
+          # ZAP gira come uid 1000; il runner crea i file come root.
+          # Rendiamo `zap-work` scrivibile da chiunque cosi' il container
+          # puo' depositare zap-report.html / .json.
+          chmod 777 zap-work
           # Replacer rule: inietta Authorization su tutte le richieste
           # outbound. Caricato da zap-full-scan.py via -z "-config ...".
           cat > zap-work/zap.conf <<EOF
