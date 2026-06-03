@@ -38,14 +38,12 @@ jobs:
       - name: Prepare .env for compose
         run: |
           cp .env.example .env
-          # Override dei valori che richiedono entropia reale (in
-          # .env.example sono placeholder "change-me-...").
-          {
-            echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"
-            echo "POSTGRES_APP_PASSWORD=$(openssl rand -hex 24)"
-            echo "Jwt__Key=$(openssl rand -hex 32)"
-            echo "FieldProtection__KeyBase64=$(openssl rand -base64 32)"
-          } >> .env
+          # `.env.example` ha passwords placeholder gia' consistenti fra
+          # ruolo Postgres e connection string; basta riempire le var
+          # required che restano vuote. Encryption__MasterKey e'
+          # obbligatoria (32B base64) e impedisce l'interpolazione di
+          # compose se mancante.
+          echo "Encryption__MasterKey=$(openssl rand -base64 32)" >> .env
 
       - name: Build & start stack
         run: |
