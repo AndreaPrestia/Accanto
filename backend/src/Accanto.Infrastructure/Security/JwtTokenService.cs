@@ -87,6 +87,11 @@ public class JwtTokenService : IJwtTokenService
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
+                // Stesso hardening del bearer principale: blocca algorithm
+                // confusion (token forgiati con alg=none o cambio algoritmo).
+                ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
+                RequireSignedTokens = true,
+                RequireExpirationTime = true,
                 ValidIssuer = _opt.Issuer,
                 ValidAudience = _opt.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.Key)),

@@ -78,6 +78,16 @@ var jwtKey = jwtSection["Key"] ?? throw new InvalidOperationException("Jwt:Key m
 var jwtIssuer = jwtSection["Issuer"] ?? "accanto";
 var jwtAudience = jwtSection["Audience"] ?? "accanto";
 
+// Fail-fast all'avvio: una chiave HS256 < 32 char UTF-8 (256 bit) e' debole.
+// Senza questo check l'errore emerge solo al primo Issue() di un token,
+// quindi un deploy errato passa l'health check e fallisce a runtime sul
+// primo login.
+if (jwtKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        $"Jwt:Key troppo corta: {jwtKey.Length} char, minimo 32 (256 bit). Genera con: openssl rand -base64 48");
+}
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
     {
@@ -87,6 +97,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            // Whitelist esplicita dell'algoritmo per prevenire algorithm
+            // confusion (es. token forgiati con "alg":"none" o con switch
+            // RS256↔HS256 in caso di future chiavi asimmetriche).
+            ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
+            RequireSignedTokens = true,
+            RequireExpirationTime = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
