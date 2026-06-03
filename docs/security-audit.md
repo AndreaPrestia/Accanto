@@ -18,6 +18,7 @@ ovvi su bash.
 | [Trivy](https://aquasecurity.github.io/trivy/) | Vulnerabilità OS + librerie applicative | `aquasec/trivy:latest` |
 | [Gitleaks](https://github.com/gitleaks/gitleaks) | Segreti nella git history | `zricethezav/gitleaks:latest` |
 | [Dockle](https://github.com/goodwithtech/dockle) | Hardening immagini (CIS) | `goodwithtech/dockle:latest` |
+| [OWASP ZAP](https://www.zaproxy.org/) | DAST passivo (baseline) sui servizi HTTP | `ghcr.io/zaproxy/zaproxy:stable` |
 
 Cache trivy persistente su volume named `trivy-cache` per evitare di
 ri-scaricare il DB CVE a ogni run.
@@ -102,6 +103,33 @@ foreach ($img in 'accanto-backend:latest','accanto-frontend:latest','accanto-web
 }
 ```
 
+### 4. DAST baseline (ZAP)
+
+Gira contro lo stack `docker compose` locale, sulla rete `accanto_default`,
+così ZAP raggiunge i container per nome senza passare dalle porte
+pubblicate sull'host (utile su Windows dove processi locali possono
+occupare le stesse porte e oscurare i container).
+
+```powershell
+docker compose up -d --build
+New-Item -ItemType Directory -Force -Path zap-reports | Out-Null
+
+foreach ($t in @(
+    @{ host = 'backend:8080';  name = 'backend' },
+    @{ host = 'frontend:80';   name = 'frontend' },
+    @{ host = 'web:80';        name = 'web' }
+)) {
+    Write-Host "=== $($t.name) ===" -ForegroundColor Cyan
+    docker run --rm --network accanto_default `
+        -v "${PWD}/zap-reports:/zap/wrk" -t `
+        ghcr.io/zaproxy/zaproxy:stable `
+        zap-baseline.py -t "http://$($t.host)" `
+            -r "$($t.name).html" -J "$($t.name).json"
+}
+```
+
+Report HTML + JSON finiscono in `zap-reports/` (cartella in `.gitignore`).
+
 ## Risultati ultimo run (v0.8.0 → patch v0.8.1)
 
 Data: **2026-06-03**
@@ -152,6 +180,34 @@ dell'immagine `caddy:2-alpine`. Nessuna azione lato Accanto.
   (chiave GPG di verifica APK nei layer di base nginx, non un secret
   applicativo).
 
+### ZAP — DAST baseline
+
+Lanciato sullo stack locale dietro `accanto_default`. Sequenza prima e
+dopo l'hardening dei `nginx.conf` (aggiunta header di sicurezza base via
+`security-headers.conf` incluso in ogni `location`):
+
+| Target | FAIL | WARN prima | WARN dopo | Note |
+|---|---|---|---|---|
+| `backend:8080` | 0 | 1 | 1 | `Storable and Cacheable Content` su `/health`. Accettato. |
+| `frontend:80` | 0 | 8 | **4** | CSP/COEP forniti da Caddy in prod. |
+| `web:80` | 0 | 7 | **3** | CSP/COEP forniti da Caddy in prod. |
+
+Header aggiunti a nginx (defense-in-depth):
+`X-Content-Type-Options nosniff`, `X-Frame-Options DENY`,
+`Referrer-Policy strict-origin-when-cross-origin`,
+`Permissions-Policy geolocation=(), microphone=(), camera=(), payment=(), usb=()`,
+`server_tokens off`.
+
+WARN residui dopo hardening (accettati):
+
+- `Content Security Policy (CSP) Header Not Set` → fornita da Caddy in
+  produzione (vedi [deploy/Caddyfile](../deploy/Caddyfile), blocco
+  `security_headers` + CSP per dominio).
+- `Cross-Origin-Embedder-Policy` → anch'esso fornito da Caddy (`COOP` /
+  `CORP`). Non serve a nginx-standalone.
+- `Storable but Non-Cacheable Content` → INFO su pagine HTML, voluto.
+- `Modern Web Application` → INFO, non actionable.
+
 ## Falsi positivi accettati
 
 | Tool | Finding | File / contesto | Motivazione |
@@ -168,6 +224,8 @@ dell'immagine `caddy:2-alpine`. Nessuna azione lato Accanto.
 2. Aggiungere uno scan ZAP baseline contro lo stack `docker compose`
    locale, autenticato su 2 tenant di prova, per coprire IDOR / authz
    sui cerchi di cura. Più alto ROI applicativo del solo CVE scan.
+   ✅ Baseline passiva eseguita il 2026-06-03; versione autenticata
+   tracciata come prossimo step.
 3. Wiring degli scan trivy + gitleaks in GitHub Actions
    (`.github/workflows/security.yml`) per failo automatico su PR e tag. ✅ Attivo dal 2026-06-03.
 4. Valutare il passaggio del backend a `mcr.microsoft.com/dotnet/aspnet:10.0-jammy-chiseled`
@@ -179,3 +237,4 @@ dell'immagine `caddy:2-alpine`. Nessuna azione lato Accanto.
 | Data | Tag | Esito | Note |
 |---|---|---|---|
 | 2026-06-03 | v0.8.0 | 5 HIGH (nginx base) + 1 HIGH (caddy upstream) + 1 falso positivo gitleaks | Patch applicata in v0.8.1. |
+| 2026-06-03 | main post-hardening | ZAP: 0 FAIL, WARN da 8→4 (frontend), 7→3 (web), 1 (backend) | Aggiunti header sicurezza nginx (defense-in-depth). |
