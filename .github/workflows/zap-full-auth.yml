@@ -85,10 +85,6 @@ jobs:
           ZAP_BEARER: ${{ steps.auth.outputs.token }}
         run: |
           mkdir -p zap-work
-          # ZAP gira come uid 1000; il runner crea i file come root.
-          # Rendiamo `zap-work` scrivibile da chiunque cosi' il container
-          # puo' depositare zap-report.html / .json.
-          chmod 777 zap-work
           # Replacer rule: inietta Authorization su tutte le richieste
           # outbound. Caricato da zap-full-scan.py via -z "-config ...".
           cat > zap-work/zap.conf <<EOF
@@ -99,6 +95,13 @@ jobs:
           -config replacer.full_list(0).regex=false
           -config replacer.full_list(0).replacement=Bearer ${ZAP_BEARER}
           EOF
+          # Il container ZAP gira come uid 1000 (utente `zap`). Il runner
+          # crea i file come root → senza chown il container non puo'
+          # scrivere zap-report.html / .json nel bind-mount. chmod 777
+          # da solo non basta (semantica mount/umask su ubuntu-latest):
+          # serve cambiare ownership. Va fatto DOPO aver scritto zap.conf
+          # perche' anche quello deve risultare leggibile dal container.
+          sudo chown -R 1000:1000 zap-work
 
       - name: Run ZAP full scan (authenticated)
         run: |
