@@ -312,6 +312,41 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     override compose (`RateLimit__*__PermitLimit=3`), spara N+1
     richieste per ciascuna policy e verifica che la `(N+1)`-esima
     riceva `429`. A fine probe ripristina i default di Development.
+13. Hardening JWT: whitelist algoritmi `HS256`, `RequireSignedTokens=true`,
+    `RequireExpirationTime=true`, fail-fast all'avvio se la chiave è
+    minore di 32 caratteri. Applicato sia al bearer principale sia al
+    challenge 2FA (`JwtTokenService.ValidateTwoFactorChallenge`). ✅
+    Fatto il 2026-06-04. Mitiga downgrade ad `alg=none`/`HS256` con
+    chiave debole e accetta solo token correttamente firmati e scaduti.
+14. Separazione ruoli Postgres: `accanto` (owner/migrator, DDL) vs
+    `accanto_app` (runtime, solo DML). Lo script
+    [scripts/db/init/01-app-role.sh](../scripts/db/init/01-app-role.sh)
+    crea/aggiorna il ruolo applicativo al primo boot del volume
+    (`docker-entrypoint-initdb.d`), assegna `SELECT/INSERT/UPDATE/DELETE`
+    sulle tabelle correnti + `USAGE/SELECT/UPDATE` sulle sequenze,
+    aggiunge `ALTER DEFAULT PRIVILEGES FOR ROLE accanto` per le tabelle
+    create dalle migration future, e fa `REVOKE CREATE ON SCHEMA public`
+    a `accanto_app`/`PUBLIC` per impedire `CREATE TABLE` runtime.
+    Il backend usa ora due connection string distinte: `Postgres`
+    (runtime, `accanto_app`) e `PostgresMigrator` (`accanto`, applicata
+    solo al `MigrateAsync()` all'avvio e dalla CLI). ✅ Fatto il
+    2026-06-04. Verificato manualmente che `CREATE TABLE evil` come
+    `accanto_app` fallisce con `permission denied for schema public`.
+    Regressione: probe tenant isolation 21/21 PASS, probe RBAC 23/23
+    PASS, suite test 131/131 PASS.
+15. Hardening upload documenti: magic-bytes sniffing
+    (`FileSignatureValidator`) sui primi 16 byte per PDF/PNG/JPEG e per
+    `text/plain` (rifiuto di byte di controllo non printabili),
+    integrato in `DocumentService.UploadAsync` dopo il check
+    content-type allow-list. Scan antivirus opzionale via interfaccia
+    `IMalwareScanner`: `NoopMalwareScanner` di default,
+    `ClamAvMalwareScanner` (protocollo `INSTREAM` TCP) attivabile
+    impostando `ClamAV:Host` (es. `clamav` con il profilo
+    `docker compose --profile av up -d`). Probe end-to-end
+    [scripts/security/upload-probe.ps1](../scripts/security/upload-probe.ps1)
+    verifica 5 casi (spoof PNG-as-PDF, content-type fuori allow-list,
+    spoof PNG-as-text, happy PDF, happy text). ✅ Fatto il 2026-06-04,
+    5/5 PASS. Suite test 131/131 PASS (13 nuovi unit test).
 
 ### Finding minori (osservabilità, non sicurezza)
 
@@ -333,3 +368,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-03 | main post-hardening immagini | 0 HIGH/CRITICAL su tutte e 3 le immagini; probe IDOR 21/21 PASS | Backend → chiseled (`app`/UID 1654, no shell). Frontend+web → `nginx-unprivileged` (`nginx`/UID 101, porta 8080). |
 | 2026-06-03 | main post-supply-chain | Dependabot attivo, CodeQL attivo, container runtime hardening, Caddyfile audit | Defense-in-depth a livello supply chain + runtime + edge proxy. Probe IDOR ancora 21/21 PASS sullo stack hardened. |
 | 2026-06-04 | main post-tier2 | `security.txt` pubblicato, CSP/COOP/CORP anche a livello nginx, probe RBAC 23/23 PASS, probe rate-limit 4/4 PASS | Coverage spostata da "perimetro + tenant" a "perimetro + tenant + ruoli + rate-limit". |
+| 2026-06-04 | main post-tier3 | JWT HS256-only fail-fast, split ruoli Postgres `accanto`/`accanto_app` con `REVOKE CREATE`, upload magic-bytes + ClamAV opzionale, probe upload 5/5 PASS, RBAC 23/23 PASS, tenant 21/21 PASS, unit 131/131 PASS | Tier 3 completo. Difesa in profondità su auth/DB/upload. |

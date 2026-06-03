@@ -16,6 +16,7 @@ public class DocumentService : IDocumentService
     private readonly ICareCircleAuthorization _auth;
     private readonly IFileStorage _storage;
     private readonly IAuditLog _audit;
+    private readonly IMalwareScanner _malwareScanner;
     private readonly DocumentStorageOptions _options;
 
     public DocumentService(
@@ -23,12 +24,14 @@ public class DocumentService : IDocumentService
         ICareCircleAuthorization auth,
         IFileStorage storage,
         IAuditLog audit,
+        IMalwareScanner malwareScanner,
         IOptions<DocumentStorageOptions> options)
     {
         _db = db;
         _auth = auth;
         _storage = storage;
         _audit = audit;
+        _malwareScanner = malwareScanner;
         _options = options.Value;
     }
 
@@ -75,7 +78,33 @@ public class DocumentService : IDocumentService
             throw new AppValidationException("Nome file mancante.");
         }
 
-        var stored = await _storage.SaveAsync(request.Content, request.OriginalFileName, contentType, cancellationToken);
+        // Difesa contro file polyglot / content-type spoofed dal client:
+        // bufferizziamo l'intero stream (size gia' validata <= MaxFileSizeBytes
+        // poco sopra) e ispezioniamo i primi byte per verificare che la
+        // firma matchi il content-type dichiarato.
+        var buffer = new MemoryStream((int)request.SizeInBytes);
+        await request.Content.CopyToAsync(buffer, cancellationToken);
+        buffer.Position = 0;
+
+        var headLen = (int)Math.Min(FileSignatureValidator.InspectBytes, buffer.Length);
+        if (headLen <= 0 || !FileSignatureValidator.IsValid(buffer.GetBuffer().AsSpan(0, headLen), contentType))
+        {
+            throw new AppValidationException("Il contenuto del file non corrisponde al tipo dichiarato.");
+        }
+
+        // Anti-malware: noop di default, ClamAV se configurato.
+        // MalwareDetectedException si propaga al middleware → 422 con motivo.
+        try
+        {
+            await _malwareScanner.ScanAsync(buffer, request.OriginalFileName, cancellationToken);
+        }
+        catch (MalwareDetectedException ex)
+        {
+            throw new AppValidationException($"File rifiutato dall'antivirus: {ex.Signature}");
+        }
+        buffer.Position = 0;
+
+        var stored = await _storage.SaveAsync(buffer, request.OriginalFileName, contentType, cancellationToken);
 
         var doc = new MedicalDocument
         {

@@ -4,6 +4,7 @@ using Accanto.Application.Email;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
 using Accanto.Application.Common.Storage;
+using Accanto.Application.Documents;
 using Accanto.Application.Export;
 using Accanto.Application.Push;
 using Accanto.Application.Security;
@@ -40,6 +41,21 @@ public static class InfrastructureServiceCollectionExtensions
         services.Configure<PushOptions>(configuration.GetSection("Push"));
         services.Configure<EmailOptions>(configuration.GetSection("Email"));
         services.Configure<AiOptions>(configuration.GetSection("Ai"));
+        services.Configure<ClamAvOptions>(configuration.GetSection("ClamAV"));
+
+        // Malware scanner: ClamAV se ClamAV:Host e' configurato, altrimenti noop.
+        // La factory rilegge il binding qui (non a runtime) perche' la
+        // registrazione e' singleton: l'opt-in/opt-out richiede comunque
+        // restart del backend.
+        var clamHost = configuration.GetSection("ClamAV")["Host"];
+        if (!string.IsNullOrWhiteSpace(clamHost))
+        {
+            services.AddSingleton<IMalwareScanner, ClamAvMalwareScanner>();
+        }
+        else
+        {
+            services.AddSingleton<IMalwareScanner, NoopMalwareScanner>();
+        }
 
         services.AddSingleton<IFieldProtector, AesGcmFieldProtector>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();

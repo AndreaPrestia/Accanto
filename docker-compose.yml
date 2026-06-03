@@ -163,7 +163,30 @@ services:
     ports:
       - "5341:80"
 
+  # Antivirus sidecar (ClamAV). Opt-in con profilo "av":
+  #   docker compose --profile av up -d
+  # Per attivare lo scan lato backend imposta in .env:
+  #   ClamAV__Host=clamav
+  #   ClamAV__Port=3310
+  # Il backend usa NoopMalwareScanner finche' ClamAV:Host resta vuoto, quindi
+  # senza il profilo l'app continua a funzionare ma senza scan AV. clamd
+  # impiega ~1 minuto al primo boot per caricare il DB delle firme.
+  clamav:
+    image: clamav/clamav:stable
+    restart: unless-stopped
+    profiles: ["av"]
+    volumes:
+      - clamav-data:/var/lib/clamav
+    ports:
+      - "3310:3310"
+    healthcheck:
+      test: ["CMD-SHELL", "clamdcheck.sh || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 volumes:
   db-data:
   ollama-data:
   seq-data:
+  clamav-data:
