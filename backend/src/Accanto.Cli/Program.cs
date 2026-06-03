@@ -87,8 +87,20 @@ public static class Program
 
         Console.WriteLine($"Avvio rotazione verso la chiave attiva '{protector.ActiveKeyId}'.");
         using var scope = provider.CreateScope();
+        // Migrazioni con connection string privilegiata se presente (vedi
+        // Accanto.Api/Program.cs per il razionale). La rotazione effettiva
+        // dei dati riusa il DbContext registrato (runtime, accanto_app).
+        var cfg = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+        var migratorConn = cfg.GetConnectionString("PostgresMigrator")
+                           ?? cfg.GetConnectionString("Postgres");
+        var migratorOptions = new DbContextOptionsBuilder<AccantoDbContext>()
+            .UseNpgsql(migratorConn)
+            .Options;
+        await using (var migratorDb = new AccantoDbContext(migratorOptions, protector))
+        {
+            await migratorDb.Database.MigrateAsync();
+        }
         var db = scope.ServiceProvider.GetRequiredService<AccantoDbContext>();
-        await db.Database.MigrateAsync();
 
         var rotator = scope.ServiceProvider.GetRequiredService<KeyRotationService>();
         var report = await rotator.RotateAsync();

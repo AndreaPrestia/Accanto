@@ -182,9 +182,26 @@ var app = builder.Build();
 
 if (!app.Environment.IsEnvironment("Testing"))
 {
+    // Migrazioni: se e' configurata una connection string separata
+    // `ConnectionStrings__PostgresMigrator` la usiamo per applicare lo
+    // schema con un ruolo Postgres privilegiato (proprietario delle
+    // tabelle, DDL). A runtime invece l'app continua a parlare al DB con
+    // `ConnectionStrings__Postgres`, che in produzione punta al ruolo
+    // `accanto_app` (solo DML). Cosi' un eventuale SQL-injection o RCE
+    // applicativa non puo' droppare tabelle o creare oggetti.
+    // In locale, se la chiave migrator non e' settata, fallback alla
+    // connection string principale (nessun cambio rispetto al comportamento
+    // storico).
     using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AccantoDbContext>();
-    await db.Database.MigrateAsync();
+    var cfg = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var protector = scope.ServiceProvider.GetRequiredService<Accanto.Application.Common.Security.IFieldProtector>();
+    var migratorConn = cfg.GetConnectionString("PostgresMigrator")
+                       ?? cfg.GetConnectionString("Postgres");
+    var migratorOptions = new DbContextOptionsBuilder<AccantoDbContext>()
+        .UseNpgsql(migratorConn)
+        .Options;
+    await using var migratorDb = new AccantoDbContext(migratorOptions, protector);
+    await migratorDb.Database.MigrateAsync();
 }
 
 app.UseMiddleware<ErrorHandlingMiddleware>();

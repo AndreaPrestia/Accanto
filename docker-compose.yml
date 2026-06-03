@@ -6,8 +6,16 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-accanto}
       POSTGRES_USER: ${POSTGRES_USER:-accanto}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-in-local}
+      # Password del ruolo runtime DML-only `accanto_app`, creato da
+      # scripts/db/init/01-app-role.sh al primo init del volume. Se omessa
+      # lo script si autodisabilita e l'app continua a usare POSTGRES_USER.
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:-change-me-in-local-app}
     volumes:
       - db-data:/var/lib/postgresql/data
+      # /docker-entrypoint-initdb.d viene eseguito UNA SOLA volta sulla prima
+      # creazione del volume db-data. Per riapplicare su dev DB esistente:
+      # `docker compose down -v` e ricrea lo stack.
+      - ./scripts/db/init:/docker-entrypoint-initdb.d:ro
     ports:
       - "5432:5432"
     healthcheck:
@@ -27,7 +35,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://+:8080}
-      ConnectionStrings__Postgres: ${ConnectionStrings__Postgres:-Host=db;Port=5432;Database=accanto;Username=accanto;Password=change-me-in-local}
+      # Runtime: ruolo `accanto_app` (DML only, niente DDL).
+      ConnectionStrings__Postgres: ${ConnectionStrings__Postgres:-Host=db;Port=5432;Database=accanto;Username=accanto_app;Password=change-me-in-local-app}
+      # Migrator: ruolo `accanto` (proprietario, DDL permessa). Usato solo
+      # all'avvio per applicare le migrazioni EF.
+      ConnectionStrings__PostgresMigrator: ${ConnectionStrings__PostgresMigrator:-Host=db;Port=5432;Database=accanto;Username=accanto;Password=change-me-in-local}
       Jwt__Issuer: ${Jwt__Issuer:-accanto}
       Jwt__Audience: ${Jwt__Audience:-accanto}
       Jwt__Key: ${Jwt__Key:-please-change-me-to-a-long-random-secret-at-least-32-chars}
