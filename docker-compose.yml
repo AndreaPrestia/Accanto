@@ -55,6 +55,20 @@ services:
     # Nessun healthcheck definito qui: l'immagine runtime e' "chiseled"
     # (distroless) e non ha curl/wget. Nessun altro servizio dipende dalla
     # salute del backend; per probe esterni usare GET /health.
+    # Hardening container (defense-in-depth):
+    # - no-new-privileges blocca setuid escalation
+    # - cap_drop ALL: il processo .NET non ha bisogno di capabilities Linux
+    # - read_only rootfs: il binario non si modifica a runtime
+    # - tmpfs su /tmp e /home/app/.aspnet per DataProtection keys e file
+    #   temporanei (lo storage persistente continua a stare su /data/storage)
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /home/app/.aspnet:size=8m,uid=1654,gid=1654,mode=0700
 
   frontend:
     build:
@@ -67,6 +81,15 @@ services:
       - backend
     ports:
       - "5173:8080"
+    # Hardening container nginx-unprivileged.
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777,uid=101,gid=101
+      - /var/cache/nginx:size=32m,uid=101,gid=101
 
   # Sito vetrina statico (Astro). Indipendente dalla SPA: pensato per il dominio apex
   # mentre la SPA vive su un sottodominio "app.". In locale è esposto sulla 4321.
@@ -80,6 +103,15 @@ services:
     restart: unless-stopped
     ports:
       - "4321:8080"
+    # Hardening container nginx-unprivileged.
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777,uid=101,gid=101
+      - /var/cache/nginx:size=32m,uid=101,gid=101
 
   # Modulo AI (opzionale, self-hosted). Si avvia solo con profilo "ai":
   #   docker compose --profile ai up -d

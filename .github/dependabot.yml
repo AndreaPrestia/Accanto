@@ -1,0 +1,130 @@
+# Dependabot: aggiornamenti automatici delle dipendenze.
+# Cadenza settimanale, raggruppati per ridurre il rumore di PR.
+# Versionamento allargato: usiamo "increase" per non bloccare patch/minor
+# automatiche su ecosistemi dove i constraint sono volutamente larghi.
+version: 2
+updates:
+  # Backend .NET (NuGet) — tutti i csproj sotto backend/
+  - package-ecosystem: nuget
+    directory: "/backend"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Rome
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - backend
+    groups:
+      microsoft-aspnetcore:
+        patterns:
+          - "Microsoft.AspNetCore.*"
+          - "Microsoft.Extensions.*"
+      microsoft-ef:
+        patterns:
+          - "Microsoft.EntityFrameworkCore*"
+          - "Npgsql*"
+          - "Pgvector*"
+      tests:
+        patterns:
+          - "xunit*"
+          - "Microsoft.NET.Test.Sdk"
+          - "FluentAssertions*"
+          - "Moq*"
+
+  # Frontend SPA (npm)
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Rome
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - frontend
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+      vite:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+      tooling:
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "typescript"
+
+  # Sito vetrina Astro (npm)
+  - package-ecosystem: npm
+    directory: "/web"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Rome
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - web
+    groups:
+      astro:
+        patterns:
+          - "astro"
+          - "@astrojs/*"
+      tooling:
+        patterns:
+          - "typescript"
+          - "prettier*"
+
+  # Immagini Docker referenziate nei Dockerfile (backend, frontend, web)
+  - package-ecosystem: docker
+    directory: "/backend"
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Rome
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies
+      - docker
+
+  - package-ecosystem: docker
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Rome
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies
+      - docker
+
+  - package-ecosystem: docker
+    directory: "/web"
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Rome
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies
+      - docker
+
+  # GitHub Actions usate nei workflow
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Rome
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - ci

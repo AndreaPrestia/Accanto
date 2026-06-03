@@ -264,6 +264,24 @@ resource scoped al cerchio prima di qualunque accesso al DB.
    ✅ Fatto il 2026-06-03: `mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled`,
    utente `app` (UID 1654), nessun apt/curl/wget, healthcheck container
    rimosso dal compose dev (probe esterno su `/health`).
+5. Aggiornamento automatico delle dipendenze. ✅ Fatto il 2026-06-03:
+   `.github/dependabot.yml` con scheduling settimanale per NuGet (backend),
+   npm (frontend, web), Docker e GitHub Actions. PR raggruppate per
+   ridurre il rumore.
+6. SAST con CodeQL. ✅ Fatto il 2026-06-03:
+   `.github/workflows/codeql.yml` analizza `csharp` (build manuale) e
+   `javascript-typescript` (build-mode none) su push/PR/cron settimanale
+   con query suite `security-and-quality`.
+7. Hardening container runtime. ✅ Fatto il 2026-06-03 su backend,
+   frontend e web in [docker-compose.yml](../docker-compose.yml):
+   `security_opt: no-new-privileges`, `cap_drop: ALL`, `read_only: true`
+   rootfs con `tmpfs` su `/tmp`, `/home/app/.aspnet` (DataProtection),
+   `/var/cache/nginx`. Caddy in prod stessa cosa + `cap_add: NET_BIND_SERVICE`
+   per le porte 80/443.
+8. Audit Caddyfile. ✅ Fatto il 2026-06-03: protocolli espliciti
+   (h1/h2/h3) sul listener `:443`, `request_body { max_size 25MB }` sul
+   reverse proxy API (allineato a `Storage__MaxFileSizeBytes`), formattazione
+   passata da `caddy fmt`.
 
 ## Storico run
 
@@ -273,3 +291,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-03 | main post-hardening | ZAP: 0 FAIL, WARN da 8→4 (frontend), 7→3 (web), 1 (backend) | Aggiunti header sicurezza nginx (defense-in-depth). |
 | 2026-06-03 | main post-IDOR-probe | 21/21 PASS su probe tenant isolation | Nessun IDOR su endpoint scoped a `care-circles/{id}`. |
 | 2026-06-03 | main post-hardening immagini | 0 HIGH/CRITICAL su tutte e 3 le immagini; probe IDOR 21/21 PASS | Backend → chiseled (`app`/UID 1654, no shell). Frontend+web → `nginx-unprivileged` (`nginx`/UID 101, porta 8080). |
+| 2026-06-03 | main post-supply-chain | Dependabot attivo, CodeQL attivo, container runtime hardening, Caddyfile audit | Defense-in-depth a livello supply chain + runtime + edge proxy. Probe IDOR ancora 21/21 PASS sullo stack hardened. |

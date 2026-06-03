@@ -1,0 +1,70 @@
+# CodeQL: analisi statica (SAST) di GitHub.
+# - csharp: backend .NET 10 (build manuale, autobuild non sempre regge .NET 10)
+# - javascript-typescript: SPA (frontend) + sito vetrina (web) — analizzati
+#   in modalita' 'none' per cogliere anche TS senza richiedere un build
+#
+# Risultati visibili in Security > Code scanning alerts.
+# Si rompe la build solo se il workflow stesso fallisce: la severity dei
+# finding viene gestita dalle Code Scanning rules del repo.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Lunedi' alle 05:30 UTC (06:30 IT estate)
+    - cron: '30 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: csharp
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # .NET 10 serve solo per la lingua csharp
+      - name: Setup .NET
+        if: matrix.language == 'csharp'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # Query suite: security-and-quality e' piu' rumorosa ma copre
+          # anche bad practice (logger su exception, async-void, etc.)
+          queries: security-and-quality
+
+      - name: Build backend (csharp)
+        if: matrix.language == 'csharp'
+        working-directory: backend
+        run: |
+          dotnet restore Accanto.slnx
+          dotnet build Accanto.slnx --configuration Release --no-restore /p:TreatWarningsAsErrors=false
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
