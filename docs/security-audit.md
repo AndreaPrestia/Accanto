@@ -130,6 +130,22 @@ foreach ($t in @(
 
 Report HTML + JSON finiscono in `zap-reports/` (cartella in `.gitignore`).
 
+### 5. Probe IDOR / tenant isolation
+
+Script PowerShell che registra due utenti (Alice/Bob), crea risorse per
+Alice e prova ad accedervi come Bob su tutti gli endpoint scoped al
+cerchio di cura (timeline, doctor questions, shared updates, documents,
+invites, audit, AI, export PDF). Atteso: ogni tentativo respinto con
+`401/403/404`.
+
+```powershell
+# Stack attivo su http://localhost:8080
+powershell -NoProfile -File scripts/security/tenant-isolation-probe.ps1
+```
+
+Exit code `0` = nessuna violazione, `1` = almeno un endpoint ha
+risposto `2xx` a una richiesta cross-tenant.
+
 ## Risultati ultimo run (v0.8.0 → patch v0.8.1)
 
 Data: **2026-06-03**
@@ -208,6 +224,20 @@ WARN residui dopo hardening (accettati):
 - `Storable but Non-Cacheable Content` → INFO su pagine HTML, voluto.
 - `Modern Web Application` → INFO, non actionable.
 
+### Probe IDOR / tenant isolation
+
+21 probe cross-tenant su tutti gli endpoint `care-circles/{id}/...`
+(circle, timeline, doctor-questions, shared-updates, documents,
+invites, audit, AI settings/operations, export PDF).
+
+| Data | Probe | PASS | FAIL | Note |
+|---|---|---|---|---|
+| 2026-06-03 | 21 | **21 (100%)** | 0 | Tutti gli endpoint rispondono `403 Forbidden`. |
+
+Nessun IDOR. La pipeline di autorizzazione (`EnsureMemberAsync` su
+`ICareCircleAuthorization`) viene invocata correttamente su ogni
+resource scoped al cerchio prima di qualunque accesso al DB.
+
 ## Falsi positivi accettati
 
 | Tool | Finding | File / contesto | Motivazione |
@@ -224,8 +254,9 @@ WARN residui dopo hardening (accettati):
 2. Aggiungere uno scan ZAP baseline contro lo stack `docker compose`
    locale, autenticato su 2 tenant di prova, per coprire IDOR / authz
    sui cerchi di cura. Più alto ROI applicativo del solo CVE scan.
-   ✅ Baseline passiva eseguita il 2026-06-03; versione autenticata
-   tracciata come prossimo step.
+   ✅ Baseline passiva eseguita il 2026-06-03; probe IDOR ad-hoc
+   ([scripts/security/tenant-isolation-probe.ps1](../scripts/security/tenant-isolation-probe.ps1))
+   eseguito stesso giorno con 21/21 PASS.
 3. Wiring degli scan trivy + gitleaks in GitHub Actions
    (`.github/workflows/security.yml`) per failo automatico su PR e tag. ✅ Attivo dal 2026-06-03.
 4. Valutare il passaggio del backend a `mcr.microsoft.com/dotnet/aspnet:10.0-jammy-chiseled`
@@ -238,3 +269,4 @@ WARN residui dopo hardening (accettati):
 |---|---|---|---|
 | 2026-06-03 | v0.8.0 | 5 HIGH (nginx base) + 1 HIGH (caddy upstream) + 1 falso positivo gitleaks | Patch applicata in v0.8.1. |
 | 2026-06-03 | main post-hardening | ZAP: 0 FAIL, WARN da 8→4 (frontend), 7→3 (web), 1 (backend) | Aggiunti header sicurezza nginx (defense-in-depth). |
+| 2026-06-03 | main post-IDOR-probe | 21/21 PASS su probe tenant isolation | Nessun IDOR su endpoint scoped a `care-circles/{id}`. |
