@@ -1,0 +1,18 @@
+# Configurazione gitleaks. Estende le regole di default e aggiunge
+# allowlist per i falsi positivi documentati in docs/security-audit.md.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Falsi positivi noti"
+
+# Chiave fittizia usata solo dai test di integrazione del backend.
+# Non concede alcun accesso.
+paths = [
+    '''backend/tests/Accanto\.Tests/AccantoFactory\.cs''',
+]
+
+regexes = [
+    '''test-key-very-long-test-key-very-long-1234''',
+]

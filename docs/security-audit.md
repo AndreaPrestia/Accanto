@@ -22,6 +22,12 @@ ovvi su bash.
 Cache trivy persistente su volume named `trivy-cache` per evitare di
 ri-scaricare il DB CVE a ogni run.
 
+In CI gli stessi scan girano automaticamente via
+[.github/workflows/security.yml](../.github/workflows/security.yml) su
+PR, push su `main` e ogni lunedì mattina UTC. La build fallisce se
+trivy trova vulnerabilità `HIGH`/`CRITICAL` con fix disponibile, o se
+gitleaks trova segreti non presenti in [.gitleaks.toml](../.gitleaks.toml).
+
 ## Scope
 
 Le 4 immagini in produzione del compose:
@@ -150,7 +156,7 @@ dell'immagine `caddy:2-alpine`. Nessuna azione lato Accanto.
 
 | Tool | Finding | File / contesto | Motivazione |
 |---|---|---|---|
-| gitleaks | `generic-api-key` valore `test-key-very-long-test-key-very-long-1234` | `backend/tests/Accanto.Tests/AccantoFactory.cs:18` | Chiave fittizia usata solo dai test di integrazione. Non concede alcun accesso. |
+| gitleaks | `generic-api-key` valore `test-key-very-long-test-key-very-long-1234` | `backend/tests/Accanto.Tests/AccantoFactory.cs:18` | Chiave fittizia usata solo dai test di integrazione. Non concede alcun accesso. Esclusa via [.gitleaks.toml](../.gitleaks.toml). |
 | dockle | `CIS-DI-0010` su `KEY_SHA512` ENV | immagini `accanto-frontend`, `accanto-web` | Variabile ereditata dal layer base `nginx:1.27-alpine`, usata per verificare le firme APK. Non è un secret applicativo. |
 | dockle | `CIS-DI-0001` last user is root | immagini `accanto-frontend`, `accanto-web` | Nginx master gira come root ma forka worker non privilegiati. Vedi nota sopra. |
 
@@ -163,7 +169,7 @@ dell'immagine `caddy:2-alpine`. Nessuna azione lato Accanto.
    locale, autenticato su 2 tenant di prova, per coprire IDOR / authz
    sui cerchi di cura. Più alto ROI applicativo del solo CVE scan.
 3. Wiring degli scan trivy + gitleaks in GitHub Actions
-   (`.github/workflows/security.yml`) per failo automatico su PR e tag.
+   (`.github/workflows/security.yml`) per failo automatico su PR e tag. ✅ Attivo dal 2026-06-03.
 4. Valutare il passaggio del backend a `mcr.microsoft.com/dotnet/aspnet:10.0-jammy-chiseled`
    per eliminare i file `setuid` ereditati da Ubuntu (oggi flag solo
    INFO su dockle, non bloccante).
