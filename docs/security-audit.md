@@ -282,6 +282,46 @@ resource scoped al cerchio prima di qualunque accesso al DB.
    (h1/h2/h3) sul listener `:443`, `request_body { max_size 25MB }` sul
    reverse proxy API (allineato a `Storage__MaxFileSizeBytes`), formattazione
    passata da `caddy fmt`.
+9. `security.txt` RFC 9116 + nginx route per `/.well-known/`.
+   ✅ Fatto il 2026-06-04: [web/public/.well-known/security.txt](../web/public/.well-known/security.txt)
+   pubblicato sotto `https://accanto.care/.well-known/security.txt`
+   con `Contact` (GitHub Security Advisories + mailto), `Expires`,
+   `Canonical`, `Policy` → `SECURITY.md`. In nginx (web) location
+   esplicita `^~ /.well-known/` con `Cache-Control: no-cache` prima
+   del fallback SPA, così il file viene servito col MIME corretto.
+10. Content Security Policy + COOP/CORP gestiti anche da nginx
+    (defense-in-depth oltre a Caddy). ✅ Fatto il 2026-06-04:
+    [frontend/security-headers.conf](../frontend/security-headers.conf) e
+    [web/security-headers.conf](../web/security-headers.conf) includono
+    `Content-Security-Policy`, `Cross-Origin-Opener-Policy: same-origin`,
+    `Cross-Origin-Resource-Policy: same-site`. CSP frontend stretta
+    (`default-src 'self'`, no inline JS, `frame-ancestors 'none'`,
+    `object-src 'none'`); CSP web allow-list Google Fonts solo dove serve.
+11. Probe RBAC autenticata sui ruoli `Owner`/`Caregiver`/`Viewer` di un
+    cerchio di cura. ✅ Fatto il 2026-06-04, 23/23 PASS.
+    ([scripts/security/rbac-probe.ps1](../scripts/security/rbac-probe.ps1))
+    Copre: lettura cerchio/timeline/doctor-q/shared-upd/documents/audit
+    per `Viewer` (allow su read, deny su mutazioni), `Caregiver` (allow
+    su mutazioni operative, deny su inviti/AI settings/eliminazione
+    cerchio).
+12. Probe rate-limit + lockout sulle policy
+    `auth-login`/`auth-register`/`auth-sensitive`/`invite-create`.
+    ✅ Fatto il 2026-06-04, 4/4 policy PASS.
+    ([scripts/security/rate-limit-probe.ps1](../scripts/security/rate-limit-probe.ps1))
+    Lo script ricarica temporaneamente il backend con limiti bassi via
+    override compose (`RateLimit__*__PermitLimit=3`), spara N+1
+    richieste per ciascuna policy e verifica che la `(N+1)`-esima
+    riceva `429`. A fine probe ripristina i default di Development.
+
+### Finding minori (osservabilità, non sicurezza)
+
+- `ForbiddenException` registrata da Serilog come HTTP `500` nei log
+  applicativi anche quando il client riceve correttamente `403`. Causa:
+  `app.UseMiddleware<ErrorHandlingMiddleware>()` è registrato PRIMA di
+  `app.UseSerilogRequestLogging()` in [backend/src/Accanto.Api/Program.cs](../backend/src/Accanto.Api/Program.cs),
+  quindi Serilog vede l'eccezione non gestita prima che il middleware
+  esterno la converta in `403`. Da invertire l'ordine in un PR dedicato:
+  riduce solo il rumore nei log/alert, non cambia la risposta HTTP.
 
 ## Storico run
 
@@ -292,3 +332,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-03 | main post-IDOR-probe | 21/21 PASS su probe tenant isolation | Nessun IDOR su endpoint scoped a `care-circles/{id}`. |
 | 2026-06-03 | main post-hardening immagini | 0 HIGH/CRITICAL su tutte e 3 le immagini; probe IDOR 21/21 PASS | Backend → chiseled (`app`/UID 1654, no shell). Frontend+web → `nginx-unprivileged` (`nginx`/UID 101, porta 8080). |
 | 2026-06-03 | main post-supply-chain | Dependabot attivo, CodeQL attivo, container runtime hardening, Caddyfile audit | Defense-in-depth a livello supply chain + runtime + edge proxy. Probe IDOR ancora 21/21 PASS sullo stack hardened. |
+| 2026-06-04 | main post-tier2 | `security.txt` pubblicato, CSP/COOP/CORP anche a livello nginx, probe RBAC 23/23 PASS, probe rate-limit 4/4 PASS | Coverage spostata da "perimetro + tenant" a "perimetro + tenant + ruoli + rate-limit". |

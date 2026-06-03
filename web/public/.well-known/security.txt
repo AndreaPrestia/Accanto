@@ -1,0 +1,12 @@
+# RFC 9116 — security.txt
+# https://www.rfc-editor.org/rfc/rfc9116
+#
+# Canonical su dominio apex (sito vetrina). La SPA su app.accanto.care
+# rinvia qui se necessario.
+Contact: https://github.com/AndreaPrestia/Accanto/security/advisories/new
+Contact: mailto:andrea.prestia@accanto.care
+Expires: 2027-06-03T00:00:00.000Z
+Preferred-Languages: it, en
+Canonical: https://accanto.care/.well-known/security.txt
+Policy: https://github.com/AndreaPrestia/Accanto/blob/main/SECURITY.md
+Acknowledgments: https://github.com/AndreaPrestia/Accanto/security/advisories
