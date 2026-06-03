@@ -1,0 +1,129 @@
+name: ZAP authenticated full scan
+
+# Esegue uno scan OWASP ZAP "full" (active scan incluso) contro il backend
+# Accanto in modalità autenticata: registra un utente di test via API,
+# inietta il bearer JWT nell'header `Authorization` di tutte le richieste
+# ZAP via "replacer rule" caricata da `zap.conf` e lancia `zap-full-scan.py`.
+#
+# Si triggera:
+#   - su `workflow_dispatch` (per girarlo on demand prima di una release);
+#   - una volta a settimana (lunedi mattina UTC).
+#
+# Non gira su ogni PR perche' uno scan full attivo dura ~10-15 min: la
+# baseline passiva per branch resta documentata in docs/security-audit.md
+# e va lanciata in locale prima della merge.
+#
+# Fail se ZAP trova >=1 alert HIGH (regola passata via `-l` a zap-full-scan).
+# Il report HTML viene caricato come artifact anche in caso di fail.
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zap-auth-full:
+    name: ZAP full scan (authenticated)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare .env for compose
+        run: |
+          cp .env.example .env
+          # Override dei valori che richiedono entropia reale (in
+          # .env.example sono placeholder "change-me-...").
+          {
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"
+            echo "POSTGRES_APP_PASSWORD=$(openssl rand -hex 24)"
+            echo "Jwt__Key=$(openssl rand -hex 32)"
+            echo "FieldProtection__KeyBase64=$(openssl rand -base64 32)"
+          } >> .env
+
+      - name: Build & start stack
+        run: |
+          docker compose up -d --build db backend
+          # Aspetta che /health risponda 200.
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/health >/dev/null 2>&1; then
+              echo "backend healthy after ${i}s"; exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::backend non e' diventato healthy in 60s"
+          docker compose logs backend | tail -100
+          exit 1
+
+      - name: Register test user and capture bearer
+        id: auth
+        run: |
+          set -euo pipefail
+          email="zap-bot+$(uuidgen)@accanto.local"
+          body=$(jq -nc \
+            --arg e "$email" \
+            --arg p "Zap-Scan-$(openssl rand -hex 8)!" \
+            '{email:$e, displayName:"zap-bot", password:$p}')
+          resp=$(curl -fsS -X POST http://localhost:8080/api/auth/register \
+            -H 'Content-Type: application/json' -d "$body")
+          token=$(echo "$resp" | jq -r '.accessToken')
+          if [ -z "$token" ] || [ "$token" = "null" ]; then
+            echo "::error::registrazione utente fallita"
+            echo "$resp"
+            exit 1
+          fi
+          # Mascher: non vogliamo che il bearer JWT finisca nei log.
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Write ZAP automation config
+        env:
+          ZAP_BEARER: ${{ steps.auth.outputs.token }}
+        run: |
+          mkdir -p zap-work
+          # Replacer rule: inietta Authorization su tutte le richieste
+          # outbound. Caricato da zap-full-scan.py via -z "-config ...".
+          cat > zap-work/zap.conf <<EOF
+          -config replacer.full_list(0).description=add-bearer
+          -config replacer.full_list(0).enabled=true
+          -config replacer.full_list(0).matchtype=REQ_HEADER
+          -config replacer.full_list(0).matchstr=Authorization
+          -config replacer.full_list(0).regex=false
+          -config replacer.full_list(0).replacement=Bearer ${ZAP_BEARER}
+          EOF
+
+      - name: Run ZAP full scan (authenticated)
+        run: |
+          # Su ubuntu-latest il container puo' raggiungere il backend
+          # pubblicato su localhost:8080 tramite `--network host`.
+          docker run --rm \
+            --network host \
+            -v "${PWD}/zap-work:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-full-scan.py \
+              -t "http://localhost:8080" \
+              -r zap-report.html \
+              -J zap-report.json \
+              -z "-configfile /zap/wrk/zap.conf" \
+              -I  # -I = non fallire su WARN/INFO; FAIL (HIGH) restano fatali
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: |
+            zap-work/zap-report.html
+            zap-work/zap-report.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Dump backend logs on failure
+        if: failure()
+        run: docker compose logs backend | tail -200

@@ -347,6 +347,18 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     verifica 5 casi (spoof PNG-as-PDF, content-type fuori allow-list,
     spoof PNG-as-text, happy PDF, happy text). ✅ Fatto il 2026-06-04,
     5/5 PASS. Suite test 131/131 PASS (13 nuovi unit test).
+16. ZAP full scan autenticato in CI:
+    [.github/workflows/zap-full-auth.yml](../.github/workflows/zap-full-auth.yml)
+    builda lo stack `docker compose`, registra un utente di test via API
+    e cattura il bearer JWT, lo inietta come header `Authorization` su
+    tutte le richieste outbound di ZAP tramite "replacer rule"
+    (`zap-work/zap.conf`), quindi lancia `zap-full-scan.py` (active +
+    passive) contro `http://localhost:8080`. Schedulato il lunedì
+    mattina UTC + `workflow_dispatch`. Fallisce su alert FAIL (HIGH);
+    WARN/INFO sono silenziati (`-I`). Il report HTML/JSON viene caricato
+    come artifact `zap-report` (retention 30 giorni). ✅ Fatto il
+    2026-06-04. Sostituisce il giro `zap-baseline.py` manuale per i casi
+    in cui serve coverage attiva (es. pre-release).
 
 ### Finding minori (osservabilità, non sicurezza)
 
@@ -369,3 +381,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-03 | main post-supply-chain | Dependabot attivo, CodeQL attivo, container runtime hardening, Caddyfile audit | Defense-in-depth a livello supply chain + runtime + edge proxy. Probe IDOR ancora 21/21 PASS sullo stack hardened. |
 | 2026-06-04 | main post-tier2 | `security.txt` pubblicato, CSP/COOP/CORP anche a livello nginx, probe RBAC 23/23 PASS, probe rate-limit 4/4 PASS | Coverage spostata da "perimetro + tenant" a "perimetro + tenant + ruoli + rate-limit". |
 | 2026-06-04 | main post-tier3 | JWT HS256-only fail-fast, split ruoli Postgres `accanto`/`accanto_app` con `REVOKE CREATE`, upload magic-bytes + ClamAV opzionale, probe upload 5/5 PASS, RBAC 23/23 PASS, tenant 21/21 PASS, unit 131/131 PASS | Tier 3 completo. Difesa in profondità su auth/DB/upload. |
+| 2026-06-04 | main post-tier3-ci | Workflow `zap-full-auth` (full scan autenticato, schedulato settimanale + manual dispatch) aggiunto in CI | Coverage DAST passa da baseline manuale a full scan autenticato pianificato. |
