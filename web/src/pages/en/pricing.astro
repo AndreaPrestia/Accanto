@@ -7,7 +7,7 @@ const lang = 'en' as const;
 ---
 <BaseLayout
   title="Pricing · Accanto"
-  description="During the beta phase Accanto is free. Future plans will be defined together with the families who use it."
+  description="Accanto is free during beta. Also available self-hosted. No ads, no profiling. Future plans will be defined together with families using it."
 >
   <section class="container-page">
     <div class="mx-auto max-w-3xl text-center">
@@ -31,7 +31,8 @@ const lang = 'en' as const;
           <li>• Documents and timeline</li>
           <li>• Data export</li>
         </ul>
-        <a href={`${appUrl}/register`} class="btn-primary w-full">Start now</a>
+        <a href={`${appUrl}/register`} class="btn-primary w-full">Go to beta cloud</a>
+        <p class="text-xs text-accanto-500 mt-2 text-center">Your data stays yours.</p>
       </div>
       <div class="card">
         <p class="eyebrow mb-2">Self-hosted</p>
@@ -42,7 +43,8 @@ const lang = 'en' as const;
           <li>• Optional AI, also local</li>
           <li>• Community support</li>
         </ul>
-        <a href={routeUrl('contact', lang)} class="btn-ghost w-full">Reach out for details</a>
+        <a href={routeUrl('contact', lang)} class="btn-ghost w-full">Contact us about self-hosting</a>
+        <p class="text-xs text-accanto-500 mt-2 text-center">Code and Docker images on GitHub.</p>
       </div>
     </div>
     <p class="text-center text-sm text-accanto-500 mt-8">No card required. No ads. No profiling.</p>

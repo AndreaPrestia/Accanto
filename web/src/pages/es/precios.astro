@@ -7,7 +7,7 @@ const lang = 'es' as const;
 ---
 <BaseLayout
   title="Precios · Accanto"
-  description="Durante la fase beta Accanto es gratis. Los planes futuros se definirán junto a las familias que lo usan."
+  description="Accanto es gratis durante la beta. También disponible self-hosted. Sin publicidad, sin perfilado. Los planes futuros se definirán junto a las familias."
 >
   <section class="container-page">
     <div class="mx-auto max-w-3xl text-center">
@@ -31,7 +31,8 @@ const lang = 'es' as const;
           <li>• Documentos y cronología</li>
           <li>• Exportación de datos</li>
         </ul>
-        <a href={`${appUrl}/register`} class="btn-primary w-full">Empieza ahora</a>
+        <a href={`${appUrl}/register`} class="btn-primary w-full">Ir a la beta cloud</a>
+        <p class="text-xs text-accanto-500 mt-2 text-center">Tus datos siguen siendo tuyos.</p>
       </div>
       <div class="card">
         <p class="eyebrow mb-2">Self-hosted</p>
@@ -42,7 +43,8 @@ const lang = 'es' as const;
           <li>• IA opcional, también local</li>
           <li>• Soporte de la comunidad</li>
         </ul>
-        <a href={routeUrl('contact', lang)} class="btn-ghost w-full">Escríbenos</a>
+        <a href={routeUrl('contact', lang)} class="btn-ghost w-full">Escríbenos sobre self-hosted</a>
+        <p class="text-xs text-accanto-500 mt-2 text-center">Código e imágenes Docker en GitHub.</p>
       </div>
     </div>
     <p class="text-center text-sm text-accanto-500 mt-8">Sin tarjeta. Sin publicidad. Sin perfilado.</p>

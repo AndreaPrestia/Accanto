@@ -10,38 +10,38 @@ const groups = [
   {
     title: 'Organizza',
     items: [
-      { icon: '🌿', title: 'Cerchi di cura', description: 'Uno spazio per persona assistita, con inviti per familiari, badanti e professionisti.' },
-      { icon: '👥', title: 'Ruoli e permessi', description: 'Decidi cosa ciascuno può vedere o modificare. Cambia idea quando vuoi.' },
-      { icon: '📁', title: 'Documenti', description: 'Ricette, referti, moduli: caricabili con un clic, ritrovabili in pochi secondi.' }
+      { title: 'Cerchi di cura', description: 'Uno spazio per persona assistita, con inviti per familiari, badanti e professionisti.' },
+      { title: 'Ruoli e permessi', description: 'Decidi cosa ciascuno può vedere o modificare. Cambia idea quando vuoi.' },
+      { title: 'Documenti', description: 'Ricette, referti e moduli, ritrovabili in pochi secondi.' }
     ]
   },
   {
     title: 'Comunica',
     items: [
-      { icon: '🗓️', title: 'Timeline', description: 'Note, sintomi ed episodi su un\'unica linea del tempo condivisa.' },
-      { icon: '✉️', title: 'Aggiornamenti', description: 'Un riepilogo gentile per la famiglia, su richiesta, senza chat infinite.' },
-      { icon: '🩺', title: 'Domande per il medico', description: 'Raccogli dubbi tra una visita e l\'altra, stampali quando serve.' }
+      { title: 'Timeline', description: 'Note, sintomi ed episodi su un\'unica linea del tempo condivisa.' },
+      { title: 'Aggiornamenti', description: 'Un riepilogo per la famiglia, su richiesta, senza chat infinite.' },
+      { title: 'Domande per il medico', description: 'Raccogli dubbi tra una visita e l\'altra, stampali quando serve.' }
     ]
   },
   {
-    title: 'Cura te stesso',
+    title: 'Prenditi cura di te',
     items: [
-      { icon: '💛', title: 'Riflessioni', description: 'Brevi annotazioni private per riconoscere come stai oggi.' },
-      { icon: '🧭', title: 'Promemoria gentili', description: 'Suggerimenti che ricordano pause, riposo e contatti utili.' },
-      { icon: '🛟', title: 'Risorse locali', description: 'Spazio per i tuoi contatti di emergenza e i servizi del territorio.' }
+      { title: 'Riflessioni', description: 'Annotazioni private per riconoscere come stai oggi.' },
+      { title: 'Promemoria', description: 'Pause, riposo e contatti utili, ricordati al momento giusto.' },
+      { title: 'Risorse locali', description: 'Spazio per i contatti di emergenza e i servizi del territorio.' }
     ]
   }
 ];
 ---
 <BaseLayout
   title="Funzioni · Accanto"
-  description="Tutte le funzioni di Accanto: cerchi di cura, timeline, documenti, aggiornamenti per la famiglia, attenzione anche al caregiver."
+  description="Le funzioni di Accanto per organizzare, comunicare e prenderti cura di te: cerchi di cura, timeline, documenti, aggiornamenti per la famiglia."
 >
   <section class="container-page">
     <div class="mx-auto max-w-3xl text-center">
       <p class="eyebrow mb-3">Le funzioni</p>
-      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Tutto quello che serve per assistere un familiare</h1>
-      <p class="text-accanto-600 leading-relaxed">Strumenti semplici, pensati con chi assiste ogni giorno. Niente complicazioni, niente passaggi superflui.</p>
+      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Strumenti per assistere un familiare</h1>
+      <p class="text-accanto-600 leading-relaxed">Organizzare, comunicare, prenderti cura di te. Strumenti pensati con chi assiste ogni giorno, senza passaggi superflui.</p>
     </div>
   </section>
 
@@ -50,7 +50,7 @@ const groups = [
       <h2 class="text-2xl font-semibold mb-6 text-center">{g.title}</h2>
       <div class="grid gap-4 sm:grid-cols-3">
         {g.items.map((it) => (
-          <FeatureCard icon={it.icon} title={it.title} description={it.description} />
+          <FeatureCard title={it.title} description={it.description} />
         ))}
       </div>
     </section>
@@ -59,12 +59,12 @@ const groups = [
   <section class="container-page border-t border-accanto-100 text-center">
     <h2 class="text-2xl font-semibold mb-3">E l'intelligenza artificiale?</h2>
     <p class="max-w-2xl mx-auto text-accanto-600 leading-relaxed">
-      È opzionale e spenta di default. Quando attiva può girare anche su un modello self-hosted, in modo che le informazioni
-      della persona assistita non lascino il tuo ambiente. La usi solo se ti aiuta davvero.
+      È opzionale e spenta di default. Quando attiva può girare su un modello self-hosted: le informazioni
+      della persona assistita non lasciano il tuo ambiente. La usi solo se ti aiuta.
     </p>
     <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
       <a href={routeUrl('privacy', lang)} class="btn-ghost">Privacy e dati</a>
-      <a href={`${appUrl}/register`} class="btn-primary">Provala gratis</a>
+      <a href={`${appUrl}/register`} class="btn-primary">Crea il tuo spazio</a>
     </div>
   </section>
 </BaseLayout>

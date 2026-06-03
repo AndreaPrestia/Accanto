@@ -8,44 +8,44 @@ const appUrl = import.meta.env.PUBLIC_APP_URL;
 const lang = 'it' as const;
 
 const features = [
-  { icon: '🌿', title: 'Cerchi di cura', description: 'Un cerchio per persona assistita, dove inviti chi vuoi e decidi cosa condividere.' },
-  { icon: '🗓️', title: 'Timeline condivisa', description: 'Annotazioni, sintomi, episodi: tutti i fatti in ordine cronologico, accessibili al cerchio.' },
-  { icon: '📄', title: 'Documenti al sicuro', description: 'Ricette, referti e moduli, organizzati e accessibili quando servono.' },
-  { icon: '🩺', title: 'Domande per il medico', description: 'Prepara la prossima visita raccogliendo dubbi e osservazioni nel tempo.' },
-  { icon: '✉️', title: 'Aggiornamenti condivisi', description: 'Un modo gentile per tenere informata la famiglia senza chat infinite.' },
-  { icon: '💛', title: 'Cura di sé', description: 'Spazi di riflessione e momenti per riconoscere il proprio carico di lavoro.' }
+  { title: 'Cerchi di cura', description: 'Un cerchio per persona assistita: inviti chi vuoi e decidi cosa condividere.' },
+  { title: 'Timeline condivisa', description: 'Note, sintomi ed episodi in ordine cronologico, accessibili al cerchio.' },
+  { title: 'Documenti', description: 'Ricette, referti e moduli, organizzati e ritrovabili quando servono.' },
+  { title: 'Domande per il medico', description: 'Raccogli dubbi e osservazioni tra una visita e l\'altra.' },
+  { title: 'Aggiornamenti per la famiglia', description: 'Un riepilogo su richiesta, senza chat infinite.' },
+  { title: 'Cura di sé', description: 'Spazi di riflessione per riconoscere il proprio carico.' }
 ];
 ---
 <BaseLayout
-  title="Accanto · Una stanza tranquilla per chi assiste un familiare"
-  description="Accanto raccoglie informazioni, documenti e aggiornamenti per chi si prende cura di un familiare. Self-hosted, privacy by design, AI opzionale."
+  title="Accanto · Stanza tranquilla per familiari caregiver"
+  description="Accanto raccoglie informazioni, documenti e aggiornamenti per chi assiste un familiare. Self-hosted, privacy by design, AI opzionale."
 >
   <Hero
     eyebrow="Per i familiari caregiver"
     title="Una stanza tranquilla per chi assiste un familiare"
-    subtitle="Accanto raccoglie informazioni, documenti e aggiornamenti in un posto solo. Inviti chi vuoi, decidi tu cosa condividere. Niente pubblicità, niente profilazione."
-    ctaPrimary={{ label: 'Inizia gratis', href: `${appUrl}/register` }}
-    ctaSecondary={{ label: 'Scopri le funzioni', href: routeUrl('features', lang) }}
+    subtitle="Informazioni, documenti e aggiornamenti in un solo posto. Decidi tu chi invitare e cosa condividere."
+    ctaPrimary={{ label: 'Crea il tuo spazio', href: `${appUrl}/register` }}
+    ctaSecondary={{ label: 'Vedi le funzioni', href: routeUrl('features', lang) }}
   />
 
   <section class="container-page">
-    <h2 class="text-2xl font-semibold mb-2 text-center">Tre cose che cambiano la giornata</h2>
-    <p class="text-accanto-600 text-center max-w-2xl mx-auto mb-10">Quello che chi assiste un familiare ci ha detto più spesso, raccolto in tre idee.</p>
+    <h2 class="text-2xl font-semibold mb-2 text-center">Cosa cambia, in concreto</h2>
+    <p class="text-accanto-600 text-center max-w-2xl mx-auto mb-10">Quello che chi assiste un familiare ci ha raccontato più spesso, in tre idee.</p>
     <div class="grid gap-4 sm:grid-cols-3">
-      <FeatureCard icon="🧠" title="Niente più 'me lo ricordo io'" description="Tutte le informazioni in un solo posto, sempre disponibili anche di notte o in pronto soccorso." />
-      <FeatureCard icon="🤝" title="La famiglia allineata" description="Un cerchio dove gli aggiornamenti arrivano a chi serve, nel modo giusto, senza inondare chat." />
-      <FeatureCard icon="🫶" title="Spazio anche per te" description="Promemoria gentili sul tuo benessere: chi assiste ha bisogno di essere assistito." />
+      <FeatureCard title="Niente più «me lo ricordo io»" description="Le informazioni in un solo posto, disponibili anche di notte o in pronto soccorso." />
+      <FeatureCard title="Famiglia allineata" description="Un cerchio dove gli aggiornamenti arrivano a chi serve, senza inondare chat." />
+      <FeatureCard title="Spazio anche per te" description="Promemoria sul tuo benessere: anche chi assiste ha bisogno di essere assistito." />
     </div>
   </section>
 
   <section class="container-page bg-white border-y border-accanto-100">
     <div class="mx-auto max-w-3xl text-center">
       <p class="eyebrow mb-3">Le funzioni principali</p>
-      <h2 class="text-2xl font-semibold mb-6">Tutto quello che serve, niente di più</h2>
+      <h2 class="text-2xl font-semibold mb-6">Le cose essenziali, niente di più</h2>
     </div>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {features.map((f) => (
-        <FeatureCard icon={f.icon} title={f.title} description={f.description} />
+        <FeatureCard title={f.title} description={f.description} />
       ))}
     </div>
     <div class="text-center mt-8">

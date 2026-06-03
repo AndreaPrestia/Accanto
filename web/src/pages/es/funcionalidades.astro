@@ -10,38 +10,38 @@ const groups = [
   {
     title: 'Organiza',
     items: [
-      { icon: '🌿', title: 'Círculos de cuidado', description: 'Un espacio por persona cuidada, con invitaciones para familia, cuidadores y profesionales.' },
-      { icon: '👥', title: 'Roles y permisos', description: 'Decide qué puede ver o editar cada persona. Cambia de idea cuando quieras.' },
-      { icon: '📁', title: 'Documentos', description: 'Recetas, informes y formularios: súbelos con un clic y encuéntralos en segundos.' }
+      { title: 'Círculos de cuidado', description: 'Un espacio por persona cuidada, con invitaciones para familia, cuidadores y profesionales.' },
+      { title: 'Roles y permisos', description: 'Decide qué puede ver o editar cada persona. Cambia de idea cuando quieras.' },
+      { title: 'Documentos', description: 'Recetas, informes y formularios, listos para encontrarse en segundos.' }
     ]
   },
   {
     title: 'Comunica',
     items: [
-      { icon: '🗓️', title: 'Cronología', description: 'Notas, síntomas y episodios en una única línea de tiempo compartida.' },
-      { icon: '✉️', title: 'Avisos', description: 'Un resumen amable para la familia, cuando hace falta, sin chats interminables.' },
-      { icon: '🩺', title: 'Preguntas para el médico', description: 'Recoge dudas entre visitas e imprímelas cuando convenga.' }
+      { title: 'Cronología', description: 'Notas, síntomas y episodios en una única línea de tiempo compartida.' },
+      { title: 'Avisos', description: 'Un resumen para la familia, cuando hace falta, sin chats interminables.' },
+      { title: 'Preguntas para el médico', description: 'Recoge dudas entre visitas e imprímelas cuando convenga.' }
     ]
   },
   {
     title: 'Cuídate a ti',
     items: [
-      { icon: '💛', title: 'Reflexiones', description: 'Notas breves y privadas para reconocer cómo estás hoy.' },
-      { icon: '🧭', title: 'Recordatorios amables', description: 'Sugerencias para pausas, descanso y contactos útiles.' },
-      { icon: '🛟', title: 'Recursos locales', description: 'Espacio para tus contactos de emergencia y los servicios del barrio.' }
+      { title: 'Reflexiones', description: 'Notas privadas para reconocer cómo estás hoy.' },
+      { title: 'Recordatorios', description: 'Pausas, descanso y contactos útiles, en el momento adecuado.' },
+      { title: 'Recursos locales', description: 'Espacio para tus contactos de emergencia y los servicios del barrio.' }
     ]
   }
 ];
 ---
 <BaseLayout
   title="Funcionalidades · Accanto"
-  description="Todas las funcionalidades de Accanto: círculos de cuidado, cronología, documentos, avisos para la familia, y atención también para quien cuida."
+  description="Funcionalidades de Accanto para organizar, comunicar y cuidarte: círculos de cuidado, cronología, documentos, avisos a la familia."
 >
   <section class="container-page">
     <div class="mx-auto max-w-3xl text-center">
       <p class="eyebrow mb-3">Funcionalidades</p>
-      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Todo lo necesario para acompañar a un familiar</h1>
-      <p class="text-accanto-600 leading-relaxed">Herramientas sencillas, pensadas con quienes cuidan cada día. Sin complicaciones, sin pasos de más.</p>
+      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Herramientas para acompañar a un familiar</h1>
+      <p class="text-accanto-600 leading-relaxed">Organizar, comunicar, cuidarte. Herramientas pensadas con quienes cuidan cada día, sin pasos de más.</p>
     </div>
   </section>
 
@@ -50,7 +50,7 @@ const groups = [
       <h2 class="text-2xl font-semibold mb-6 text-center">{g.title}</h2>
       <div class="grid gap-4 sm:grid-cols-3">
         {g.items.map((it) => (
-          <FeatureCard icon={it.icon} title={it.title} description={it.description} />
+          <FeatureCard title={it.title} description={it.description} />
         ))}
       </div>
     </section>
@@ -59,12 +59,12 @@ const groups = [
   <section class="container-page border-t border-accanto-100 text-center">
     <h2 class="text-2xl font-semibold mb-3">¿Y la inteligencia artificial?</h2>
     <p class="max-w-2xl mx-auto text-accanto-600 leading-relaxed">
-      Es opcional y está desactivada por defecto. Cuando se activa, puede ejecutarse en un modelo self-hosted,
-      para que la información sobre la persona cuidada no salga de tu entorno. Úsala solo si te ayuda de verdad.
+      Es opcional y está desactivada por defecto. Cuando se activa, puede ejecutarse en un modelo self-hosted:
+      la información sobre la persona cuidada no sale de tu entorno. Úsala solo si te ayuda.
     </p>
     <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
       <a href={routeUrl('privacy', lang)} class="btn-ghost">Privacidad y datos</a>
-      <a href={`${appUrl}/register`} class="btn-primary">Pruébala gratis</a>
+      <a href={`${appUrl}/register`} class="btn-primary">Crea tu espacio</a>
     </div>
   </section>
 </BaseLayout>

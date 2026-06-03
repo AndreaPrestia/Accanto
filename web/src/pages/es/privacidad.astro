@@ -12,31 +12,43 @@ const lang = 'es' as const;
     <p class="eyebrow mb-3">Privacidad</p>
     <h1>Tus datos, tus reglas</h1>
 
+    <nav aria-label="Índice de la página" class="mb-8">
+      <p class="eyebrow mb-2">En esta página</p>
+      <ul class="text-sm text-accanto-600 space-y-1">
+        <li>• <a href="#que-recogemos" class="underline">Qué recogemos</a></li>
+        <li>• <a href="#que-no-hacemos" class="underline">Qué no hacemos</a></li>
+        <li>• <a href="#self-hosting" class="underline">Self-hosting</a></li>
+        <li>• <a href="#derechos" class="underline">Tus derechos</a></li>
+        <li>• <a href="#seguridad" class="underline">Seguridad</a></li>
+        <li>• <a href="#aviso-medico" class="underline">Aviso médico</a></li>
+      </ul>
+    </nav>
+
     <p>Accanto trata información sensible sobre la salud de la persona cuidada. Por eso desde el inicio elegimos un enfoque "privacy by design".</p>
 
-    <h2>Qué recogemos</h2>
+    <h2 id="que-recogemos">Qué recogemos</h2>
     <ul>
       <li>La información que tú introduces (notas, síntomas, documentos, contactos).</li>
       <li>Los datos estrictamente necesarios para el funcionamiento de la cuenta (email, hash de contraseña, logs esenciales).</li>
     </ul>
 
-    <h2>Qué no hacemos</h2>
+    <h2 id="que-no-hacemos">Qué no hacemos</h2>
     <ul>
       <li>No vendemos tus datos.</li>
       <li>No hacemos perfilado publicitario.</li>
       <li>No integramos rastreadores de terceros con fines comerciales.</li>
     </ul>
 
-    <h2>Self-hosting</h2>
+    <h2 id="self-hosting">Self-hosting</h2>
     <p>Accanto puede instalarse en tu propio servidor. En ese caso los datos permanecen físicamente en tu entorno. El modo IA es opcional y puede conectarse a un modelo local (por ejemplo con Ollama).</p>
 
-    <h2>Tus derechos</h2>
+    <h2 id="derechos">Tus derechos</h2>
     <p>Puedes exportar tus datos o solicitar su eliminación en cualquier momento desde tu área personal. Para consultas específicas escríbenos desde la página de <a href={routeUrl('contact', lang)}>contacto</a>.</p>
 
-    <h2>Seguridad</h2>
+    <h2 id="seguridad">Seguridad</h2>
     <p>Las contraseñas se guardan solo como hash. Las sesiones están firmadas y son revocables. Las conexiones usan HTTPS. Trabajamos para mantener una superficie de ataque reducida y vigilada.</p>
 
-    <h2>Aviso médico</h2>
+    <h2 id="aviso-medico">Aviso médico</h2>
     <p>Accanto no es un dispositivo médico. La información de la aplicación no sustituye el consejo médico cualificado.</p>
 
     <p class="text-sm text-accanto-500 mt-10">Esta página es un resumen orientativo, no sustituye una política de privacidad completa que puede solicitarse a través de la página de contacto.</p>

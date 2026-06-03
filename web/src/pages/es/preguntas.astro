@@ -2,13 +2,17 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import FaqItem from '../../components/FaqItem.astro';
 import { routeUrl } from '../../i18n';
+import { getFaq, faqJsonLd } from '../../data/faq';
 
 const lang = 'es' as const;
+const entries = getFaq(lang);
 ---
 <BaseLayout
   title="Preguntas frecuentes · Accanto"
   description="Respuestas a las preguntas más habituales sobre Accanto: para quién es, cómo funciona, privacidad, IA, self-hosting."
 >
+  <script type="application/ld+json" set:html={faqJsonLd(lang)} />
+
   <section class="container-page container-prose">
     <p class="eyebrow mb-3">FAQ</p>
     <h1>Preguntas frecuentes</h1>
@@ -17,27 +21,9 @@ const lang = 'es' as const;
 
   <section class="container-page">
     <div class="mx-auto max-w-2xl space-y-3">
-      <FaqItem question="¿Es Accanto un dispositivo médico?">
-        No. Accanto es una herramienta de apoyo organizativo. No sustituye al médico de cabecera ni a un consejo médico cualificado.
-      </FaqItem>
-      <FaqItem question="¿Cuánto cuesta?">
-        Durante la fase beta es gratis. Aún no hemos definido los planes futuros: el objetivo es seguir siendo accesible para las familias.
-      </FaqItem>
-      <FaqItem question="¿Quién puede ver mis datos?">
-        Solo las personas que tú invitas al círculo de cuidado, según los roles que asignes. Ningún administrador de Accanto accede a los contenidos que introduces.
-      </FaqItem>
-      <FaqItem question="¿Puedo instalar Accanto en mi servidor?">
-        Sí. Accanto está pensado para poder ser self-hosted, así los datos permanecen físicamente en tu entorno.
-      </FaqItem>
-      <FaqItem question="¿La inteligencia artificial es obligatoria?">
-        No. Es opcional y está desactivada por defecto. Cuando se activa puede conectarse a un modelo local para que los datos no salgan de tu entorno.
-      </FaqItem>
-      <FaqItem question="¿Cómo exporto mis datos?">
-        Desde tu área personal puedes solicitar la exportación completa de los datos en cualquier momento.
-      </FaqItem>
-      <FaqItem question="¿En qué idiomas está disponible?">
-        Italiano, inglés y español. Otros idiomas llegarán según las peticiones.
-      </FaqItem>
+      {entries.map((e) => (
+        <FaqItem question={e.question}>{e.answer}</FaqItem>
+      ))}
     </div>
   </section>
 </BaseLayout>

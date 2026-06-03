@@ -10,38 +10,38 @@ const groups = [
   {
     title: 'Organize',
     items: [
-      { icon: '🌿', title: 'Care circles', description: 'A space per person you care for, with invites for family, carers and professionals.' },
-      { icon: '👥', title: 'Roles and permissions', description: 'Decide what each person can see or edit. Change your mind anytime.' },
-      { icon: '📁', title: 'Documents', description: 'Prescriptions, reports, forms: upload with one click, find them in seconds.' }
+      { title: 'Care circles', description: 'A space per person you care for, with invites for family, carers and professionals.' },
+      { title: 'Roles and permissions', description: 'Decide what each person can see or edit. Change your mind anytime.' },
+      { title: 'Documents', description: 'Prescriptions, reports and forms, easy to find in seconds.' }
     ]
   },
   {
     title: 'Communicate',
     items: [
-      { icon: '🗓️', title: 'Timeline', description: 'Notes, symptoms and episodes on a single shared timeline.' },
-      { icon: '✉️', title: 'Updates', description: 'A gentle summary for the family, on demand, without endless chats.' },
-      { icon: '🩺', title: 'Questions for the doctor', description: 'Gather doubts between visits, print them when needed.' }
+      { title: 'Timeline', description: 'Notes, symptoms and episodes on a single shared timeline.' },
+      { title: 'Updates', description: 'A summary for the family, on demand, without endless chats.' },
+      { title: 'Questions for the doctor', description: 'Gather doubts between visits, print them when needed.' }
     ]
   },
   {
     title: 'Care for yourself',
     items: [
-      { icon: '💛', title: 'Reflections', description: 'Short private notes to acknowledge how you are today.' },
-      { icon: '🧭', title: 'Gentle reminders', description: 'Prompts that remind you of breaks, rest and useful contacts.' },
-      { icon: '🛟', title: 'Local resources', description: 'Room for your emergency contacts and local services.' }
+      { title: 'Reflections', description: 'Private notes to acknowledge how you are today.' },
+      { title: 'Reminders', description: 'Breaks, rest and useful contacts, surfaced at the right moment.' },
+      { title: 'Local resources', description: 'Room for emergency contacts and local services.' }
     ]
   }
 ];
 ---
 <BaseLayout
   title="Features · Accanto"
-  description="All Accanto features: care circles, timeline, documents, family updates, and care for the caregiver too."
+  description="Accanto features to organize, communicate and care for yourself: care circles, timeline, documents, family updates."
 >
   <section class="container-page">
     <div class="mx-auto max-w-3xl text-center">
       <p class="eyebrow mb-3">Features</p>
-      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Everything you need to support a family member</h1>
-      <p class="text-accanto-600 leading-relaxed">Simple tools, shaped by people who give care every day. No complications, no unnecessary steps.</p>
+      <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Tools to support a family member</h1>
+      <p class="text-accanto-600 leading-relaxed">Organize, communicate, take care of yourself. Tools shaped with people who give care every day, no unnecessary steps.</p>
     </div>
   </section>
 
@@ -50,7 +50,7 @@ const groups = [
       <h2 class="text-2xl font-semibold mb-6 text-center">{g.title}</h2>
       <div class="grid gap-4 sm:grid-cols-3">
         {g.items.map((it) => (
-          <FeatureCard icon={it.icon} title={it.title} description={it.description} />
+          <FeatureCard title={it.title} description={it.description} />
         ))}
       </div>
     </section>
@@ -59,12 +59,12 @@ const groups = [
   <section class="container-page border-t border-accanto-100 text-center">
     <h2 class="text-2xl font-semibold mb-3">And artificial intelligence?</h2>
     <p class="max-w-2xl mx-auto text-accanto-600 leading-relaxed">
-      It's optional and off by default. When on, it can run on a self-hosted model, so the information about
-      the person you care for never leaves your environment. Use it only if it truly helps.
+      It's optional and off by default. When on, it can run on a self-hosted model: information about
+      the person you care for never leaves your environment. Use it only if it helps.
     </p>
     <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
       <a href={routeUrl('privacy', lang)} class="btn-ghost">Privacy and data</a>
-      <a href={`${appUrl}/register`} class="btn-primary">Try it free</a>
+      <a href={`${appUrl}/register`} class="btn-primary">Create your space</a>
     </div>
   </section>
 </BaseLayout>

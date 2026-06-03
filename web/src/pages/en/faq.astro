@@ -2,13 +2,17 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import FaqItem from '../../components/FaqItem.astro';
 import { routeUrl } from '../../i18n';
+import { getFaq, faqJsonLd } from '../../data/faq';
 
 const lang = 'en' as const;
+const entries = getFaq(lang);
 ---
 <BaseLayout
   title="FAQ · Accanto"
   description="Frequently asked questions about Accanto: who it's for, how it works, privacy, AI, self-hosting."
 >
+  <script type="application/ld+json" set:html={faqJsonLd(lang)} />
+
   <section class="container-page container-prose">
     <p class="eyebrow mb-3">FAQ</p>
     <h1>Frequently asked questions</h1>
@@ -17,27 +21,9 @@ const lang = 'en' as const;
 
   <section class="container-page">
     <div class="mx-auto max-w-2xl space-y-3">
-      <FaqItem question="Is Accanto a medical device?">
-        No. Accanto is an organizational support tool. It does not replace your doctor or any qualified medical advice.
-      </FaqItem>
-      <FaqItem question="How much does it cost?">
-        During the beta phase it is free. We have not defined future plans yet — our goal is to stay accessible to families.
-      </FaqItem>
-      <FaqItem question="Who can see my data?">
-        Only the people you invite into the care circle, according to the roles you assign. No Accanto administrator accesses the content you enter.
-      </FaqItem>
-      <FaqItem question="Can I install Accanto on my own server?">
-        Yes. Accanto is designed to be self-hosted, so data stays physically in your environment.
-      </FaqItem>
-      <FaqItem question="Is the AI mandatory?">
-        No. It is optional and off by default. When on, it can be connected to a local model to keep data inside your environment.
-      </FaqItem>
-      <FaqItem question="How do I export my data?">
-        You can request a full data export from your personal area at any time.
-      </FaqItem>
-      <FaqItem question="Which languages are supported?">
-        Italian, English and Spanish. More languages will follow based on requests.
-      </FaqItem>
+      {entries.map((e) => (
+        <FaqItem question={e.question}>{e.answer}</FaqItem>
+      ))}
     </div>
   </section>
 </BaseLayout>

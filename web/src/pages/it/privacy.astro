@@ -12,37 +12,49 @@ const lang = 'it' as const;
     <p class="eyebrow mb-3">Privacy</p>
     <h1 class="text-3xl sm:text-4xl font-semibold mb-6">I tuoi dati, le tue regole</h1>
 
+    <nav aria-label="Indice della pagina" class="mb-8">
+      <p class="eyebrow mb-2">In questa pagina</p>
+      <ul class="text-sm text-accanto-600 space-y-1">
+        <li>• <a href="#cosa-raccogliamo" class="underline">Cosa raccogliamo</a></li>
+        <li>• <a href="#cosa-non-facciamo" class="underline">Cosa non facciamo</a></li>
+        <li>• <a href="#self-hosting" class="underline">Self-hosting</a></li>
+        <li>• <a href="#diritti" class="underline">I tuoi diritti</a></li>
+        <li>• <a href="#sicurezza" class="underline">Sicurezza</a></li>
+        <li>• <a href="#avviso-medico" class="underline">Avviso medico</a></li>
+      </ul>
+    </nav>
+
     <p>Accanto raccoglie informazioni sensibili che riguardano la salute di chi assisti.
     Per questo motivo abbiamo scelto fin dall'inizio un approccio "privacy by design".</p>
 
-    <h2>Cosa raccogliamo</h2>
+    <h2 id="cosa-raccogliamo">Cosa raccogliamo</h2>
     <ul>
       <li>Le informazioni che inserisci tu (note, sintomi, documenti, contatti).</li>
       <li>I dati strettamente necessari al funzionamento dell'account (email, password con hash, log essenziali).</li>
     </ul>
 
-    <h2>Cosa non facciamo</h2>
+    <h2 id="cosa-non-facciamo">Cosa non facciamo</h2>
     <ul>
       <li>Non vendiamo i tuoi dati.</li>
       <li>Non facciamo profilazione pubblicitaria.</li>
       <li>Non integriamo tracker di terze parti per scopi commerciali.</li>
     </ul>
 
-    <h2>Self-hosting</h2>
+    <h2 id="self-hosting">Self-hosting</h2>
     <p>Accanto può essere installato sul tuo server. In quel caso i dati restano fisicamente
     nel tuo ambiente. La modalità AI è opzionale e può essere collegata a un modello locale
     (per esempio tramite Ollama).</p>
 
-    <h2>I tuoi diritti</h2>
+    <h2 id="diritti">I tuoi diritti</h2>
     <p>Puoi esportare i tuoi dati o richiederne la cancellazione in qualunque momento dalla tua area personale.
     Per richieste specifiche puoi contattarci dalla pagina <a href={routeUrl('contact', lang)}>Contatti</a>.</p>
 
-    <h2>Sicurezza</h2>
+    <h2 id="sicurezza">Sicurezza</h2>
     <p>Le password sono salvate solo come hash. Le sessioni sono firmate e revocabili.
     Le connessioni avvengono tramite HTTPS. Lavoriamo per mantenere superfici di attacco
     ridotte e ben sorvegliate.</p>
 
-    <h2>Avviso medico</h2>
+    <h2 id="avviso-medico">Avviso medico</h2>
     <p>Accanto non è un dispositivo medico. Le informazioni contenute nell'applicazione
     non sostituiscono un consulto sanitario qualificato.</p>
 
