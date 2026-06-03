@@ -51,7 +51,7 @@
 	redir / /it 302
 
 	# Servito da nginx nel container web (Astro statico)
-	reverse_proxy web:80
+	reverse_proxy web:8080
 }
 
 # --- Applicazione (sottodominio app.) ---
@@ -67,7 +67,7 @@
 
 	# SPA servita da nginx nel container frontend. Nessun proxy verso il backend qui:
 	# le chiamate API partono dal browser e vanno direttamente a https://{$ACCANTO_API_DOMAIN}.
-	reverse_proxy frontend:80
+	reverse_proxy frontend:8080
 }
 
 # --- API (sottodominio api.) ---

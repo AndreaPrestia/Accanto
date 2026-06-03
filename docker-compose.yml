@@ -52,11 +52,9 @@ services:
       - ./storage:/data/storage
     ports:
       - "8080:8080"
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # Nessun healthcheck definito qui: l'immagine runtime e' "chiseled"
+    # (distroless) e non ha curl/wget. Nessun altro servizio dipende dalla
+    # salute del backend; per probe esterni usare GET /health.
 
   frontend:
     build:
@@ -68,7 +66,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "5173:80"
+      - "5173:8080"
 
   # Sito vetrina statico (Astro). Indipendente dalla SPA: pensato per il dominio apex
   # mentre la SPA vive su un sottodominio "app.". In locale è esposto sulla 4321.
@@ -81,7 +79,7 @@ services:
         PUBLIC_APP_URL: ${WEB_PUBLIC_APP_URL:-http://localhost:5173}
     restart: unless-stopped
     ports:
-      - "4321:80"
+      - "4321:8080"
 
   # Modulo AI (opzionale, self-hosted). Si avvia solo con profilo "ai":
   #   docker compose --profile ai up -d

@@ -15,18 +15,18 @@ COPY backend/ ./
 ARG APP_VERSION=0.0.0
 RUN dotnet publish ./src/Accanto.Api/Accanto.Api.csproj -c Release -o /app/publish /p:UseAppHost=false /p:Version=${APP_VERSION}
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+# Runtime: chiseled distroless di Microsoft.
+# - no shell, no package manager (zero CVE da apt/distro)
+# - utente non-root (`app`, UID 1654) gia' configurato
+# - solo le dipendenze ASP.NET, niente curl/wget
+# Nota: lo storage scrivibile (/data/storage) arriva via bind/volume in compose;
+# l'utente `app` deve poter scrivere sul mount.
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS runtime
 WORKDIR /app
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && useradd -m accanto \
-    && mkdir -p /data/storage \
-    && chown -R accanto:accanto /data/storage /app
-USER accanto
-
-COPY --from=build /app/publish ./
+COPY --from=build --chown=app:app /app/publish /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV DOTNET_RUNNING_IN_CONTAINER=true
 EXPOSE 8080
+USER app
 ENTRYPOINT ["dotnet", "Accanto.Api.dll"]
