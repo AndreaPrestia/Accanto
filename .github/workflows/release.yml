@@ -169,7 +169,7 @@ jobs:
           export PATH="$PATH:$HOME/.dotnet/tools"
 
           dotnet CycloneDX backend/src/Accanto.Api/Accanto.Api.csproj \
-            --json --output-path sbom --filename "backend-${TAG}.cdx.json"
+            --output-format Json --output sbom --filename "backend-${TAG}.cdx.json"
 
           npm install -g @cyclonedx/cyclonedx-npm
 

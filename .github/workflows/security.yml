@@ -179,16 +179,17 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ../sbom
-          # CycloneDX .NET v4+: i flag short (-j/-t/-o) sono stati rimossi,
-          # vanno usate le long form (--json / --include-transitive /
-          # --output-path). Eseguiamo sul solo progetto runtime
-          # (Accanto.Api): include tutte le dipendenze dei progetti
-          # referenziati (Application, Domain, Infrastructure) ma esclude
-          # le dev/test deps di Accanto.Tests, che NON finiscono nei
-          # container di produzione.
+          # CycloneDX .NET v6: -j/-o short flags rimossi/cambiati (-t ora
+          # significa --exclude-test-projects). Usiamo long form:
+          # --output-format Json (al posto del deprecato --json) e
+          # --output <dir> (al posto del deprecato --out).
+          # Eseguiamo sul solo progetto runtime (Accanto.Api): include
+          # tutte le dipendenze dei progetti referenziati (Application,
+          # Domain, Infrastructure) ma esclude le dev/test deps di
+          # Accanto.Tests, che NON finiscono nei container di produzione.
           dotnet CycloneDX src/Accanto.Api/Accanto.Api.csproj \
-            --json \
-            --output-path ../sbom \
+            --output-format Json \
+            --output ../sbom \
             --filename backend.cdx.json
 
       - name: Install CycloneDX npm tool
