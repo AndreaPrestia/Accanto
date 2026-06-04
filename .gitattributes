@@ -2,3 +2,7 @@
 
 # Bash scripts must keep LF endings to be executable on Linux even when committed from Windows.
 *.sh text eol=lf
+
+# Caddyfile is consumed by Caddy in a Linux container; keep LF to avoid endless
+# 'LF will be replaced by CRLF' warnings on Windows checkouts.
+Caddyfile text eol=lf

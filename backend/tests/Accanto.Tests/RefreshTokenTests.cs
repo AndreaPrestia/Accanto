@@ -101,7 +101,7 @@ public class RefreshTokenTests : IClassFixture<AccantoFactory>
         sessions!.Should().HaveCount(2);
         sessions.Should().ContainSingle(s => s.Current);
 
-        var other = sessions.First(s => !s.Current);
+        var other = sessions!.First(s => !s.Current);
         var del = await client.DeleteAsync($"/api/account/sessions/{other.Id}");
         del.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
