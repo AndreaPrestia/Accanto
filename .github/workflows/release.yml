@@ -26,6 +26,12 @@ on:
 permissions:
   contents: write
   packages: write
+  # Necessari per SLSA build provenance attestation firmata via Sigstore:
+  #   - id-token:write -> OIDC token per Fulcio (cert ephemeral)
+  #   - attestations:write -> pubblica l'attestation su GitHub (visibile
+  #     nella tab Security > Attestations e via `gh attestation verify`)
+  id-token: write
+  attestations: write
 
 env:
   REGISTRY: ghcr.io
@@ -87,6 +93,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build & push
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.image.context }}
@@ -102,6 +109,29 @@ jobs:
             PUBLIC_APP_URL=${{ vars.WEB_PUBLIC_APP_URL || 'http://localhost:5173' }}
           cache-from: type=gha,scope=${{ matrix.image.name }}
           cache-to: type=gha,scope=${{ matrix.image.name }},mode=max
+          # BuildKit attestations attaccate all'OCI manifest come referrers
+          # nel registry (in-toto format). 'mode=max' include i Dockerfile +
+          # i build args nelle SLSA provenance materials. 'sbom: true'
+          # esegue syft dentro BuildKit -> SBOM SPDX embedded nell'immagine,
+          # complementare alle CycloneDX generate post-build dal job
+          # github-release (CycloneDX = release-level, SPDX = image-level).
+          provenance: mode=max
+          sbom: true
+
+      # SLSA v1.0 build provenance firmata via Sigstore keyless (Fulcio +
+      # Rekor). Diversa dalla provenance BuildKit di sopra: questa e'
+      # firmata da GitHub con OIDC ed e' verificabile pubblicamente con
+      # `gh attestation verify oci://ghcr.io/.../accanto-<img>:<tag>
+      # --repo AndreaPrestia/Accanto`. Conferma che l'immagine e' stata
+      # buildata da questa repo, in questo workflow, a partire da questo
+      # commit (proteggge da tipo-squatting + dependency confusion sui
+      # consumatori delle immagini).
+      - name: SLSA build provenance attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/accanto-${{ matrix.image.name }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
 
   github-release:
     name: Create GitHub Release

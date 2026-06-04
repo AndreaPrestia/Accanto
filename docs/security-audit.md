@@ -504,6 +504,32 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     (allineato a NTIA Minimum Elements + Executive Order 14028), (c)
     diff delle dipendenze tra release per change management.
     Consumabile da Dependency-Track, Grype, OSV-Scanner, Snyk.
+27. **SLSA build provenance firmata su immagini GHCR** ✅ Fatto il 2026-06-04.
+    [.github/workflows/release.yml](../.github/workflows/release.yml)
+    aggiunge due livelli di attestation a ogni immagine pushata:
+    (a) **BuildKit-native** (`provenance: mode=max` + `sbom: true` su
+    `docker/build-push-action`) → SLSA provenance + SPDX SBOM embedded
+    nell'OCI manifest come referrers, inclusi Dockerfile e build args
+    nei materials;
+    (b) **GitHub-signed via Sigstore keyless** (`actions/attest-build-provenance@v2`
+    con `push-to-registry: true`) → SLSA v1.0 statement firmato con
+    certificato ephemeral Fulcio e trasparenza Rekor, pubblicato sia
+    nella tab Security > Attestations del repo sia come referrer OCI.
+    Permessi aggiunti al workflow: `id-token: write` (OIDC per Fulcio) +
+    `attestations: write` (pubblicazione su GitHub).
+    Verifica da consumer:
+    ```sh
+    gh attestation verify oci://ghcr.io/andreaprestia/accanto-backend:v0.8.2 \
+      --repo AndreaPrestia/Accanto
+    ```
+    Conferma criptograficamente che l'immagine e' stata buildata da
+    questa repo, in questo workflow `release.yml`, a partire da quel
+    commit specifico (mitigazione di tipo-squatting, dependency
+    confusion, e supply-chain attack su immagini "look-alike" pushate
+    su altri registry). Allineato a SLSA build level 3 (build platform
+    isolata = GitHub Actions runner, provenance non falsificabile,
+    OIDC + Fulcio + Rekor). Prossimi step opzionali per arrivare a
+    L3 pieno: hosted build platform → policy-gated deployment.
 
 ## Storico run
 
@@ -526,3 +552,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-forensic | `forensic-snapshot.ps1` (bundle .tar.gz: DB enc + audit CSV 30gg + refresh attivi + users summary + docker inspect + immagini digest + log 72h + sha256 manifest). `backup-offsite.ps1` + `.env.backup-offsite.example` (wrapper amazon/aws-cli per S3-compat, IONOS placeholder, idempotente). Compromise scenario aggiornato: step 0 = forensic snapshot PRIMA di toccare segreti. | Risolve "rotare segreti distrugge prove volatili"; aggancia il futuro upload offsite IONOS senza dover scrivere codice quando il piano cloud sara' attivo. |
 | 2026-06-04 | main post-csp-reporting | Endpoint `/api/security/csp-report` (anonimo, rate-limit 100/min IP, body cap 8KB, accetta sia `application/csp-report` legacy che `application/reports+json` Reporting API moderno) → log strutturati `Accanto.Security.Csp`. Caddyfile vetrina + SPA aggiungono `report-uri` + `report-to csp-endpoint` + header `Reporting-Endpoints` puntando all'endpoint. Test 146/146 PASS (5 nuovi `CspReportEndpointTests`: legacy, Reporting API, JSON invalido, body vuoto, anonimo). | Le CSP sono gia' in enforce dal day-1; mancava il canale per RACCOGLIERE le violazioni reali (es. estensioni browser, mixed content, regressioni del frontend dopo refactor). Ora ogni violazione finisce in log strutturato per ASR-tuning. |
 | 2026-06-04 | main post-sbom | Job `sbom` in security.yml genera SBOM CycloneDX 1.5 JSON per backend (.NET, runtime-only) + frontend + web ad ogni push/PR/schedulazione (upload come workflow artifact, retention 90 gg). release.yml rigenera e allega le SBOM come asset della GitHub Release con sidecar `.sha256`. | Da "scan-and-fail" a "inventario versionato": consumabile da Dependency-Track/Grype/OSV-Scanner per re-scan offline su nuove CVE, e richiesto da clienti enterprise/sanitario (NTIA + EO 14028). |
+| 2026-06-04 | main post-slsa | SLSA build provenance per le 3 immagini GHCR: BuildKit attestation (`provenance: mode=max` + `sbom: true`) embedded nell'OCI manifest + GitHub-signed attestation via Sigstore keyless (`actions/attest-build-provenance@v2`, push-to-registry). Verifica consumer: `gh attestation verify oci://ghcr.io/.../accanto-<img>:<tag> --repo AndreaPrestia/Accanto`. | Mitigazione tipo-squatting + dependency-confusion: criptograficamente verificabile che l'immagine viene da questa repo e da questo workflow, non da un look-alike pushato altrove. Allineato a SLSA L3. |
