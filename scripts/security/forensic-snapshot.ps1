@@ -55,7 +55,7 @@
 
 .NOTES
     Dopo aver creato il bundle e averlo messo al sicuro, PROCEDI con:
-    1. Rotazione segreti (docs/runbooks/secret-rotation.md, sezione
+    1. Rotazione segreti (accanto-ops/secret-rotation.md, sezione
        "Compromise scenario").
     2. Analisi log audit (audit_log_entries + security_audit_log_entries
        sono append-only — vedi security-audit.md item 17 e 20).

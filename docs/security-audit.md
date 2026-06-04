@@ -389,9 +389,9 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     leggibile). Primo drill: 13/13 PASS in ~25 s. Runbook completo con
     procedura DR step-by-step, RPO 24h / RTO 1h, retention
     7d+4w+12m+7y, schedule drill mensile in
-    [docs/runbooks/backup-restore.md](runbooks/backup-restore.md).
+    `accanto-ops/backup-restore.md` (repo separato).
 20. **Secret rotation runbook** ✅ Fatto il 2026-06-04.
-    [docs/runbooks/secret-rotation.md](runbooks/secret-rotation.md)
+    `accanto-ops/secret-rotation.md` (repo separato)
     inventaria tutti i segreti (Postgres owner/app, `Jwt__Key`,
     `Encryption__MasterKey`, `BACKUP_PASSPHRASE`, cloud keys) con
     blast radius, cadenza e procedura per-segreto. Sezione "compromise
@@ -454,7 +454,7 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     git rev + operator + sha256 per file. Risolve il problema classico
     del "ho ruotato i segreti e restartato → ho distrutto le prove
     volatili". Lo step 0 del compromise scenario in
-    [docs/runbooks/secret-rotation.md](../docs/runbooks/secret-rotation.md)
+    `accanto-ops/secret-rotation.md` (repo separato)
     e' ora "lancia forensic-snapshot.ps1 PRIMA di toccare qualunque cosa".
     [scripts/db/backup-offsite.ps1](../scripts/db/backup-offsite.ps1)
     + [.env.backup-offsite.example](../.env.backup-offsite.example)
@@ -547,7 +547,7 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     come variabili opt-in (default vuoto = no-op, app logga solo su
     stdout). Per attivare basta `docker compose --profile observability
     up -d` + valorizzare `Logging__SeqUrl=http://seq:5341` in `.env`.
-    Nuovo runbook [docs/runbooks/logging.md](runbooks/logging.md):
+    Nuovo runbook `accanto-ops/logging.md` (repo separato):
     architettura, query Seq utili per scenari di sicurezza (login
     falliti per IP, rate-limit triggered, attivita' per utente, CSP
     violations, slow request, errori EF), retention raccomandata,
@@ -614,7 +614,7 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     monitorati solo internamente (Serilog → Seq). Problema noto:
     se il backend crash-loopa o l'host e' giu', _l'unico processo
     che dovrebbe alertare_ e' anche quello morto → blind spot.
-    Aggiunto runbook [docs/runbooks/monitoring.md](runbooks/monitoring.md):
+    Aggiunto runbook `accanto-ops/monitoring.md` (repo separato):
     Healthchecks.io (free, EU, self-hostabile) per i job interni +
     UptimeRobot (free) per gli endpoint pubblici. Decisione di usare
     due provider indipendenti cosi' un loro outage non azzera la

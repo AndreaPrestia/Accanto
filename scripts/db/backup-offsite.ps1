@@ -45,7 +45,7 @@
       - Access key dedicata: write/list ONLY su questo bucket, NO delete
         (la cancellazione vecchi backup la fa il lifecycle, non l'app)
 
-    Vedi docs/runbooks/backup-restore.md sezione "Storage offsite (IONOS S3)".
+    Vedi accanto-ops/backup-restore.md sezione "Storage offsite (IONOS S3)".
 #>
 [CmdletBinding()]
 param(
