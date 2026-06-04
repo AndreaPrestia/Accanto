@@ -202,12 +202,29 @@ if (!app.Environment.IsEnvironment("Testing"))
         .Options;
     await using var migratorDb = new AccantoDbContext(migratorOptions, protector);
     await migratorDb.Database.MigrateAsync();
+
+    // Defense-in-depth: rendiamo le tabelle di audit append-only a
+    // livello DB per il ruolo runtime `accanto_app`. Anche se l'app
+    // venisse compromessa (SQLi, RCE) non potrebbe alterare o
+    // cancellare gli eventi di audit gia' registrati. SELECT e INSERT
+    // restano (servono a controller / scrittura eventi). Idempotente:
+    // REVOKE su privilegi inesistenti e' un no-op. No-op anche se il
+    // ruolo accanto_app non esiste (single-role dev setup).
+    await migratorDb.Database.ExecuteSqlRawAsync(@"
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'accanto_app') THEN
+        REVOKE UPDATE, DELETE ON TABLE public.security_audit_log_entries FROM accanto_app;
+        REVOKE UPDATE, DELETE ON TABLE public.audit_log_entries FROM accanto_app;
+    END IF;
+END$$;");
 }
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
-
-// Una riga strutturata per richiesta HTTP (metodo, path, status, latenza, user agent).
+// Serilog deve avvolgere ErrorHandlingMiddleware: cosi' quando il
+// middleware traduce una ForbiddenException in 403, Serilog logga la
+// status code finale (403) e non l'eccezione non gestita (500).
 app.UseSerilogRequestLogging();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI();

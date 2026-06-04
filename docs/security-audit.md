@@ -360,15 +360,23 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     2026-06-04. Sostituisce il giro `zap-baseline.py` manuale per i casi
     in cui serve coverage attiva (es. pre-release).
 
-### Finding minori (osservabilità, non sicurezza)
-
-- `ForbiddenException` registrata da Serilog come HTTP `500` nei log
-  applicativi anche quando il client riceve correttamente `403`. Causa:
-  `app.UseMiddleware<ErrorHandlingMiddleware>()` è registrato PRIMA di
-  `app.UseSerilogRequestLogging()` in [backend/src/Accanto.Api/Program.cs](../backend/src/Accanto.Api/Program.cs),
-  quindi Serilog vede l'eccezione non gestita prima che il middleware
-  esterno la converta in `403`. Da invertire l'ordine in un PR dedicato:
-  riduce solo il rumore nei log/alert, non cambia la risposta HTTP.
+17. **Tabelle di audit append-only a livello DB** ✅ Fatto il 2026-06-04.
+    Dopo `MigrateAsync()`, in [backend/src/Accanto.Api/Program.cs](../backend/src/Accanto.Api/Program.cs)
+    si esegue `REVOKE UPDATE, DELETE ON security_audit_log_entries,
+    audit_log_entries FROM accanto_app` (idempotente, no-op se il
+    ruolo non esiste). Il ruolo runtime conserva `SELECT` (lettura via
+    `AuditController`) e `INSERT` (scrittura eventi via
+    `SecurityAuditLog`) ma non può più mutare o cancellare righe
+    storiche. Difesa in profondità: anche con SQLi o RCE applicativa
+    l'attaccante non può ripulire le proprie tracce. Verifica manuale:
+    `psql -U accanto_app -c 'DELETE FROM audit_log_entries WHERE 1=0'`
+    → `ERROR: permission denied for table audit_log_entries`.
+18. **Ordine middleware Serilog/ErrorHandling corretto** ✅ Fatto il
+    2026-06-04. `app.UseSerilogRequestLogging()` precede ora
+    `app.UseMiddleware<ErrorHandlingMiddleware>()`: Serilog vede la
+    risposta finale (`403` per `ForbiddenException`) invece
+    dell'eccezione non gestita (loggata come `500`). Riduce il rumore
+    nei log/alert senza cambiare la risposta HTTP al client.
 
 ## Storico run
 
@@ -382,3 +390,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-tier2 | `security.txt` pubblicato, CSP/COOP/CORP anche a livello nginx, probe RBAC 23/23 PASS, probe rate-limit 4/4 PASS | Coverage spostata da "perimetro + tenant" a "perimetro + tenant + ruoli + rate-limit". |
 | 2026-06-04 | main post-tier3 | JWT HS256-only fail-fast, split ruoli Postgres `accanto`/`accanto_app` con `REVOKE CREATE`, upload magic-bytes + ClamAV opzionale, probe upload 5/5 PASS, RBAC 23/23 PASS, tenant 21/21 PASS, unit 131/131 PASS | Tier 3 completo. Difesa in profondità su auth/DB/upload. |
 | 2026-06-04 | main post-tier3-ci | Workflow `zap-full-auth` (full scan autenticato, schedulato settimanale + manual dispatch) aggiunto in CI | Coverage DAST passa da baseline manuale a full scan autenticato pianificato. |
+| 2026-06-04 | main post-tier3-hardening | Tabelle audit append-only via `REVOKE UPDATE,DELETE` su `accanto_app` (verifica manuale: `permission denied for table audit_log_entries`); ordine middleware corretto → 403 loggati come 403, non più come 500; RBAC 23/23 PASS, unit 131/131 PASS | Quick wins post-audit: difesa in profondità su audit + osservabilità log. |
