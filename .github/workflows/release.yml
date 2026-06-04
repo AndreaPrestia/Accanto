@@ -115,6 +115,45 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # SBOM CycloneDX allegate alla release per audit/compliance.
+      # Stessa logica del job 'sbom' in security.yml ma versionata
+      # immutabilmente (asset di release, retention infinita).
+      - name: Generate SBOMs
+        run: |
+          set -euo pipefail
+          mkdir -p sbom
+          TAG="${GITHUB_REF_NAME}"
+
+          dotnet tool install --global CycloneDX
+          # Aggiungi global tools al PATH.
+          export PATH="$PATH:$HOME/.dotnet/tools"
+
+          dotnet CycloneDX backend/src/Accanto.Api/Accanto.Api.csproj \
+            -j -t -o sbom --filename "backend-${TAG}.cdx.json"
+
+          npm install -g @cyclonedx/cyclonedx-npm
+
+          (cd frontend && npm ci --ignore-scripts && \
+            cyclonedx-npm --output-format JSON --spec-version 1.5 \
+              --output-file "../sbom/frontend-${TAG}.cdx.json")
+          (cd web && npm ci --ignore-scripts && \
+            cyclonedx-npm --output-format JSON --spec-version 1.5 \
+              --output-file "../sbom/web-${TAG}.cdx.json")
+
+          # Sidecar SHA-256 per chain of custody dei file SBOM.
+          (cd sbom && for f in *.cdx.json; do sha256sum "$f" > "$f.sha256"; done)
+          ls -la sbom/
+
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -122,9 +161,11 @@ jobs:
           TAG="${GITHUB_REF_NAME}"
           # Skip se la release esiste già (es. ri-run manuale).
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists, skipping."
+            echo "Release $TAG already exists, allegando SBOM..."
+            gh release upload "$TAG" sbom/*.cdx.json sbom/*.sha256 --clobber
             exit 0
           fi
           gh release create "$TAG" \
             --title "$TAG" \
-            --generate-notes
+            --generate-notes \
+            sbom/*.cdx.json sbom/*.sha256

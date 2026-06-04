@@ -142,3 +142,83 @@ jobs:
       - name: Audit (allowlist-aware)
         working-directory: ${{ matrix.project }}
         run: bash ../scripts/ci/npm-audit-check.sh ./.npm-audit-allow
+
+  sbom:
+    name: SBOM (CycloneDX)
+    runs-on: ubuntu-latest
+    # Genera l'inventario firmato delle dipendenze per backend (.NET) e
+    # per i due progetti JS (frontend SPA + sito vetrina). Formato:
+    # CycloneDX 1.5 JSON, standard de-facto consumabile da Dependency-Track,
+    # Grype, OSV-Scanner, Snyk e dai tool di compliance (NTIA SBOM, EO 14028).
+    #
+    # Differenza vs dotnet-deps/npm-audit: questi job FALLISCONO la build se
+    # trovano vuln High/Critical. La SBOM invece e' un ARTIFACT della build,
+    # utilizzabile per:
+    #   - re-scan offline quando una nuova CVE viene pubblicata (senza
+    #     dover ri-buildare l'app)
+    #   - audit di compliance (clienti enterprise / sanitario chiedono SBOM)
+    #   - tracking delle dipendenze nel tempo (delta tra release)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install CycloneDX .NET tool
+        run: dotnet tool install --global CycloneDX
+
+      - name: Generate backend SBOM
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          mkdir -p ../sbom
+          # -j JSON, -t includi transitive, -o out dir.
+          # Eseguiamo sul solo progetto runtime (Accanto.Api): include
+          # tutte le dipendenze dei progetti referenziati (Application,
+          # Domain, Infrastructure) ma esclude le dev/test deps di
+          # Accanto.Tests, che NON finiscono nei container di produzione.
+          dotnet CycloneDX src/Accanto.Api/Accanto.Api.csproj \
+            -j -t -o ../sbom \
+            --filename backend.cdx.json
+
+      - name: Install CycloneDX npm tool
+        run: npm install -g @cyclonedx/cyclonedx-npm
+
+      - name: Generate frontend SBOM
+        working-directory: frontend
+        run: |
+          npm ci --ignore-scripts
+          cyclonedx-npm --output-format JSON --spec-version 1.5 \
+            --output-file ../sbom/frontend.cdx.json
+
+      - name: Generate web SBOM
+        working-directory: web
+        run: |
+          npm ci --ignore-scripts
+          cyclonedx-npm --output-format JSON --spec-version 1.5 \
+            --output-file ../sbom/web.cdx.json
+
+      - name: SBOM summary
+        run: |
+          set -euo pipefail
+          for f in sbom/*.cdx.json; do
+            COMP=$(jq '.components | length' "$f")
+            SPEC=$(jq -r '.specVersion' "$f")
+            echo "$(basename "$f"): $COMP componenti (CycloneDX $SPEC)"
+          done
+
+      - name: Upload SBOMs as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom/
+          # Retention 90 giorni e' default; per release/audit a lungo
+          # termine vedi release.yml che li allega come release asset.
+          retention-days: 90

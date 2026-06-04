@@ -484,6 +484,26 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     utili a chi sonda l'endpoint). Coperto da 5 test integrazione
     (`CspReportEndpointTests`). Le CSP erano gia' in enforce dal day-1;
     questa e' la parte mancante per chiudere il loop di osservabilita'.
+26. **SBOM CycloneDX in CI + allegata alle release** ✅ Fatto il 2026-06-04.
+    Nuovo job `sbom` in [.github/workflows/security.yml](../.github/workflows/security.yml)
+    genera ad ogni push/PR/schedulazione 3 SBOM CycloneDX 1.5 JSON:
+    `backend.cdx.json` (via tool .NET `CycloneDX`, sul progetto runtime
+    `Accanto.Api` con `-t` per transitive → esclude le deps di test che
+    non finiscono in container), `frontend.cdx.json` e `web.cdx.json`
+    (via `@cyclonedx/cyclonedx-npm`). Upload come workflow artifact
+    `sbom-cyclonedx` (retention 90 gg). Il job stampa anche il numero
+    di componenti per file come summary.
+    [.github/workflows/release.yml](../.github/workflows/release.yml)
+    rigenera le stesse SBOM al tag `vX.Y.Z` e le **allega come asset
+    della GitHub Release** (versionamento immutabile, retention infinita)
+    con sidecar `.sha256` per chain of custody.
+    Valore vs dotnet-deps/npm-audit (che FALLISCONO la build su
+    vuln High/Critical): la SBOM e' un INVENTARIO post-build, riusabile
+    per (a) re-scan offline quando esce una nuova CVE senza ri-buildare,
+    (b) audit di compliance richiesti da clienti enterprise/sanitario
+    (allineato a NTIA Minimum Elements + Executive Order 14028), (c)
+    diff delle dipendenze tra release per change management.
+    Consumabile da Dependency-Track, Grype, OSV-Scanner, Snyk.
 
 ## Storico run
 
@@ -505,3 +525,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-jwt-multikid | JWT multi-key con `IssuerSigningKeyResolver`: schema `Jwt__Keys__<id>` + `Jwt__ActiveKeyId`, claim `kid` nell'header, validazione kid-aware con fallback per token legacy. Backward compat su `Jwt__Key`. Test 141/141 PASS (10 nuovi `JwtSigningMaterialTests`). Runbook secret-rotation §3 con procedura zero-downtime. | Ultimo TODO della sezione secret-rotation chiuso: ora ogni segreto Accanto ha procedura di rotazione zero-downtime o quasi (eccetto BACKUP_PASSPHRASE per ovvi motivi di retention). |
 | 2026-06-04 | main post-forensic | `forensic-snapshot.ps1` (bundle .tar.gz: DB enc + audit CSV 30gg + refresh attivi + users summary + docker inspect + immagini digest + log 72h + sha256 manifest). `backup-offsite.ps1` + `.env.backup-offsite.example` (wrapper amazon/aws-cli per S3-compat, IONOS placeholder, idempotente). Compromise scenario aggiornato: step 0 = forensic snapshot PRIMA di toccare segreti. | Risolve "rotare segreti distrugge prove volatili"; aggancia il futuro upload offsite IONOS senza dover scrivere codice quando il piano cloud sara' attivo. |
 | 2026-06-04 | main post-csp-reporting | Endpoint `/api/security/csp-report` (anonimo, rate-limit 100/min IP, body cap 8KB, accetta sia `application/csp-report` legacy che `application/reports+json` Reporting API moderno) → log strutturati `Accanto.Security.Csp`. Caddyfile vetrina + SPA aggiungono `report-uri` + `report-to csp-endpoint` + header `Reporting-Endpoints` puntando all'endpoint. Test 146/146 PASS (5 nuovi `CspReportEndpointTests`: legacy, Reporting API, JSON invalido, body vuoto, anonimo). | Le CSP sono gia' in enforce dal day-1; mancava il canale per RACCOGLIERE le violazioni reali (es. estensioni browser, mixed content, regressioni del frontend dopo refactor). Ora ogni violazione finisce in log strutturato per ASR-tuning. |
+| 2026-06-04 | main post-sbom | Job `sbom` in security.yml genera SBOM CycloneDX 1.5 JSON per backend (.NET, runtime-only) + frontend + web ad ogni push/PR/schedulazione (upload come workflow artifact, retention 90 gg). release.yml rigenera e allega le SBOM come asset della GitHub Release con sidecar `.sha256`. | Da "scan-and-fail" a "inventario versionato": consumabile da Dependency-Track/Grype/OSV-Scanner per re-scan offline su nuove CVE, e richiesto da clienti enterprise/sanitario (NTIA + EO 14028). |
