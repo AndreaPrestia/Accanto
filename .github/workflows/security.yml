@@ -179,13 +179,16 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ../sbom
-          # -j JSON, -t includi transitive, -o out dir.
-          # Eseguiamo sul solo progetto runtime (Accanto.Api): include
-          # tutte le dipendenze dei progetti referenziati (Application,
-          # Domain, Infrastructure) ma esclude le dev/test deps di
-          # Accanto.Tests, che NON finiscono nei container di produzione.
+          # CycloneDX .NET v4+: i flag short (-j/-t/-o) sono stati rimossi,
+          # vanno usate le long form (--json / --include-transitive /
+          # --output-path). Eseguiamo sul solo progetto runtime
+          # (Accanto.Api): include tutte le dipendenze dei progetti
+          # referenziati (Application, Domain, Infrastructure) ma esclude
+          # le dev/test deps di Accanto.Tests, che NON finiscono nei
+          # container di produzione.
           dotnet CycloneDX src/Accanto.Api/Accanto.Api.csproj \
-            -j -t -o ../sbom \
+            --json \
+            --output-path ../sbom \
             --filename backend.cdx.json
 
       - name: Install CycloneDX npm tool
