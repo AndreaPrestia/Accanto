@@ -4,6 +4,7 @@ using System.Text.Json;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
+using Accanto.Application.Email;
 using Accanto.Application.Security;
 using Accanto.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ public class TwoFactorService : ITwoFactorService
     private readonly IPasswordHasher _hasher;
     private readonly IRefreshTokenService _refresh;
     private readonly ISecurityAuditLog _audit;
+    private readonly ICircleEmailNotifier _email;
     private readonly TwoFactorOptions _opt;
 
     public TwoFactorService(
@@ -27,6 +29,7 @@ public class TwoFactorService : ITwoFactorService
         IPasswordHasher hasher,
         IRefreshTokenService refresh,
         ISecurityAuditLog audit,
+        ICircleEmailNotifier email,
         IOptions<TwoFactorOptions> opt)
     {
         _db = db;
@@ -34,6 +37,7 @@ public class TwoFactorService : ITwoFactorService
         _hasher = hasher;
         _refresh = refresh;
         _audit = audit;
+        _email = email;
         _opt = opt.Value;
     }
 
@@ -92,6 +96,10 @@ public class TwoFactorService : ITwoFactorService
         await _db.SaveChangesAsync(cancellationToken);
 
         await _audit.LogAsync(userId, SecurityAuditEventType.TwoFactorEnabled, cancellationToken: cancellationToken);
+        // Notifica di sicurezza (bypassa preferenze): l'utente deve sapere che
+        // 2FA e' stata attivata sul suo account, soprattutto se non e' stato lui.
+        _ = _email.SendSecurityEmailAsync(userId, "2FA attivata sul tuo account Accanto",
+            EmailTemplates.TwoFactorEnabled(), CancellationToken.None);
         return new EnableTwoFactorResponse(codes);
     }
 
@@ -126,6 +134,8 @@ public class TwoFactorService : ITwoFactorService
         await _db.SaveChangesAsync(cancellationToken);
 
         await _audit.LogAsync(userId, SecurityAuditEventType.TwoFactorDisabled, cancellationToken: cancellationToken);
+        _ = _email.SendSecurityEmailAsync(userId, "2FA disattivata sul tuo account Accanto",
+            EmailTemplates.TwoFactorDisabled(), CancellationToken.None);
 
         // Le sessioni attive restano, ma per sicurezza notifichiamo: per ora niente revoca esplicita.
     }

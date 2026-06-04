@@ -32,7 +32,7 @@ public class GdprExportServiceTests
         var hasher = new PasswordHasher();
         var auth = new Accanto.Infrastructure.Authorization.CareCircleAuthorization(db);
         var audit = new NoOpAuditLog();
-        var circles = new CareCircleService(db, auth, audit, new CreateCareCircleRequestValidator(), new UpdateCareCircleRequestValidator());
+        var circles = new CareCircleService(db, auth, audit, new NoOpOwnerTwoFactorOnboarding(), new CreateCareCircleRequestValidator(), new UpdateCareCircleRequestValidator());
 
         var user = new User
         {

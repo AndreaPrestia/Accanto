@@ -15,7 +15,7 @@ public class CareCircleExportServiceTests
         QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
         var db = TestDb.Create();
         var auth = new CareCircleAuthorization(db);
-        var circles = new CareCircleService(db, auth, new NoOpAuditLog(), new CreateCareCircleRequestValidator(), new UpdateCareCircleRequestValidator());
+        var circles = new CareCircleService(db, auth, new NoOpAuditLog(), new NoOpOwnerTwoFactorOnboarding(), new CreateCareCircleRequestValidator(), new UpdateCareCircleRequestValidator());
         var export = new CareCircleExportService(db, auth);
         return (export, circles, db);
     }

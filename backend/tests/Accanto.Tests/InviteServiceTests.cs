@@ -18,10 +18,11 @@ public class InviteServiceTests
         var circles = new CareCircleService(
             db, auth,
             new NoOpAuditLog(),
+            new NoOpOwnerTwoFactorOnboarding(),
             new CreateCareCircleRequestValidator(),
             new UpdateCareCircleRequestValidator());
         IValidator<CreateInviteRequest> createV = new CreateInviteRequestValidator();
-        var invites = new InviteService(db, auth, new NoOpAuditLog(), new NoOpCircleEmailNotifier(), createV);
+        var invites = new InviteService(db, auth, new NoOpAuditLog(), new NoOpCircleEmailNotifier(), new NoOpOwnerTwoFactorOnboarding(), createV);
         return (invites, circles, db);
     }
 

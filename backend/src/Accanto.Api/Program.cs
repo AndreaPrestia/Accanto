@@ -249,6 +249,10 @@ app.UseAuthorization();
 // nel LogContext. Tutti i log emessi dai controller/servizi nella request
 // erediteranno automaticamente UserId/ClientIp/RequestId.
 app.UseMiddleware<LogContextEnrichmentMiddleware>();
+// Enforcement 2FA per ruolo Owner: deve girare DOPO authentication (serve
+// il ClaimsPrincipal) e PRIMA dei controller. Whitelist su /api/account/2fa/*
+// per evitare deadlock.
+app.UseMiddleware<Accanto.Api.Middleware.RequireTwoFactorForOwnersMiddleware>();
 app.UseRateLimiter();
 
 // Health endpoints:

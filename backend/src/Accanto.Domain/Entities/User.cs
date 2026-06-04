@@ -20,4 +20,11 @@ public class User
     public string? TwoFactorPendingSecret { get; set; }
     /// <summary>JSON array di hash SHA-256 (hex) dei codici di recupero non ancora usati.</summary>
     public string? TwoFactorRecoveryCodesJson { get; set; }
+
+    /// <summary>
+    /// Scadenza della grace window dopo cui 2FA diventa obbligatorio per questo
+    /// utente. Settato al momento della promozione a Owner (o backfill alla
+    /// migration di rollout). NULL = nessun obbligo (utente mai stato Owner).
+    /// </summary>
+    public DateTimeOffset? TwoFactorRequiredFromUtc { get; set; }
 }

@@ -640,6 +640,70 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     Sommato a item 19 (backup cifrato) + item 24 (forensic snapshot
     + offsite) la pipeline DR e' ora end-to-end monitorata.
 
+31. **2FA obbligatorio per Owner con grace 7 giorni** ✅ Fatto il 2026-06-04.
+    Gli Owner di un care circle hanno accesso a operazioni
+    distruttive (delete circle, change role, export GDPR completo)
+    e ai dati di tutti i membri: e' il ruolo piu' privilegiato.
+    Finora 2FA era facoltativa; un Owner con password debole o
+    leakata era game-over per il cerchio. Aggiunto enforcement:
+    - Entita' `User.TwoFactorRequiredFromUtc` (timestamptz nullable)
+      con migration di backfill SQL: ogni Owner pre-rollout
+      riceve deadline = `NOW() + 7 giorni`. Cosi' nessun account
+      esistente viene bloccato istantaneamente al deploy.
+    - Middleware
+      [`RequireTwoFactorForOwnersMiddleware`](../backend/src/Accanto.Api/Middleware/RequireTwoFactorForOwnersMiddleware.cs)
+      tra `UseAuthorization` e `UseRateLimiter`: per ogni request
+      autenticata controlla in una sola query
+      `(TwoFactorEnabled, TwoFactorRequiredFromUtc, IsOwner)`. Se
+      Owner senza 2FA e deadline scaduta → 403
+      `application/problem+json` con `code: two_factor_required_for_owner`.
+      Entro la grace, passa ma aggiunge header `X-2FA-Required-By`
+      (ISO 8601) per il banner countdown frontend.
+    - Whitelist minima volutamente: `/api/account/2fa/*`,
+      `/api/account/me`, `/api/auth/{login,logout,refresh,2fa-login}`,
+      `/api/security/csp-report`, `/swagger`, `/health`. Senza
+      questa whitelist l'Owner scaduto non potrebbe MAI raggiungere
+      `/api/account/2fa/setup` per uscire dal blocco → deadlock.
+    - Lazy backfill: utente Owner con deadline=null (es. seed di
+      test, account creato fuori dai code-path normali) riceve la
+      deadline alla prima request, calcolata su `OwnerGraceHours`.
+    - Hook su promozione runtime:
+      [`CareCircleService.CreateAsync`](../backend/src/Accanto.Application/CareCircles/CareCircleService.cs)
+      (creatore del cerchio) e
+      [`InviteService.AcceptAsync`](../backend/src/Accanto.Application/Invites/InviteService.cs)
+      (invitato come Owner) chiamano
+      [`IOwnerTwoFactorOnboarding`](../backend/src/Accanto.Application/Auth/TwoFactor/OwnerTwoFactorOnboarding.cs)
+      che setta la deadline (se assente) e invia l'email
+      `TwoFactorRequiredForOwner` con la data limite.
+    - Notifiche email (3 totali, minime, via
+      `ICircleEmailNotifier.SendSecurityEmailAsync` che bypassa
+      preferenze topic):
+      `TwoFactorRequiredForOwner` (alla promozione),
+      `TwoFactorEnabled` (post enable, "se non sei stato tu..."),
+      `TwoFactorDisabled` (post disable). NIENTE reminder
+      schedulato o hosted-service: per scelta esplicita di
+      scope minimo. Il banner frontend si arrangia con
+      `X-2FA-Required-By`.
+    - Flag di backout: `TwoFactor:RequireForOwners=false` (default
+      true) disattiva l'intero enforcement runtime senza ridistribuire.
+      Utile come kill-switch operativo se emergesse un edge case
+      in produzione.
+    - 6 nuovi integration test in
+      [`TwoFactorOwnerEnforcementTests`](../backend/tests/Accanto.Tests/TwoFactorOwnerEnforcementTests.cs):
+      Owner entro grace (200 + header), Owner oltre grace (403 +
+      problem code), 2fa/setup raggiungibile oltre grace, logout
+      raggiungibile oltre grace, non-Owner mai bloccato, lazy
+      backfill funzionante. Totale 167/167 PASS.
+    - **Out of scope (deliberato per minimal)**: forzare 2FA
+      *anche entro la grace* sui soli endpoint distruttivi (delete
+      circle, change role, owner-only invite). Da rivalutare se
+      durante la grace dovesse capitare un incident reale di
+      account takeover su Owner senza 2FA configurata.
+    Effetto sicurezza: chiude la classe di compromise "Owner senza
+    2FA → password leakata → game-over cerchio". Ruolo piu'
+    privilegiato finalmente protetto al livello che merita, con
+    rollout senza lockout grazie a backfill + grace.
+
 ## Storico run
 
 | Data | Tag | Esito | Note |
@@ -665,3 +729,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-logging | `LogContextEnrichmentMiddleware` arricchisce ogni request con `UserId`/`ClientIp`/`RequestId` nel Serilog `LogContext`; backend in compose riceve `Logging__SeqUrl` come opt-in; runbook `logging.md` con query sicurezza, retention, esposizione prod (VPN/auth/OIDC). | Da `grep` su `docker logs` a indagine indicizzata multi-dimensionale (user × ip × time × event). Cardine per il prossimo step su monitoring + alerting su pattern sospetti. |
 | 2026-06-04 | main post-upload-hardening | `FileSignatureValidator.Validate` introdotto: 3 livelli di difesa (coerenza estensione/content-type, rifiuto universale di magics pericolosi MZ/ELF/Mach-O/ZIP/gzip/RAR/7z, validazione strutturale per formato — PDF `%%EOF`, PNG `IHDR`, JPEG `EOI`, UTF-8 strict per `text/plain`). 16 nuovi unit test, 2 nuove probe end-to-end (totale 7). Test 161/161 PASS. | Chiude polyglot upload e extension confusion; sommato a magic-bytes head-only + AV (item 15) il livello di difesa su upload diventa coerente con il resto della superficie. |
 | 2026-06-04 | main post-monitoring | Runbook `monitoring.md`: Healthchecks.io per job interni + UptimeRobot per endpoint pubblici (`/`, `app/`, `/api/health/ready`). Dead-man's switch implementato in `backup.ps1` e `restore-drill.ps1` (env `HEARTBEAT_BACKUP_URL` / `HEARTBEAT_RESTORE_URL`, ping POST opt-in solo a fine job riuscito). | Auto-osservazione (Seq) non basta: serve sonda esterna indipendente dall'infra monitorata. Chiude la classe "cron silenziosamente fallito" sui job DR critici. |
+| 2026-06-04 | main post-2fa-owner-enforcement | `User.TwoFactorRequiredFromUtc` + migration con backfill SQL per Owner esistenti (deadline NOW+7gg). `RequireTwoFactorForOwnersMiddleware`: 403/`two_factor_required_for_owner` oltre grace, header `X-2FA-Required-By` entro. Whitelist minima (`/api/account/2fa/*`, auth, health, swagger). 3 notifiche email security (`TwoFactorRequiredForOwner`/`Enabled`/`Disabled`) via `SendSecurityEmailAsync` (bypassa preferenze topic). Hook su `CareCircleService.CreateAsync` + `InviteService.AcceptAsync`. Flag `TwoFactor:RequireForOwners` per backout. Test 167/167 PASS (6 nuovi `TwoFactorOwnerEnforcementTests`). | Chiude la classe "Owner senza 2FA → password leakata → game-over cerchio": il ruolo piu' privilegiato finalmente protetto. Rollout senza lockout grazie a backfill + grace 7gg + whitelist deadlock-free. |

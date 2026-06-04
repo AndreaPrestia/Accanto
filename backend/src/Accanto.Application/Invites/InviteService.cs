@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Accanto.Application.Audit;
+using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
@@ -21,6 +22,7 @@ public class InviteService : IInviteService
     private readonly ICareCircleAuthorization _auth;
     private readonly IAuditLog _audit;
     private readonly ICircleEmailNotifier _email;
+    private readonly IOwnerTwoFactorOnboarding _ownerOnboarding;
     private readonly IValidator<CreateInviteRequest> _createValidator;
 
     public InviteService(
@@ -28,12 +30,14 @@ public class InviteService : IInviteService
         ICareCircleAuthorization auth,
         IAuditLog audit,
         ICircleEmailNotifier email,
+        IOwnerTwoFactorOnboarding ownerOnboarding,
         IValidator<CreateInviteRequest> createValidator)
     {
         _db = db;
         _auth = auth;
         _audit = audit;
         _email = email;
+        _ownerOnboarding = ownerOnboarding;
         _createValidator = createValidator;
     }
 
@@ -152,6 +156,14 @@ public class InviteService : IInviteService
         // Notifico gli Owner del cerchio che una nuova persona è entrata.
         var circle = await _db.CareCircles.FirstOrDefaultAsync(c => c.Id == invite.CareCircleId, cancellationToken);
         var circleName = circle?.Name ?? "Cerchio";
+
+        // Se l'utente accetta un invito con ruolo Owner -> avvia il timer 2FA
+        // e invia l'email informativa con la deadline.
+        if (invite.Role == CareCircleRole.Owner)
+        {
+            await _ownerOnboarding.OnPromotedToOwnerAsync(userId, circleName, cancellationToken);
+        }
+
         var newMember = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
         var newMemberName = newMember?.DisplayName ?? "Qualcuno";
         var ownerIds = await _db.CareCircleMembers

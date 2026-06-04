@@ -29,6 +29,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<ITwoFactorService, TwoFactorService>();
+        services.AddScoped<IOwnerTwoFactorOnboarding, OwnerTwoFactorOnboarding>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IGdprExportService, GdprExportService>();
         services.AddScoped<ICareCircleService, CareCircleService>();

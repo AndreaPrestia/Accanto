@@ -35,6 +35,7 @@ public class DocumentServiceUploadGuardsTests : IDisposable
 
         var circles = new CareCircleService(
             db, auth, new NoOpAuditLog(),
+            new NoOpOwnerTwoFactorOnboarding(),
             new CreateCareCircleRequestValidator(),
             new UpdateCareCircleRequestValidator());
 
