@@ -60,6 +60,12 @@ services:
       Ai__Model: ${Ai__Model:-llama3.2:3b}
       Ai__TimeoutSeconds: ${Ai__TimeoutSeconds:-60}
       Ai__MaxOutputTokens: ${Ai__MaxOutputTokens:-512}
+      # Log centralizzato (Seq). Default vuoto = sink Seq disabilitato e
+      # l'app logga solo su stdout. Per attivarlo: avvia il profilo
+      # `observability` e imposta in .env:
+      #   Logging__SeqUrl=http://seq:5341
+      Logging__SeqUrl: ${Logging__SeqUrl:-}
+      Logging__SeqApiKey: ${Logging__SeqApiKey:-}
     volumes:
       - ./storage:/data/storage
     ports:

@@ -225,7 +225,18 @@ END$$;");
 // Serilog deve avvolgere ErrorHandlingMiddleware: cosi' quando il
 // middleware traduce una ForbiddenException in 403, Serilog logga la
 // status code finale (403) e non l'eccezione non gestita (500).
-app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging(opt =>
+{
+    // Arricchisce la "summary line" emessa a fine request con UserId/IP/RequestId.
+    // L'enricher LogContext (via middleware piu' sotto) ce li ha gia' messi,
+    // ma copiarli su DiagnosticContext li rende visibili anche come property
+    // top-level della summary, comode per dashboard Seq.
+    opt.EnrichDiagnosticContext = (diag, http) =>
+    {
+        diag.Set("ClientIp", http.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+        diag.Set("UserAgent", http.Request.Headers["User-Agent"].ToString());
+    };
+});
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseSwagger();
@@ -234,6 +245,10 @@ app.UseSwaggerUI();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+// Dopo Authentication -> ClaimsPrincipal popolato -> possiamo pushare UserId
+// nel LogContext. Tutti i log emessi dai controller/servizi nella request
+// erediteranno automaticamente UserId/ClientIp/RequestId.
+app.UseMiddleware<LogContextEnrichmentMiddleware>();
 app.UseRateLimiter();
 
 // Health endpoints:

@@ -530,6 +530,34 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     isolata = GitHub Actions runner, provenance non falsificabile,
     OIDC + Fulcio + Rekor). Prossimi step opzionali per arrivare a
     L3 pieno: hosted build platform → policy-gated deployment.
+28. **Log centralizzato (Seq) + enricher di contesto request** ✅ Fatto il 2026-06-04.
+    Stack Seq via profilo `observability` di
+    [docker-compose.yml](../docker-compose.yml) era gia' presente ma il
+    backend non lo riceveva di default e nessun log di applicazione
+    portava `UserId`/`ClientIp`/`RequestId` → filtering inutile in UI.
+    Aggiunto [`LogContextEnrichmentMiddleware`](../backend/src/Accanto.Api/Common/LogContextEnrichmentMiddleware.cs)
+    registrato dopo `UseAuthentication()`: pusha `RequestId`, `ClientIp`
+    (X-Forwarded-For first hop, fallback peer, cap 45 char per evitare
+    log injection da header arbitrari) e `UserId` (claim `sub` /
+    `NameIdentifier`, null se anonimo) nel `Serilog.Context.LogContext`
+    per tutta la durata della request. `UseSerilogRequestLogging` ha
+    ora un `EnrichDiagnosticContext` che mette `ClientIp` + `UserAgent`
+    anche sulla summary line.
+    Backend in compose riceve `Logging__SeqUrl` / `Logging__SeqApiKey`
+    come variabili opt-in (default vuoto = no-op, app logga solo su
+    stdout). Per attivare basta `docker compose --profile observability
+    up -d` + valorizzare `Logging__SeqUrl=http://seq:5341` in `.env`.
+    Nuovo runbook [docs/runbooks/logging.md](runbooks/logging.md):
+    architettura, query Seq utili per scenari di sicurezza (login
+    falliti per IP, rate-limit triggered, attivita' per utente, CSP
+    violations, slow request, errori EF), retention raccomandata,
+    backup volume `seq-data`, esposizione in produzione (VPN-only /
+    basic-auth via Caddy / OIDC), smoke test.
+    Effetto sicurezza: incident response passa da `grep` su
+    `docker logs` a query indicizzate su tutto il fleet con join per
+    `UserId`/`ClientIp` → forensica veloce, dashboard real-time, alert
+    su pattern sospetti (cardine per i prossimi item su monitoring +
+    2FA admin enforcement).
 
 ## Storico run
 
@@ -553,3 +581,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-csp-reporting | Endpoint `/api/security/csp-report` (anonimo, rate-limit 100/min IP, body cap 8KB, accetta sia `application/csp-report` legacy che `application/reports+json` Reporting API moderno) → log strutturati `Accanto.Security.Csp`. Caddyfile vetrina + SPA aggiungono `report-uri` + `report-to csp-endpoint` + header `Reporting-Endpoints` puntando all'endpoint. Test 146/146 PASS (5 nuovi `CspReportEndpointTests`: legacy, Reporting API, JSON invalido, body vuoto, anonimo). | Le CSP sono gia' in enforce dal day-1; mancava il canale per RACCOGLIERE le violazioni reali (es. estensioni browser, mixed content, regressioni del frontend dopo refactor). Ora ogni violazione finisce in log strutturato per ASR-tuning. |
 | 2026-06-04 | main post-sbom | Job `sbom` in security.yml genera SBOM CycloneDX 1.5 JSON per backend (.NET, runtime-only) + frontend + web ad ogni push/PR/schedulazione (upload come workflow artifact, retention 90 gg). release.yml rigenera e allega le SBOM come asset della GitHub Release con sidecar `.sha256`. | Da "scan-and-fail" a "inventario versionato": consumabile da Dependency-Track/Grype/OSV-Scanner per re-scan offline su nuove CVE, e richiesto da clienti enterprise/sanitario (NTIA + EO 14028). |
 | 2026-06-04 | main post-slsa | SLSA build provenance per le 3 immagini GHCR: BuildKit attestation (`provenance: mode=max` + `sbom: true`) embedded nell'OCI manifest + GitHub-signed attestation via Sigstore keyless (`actions/attest-build-provenance@v2`, push-to-registry). Verifica consumer: `gh attestation verify oci://ghcr.io/.../accanto-<img>:<tag> --repo AndreaPrestia/Accanto`. | Mitigazione tipo-squatting + dependency-confusion: criptograficamente verificabile che l'immagine viene da questa repo e da questo workflow, non da un look-alike pushato altrove. Allineato a SLSA L3. |
+| 2026-06-04 | main post-logging | `LogContextEnrichmentMiddleware` arricchisce ogni request con `UserId`/`ClientIp`/`RequestId` nel Serilog `LogContext`; backend in compose riceve `Logging__SeqUrl` come opt-in; runbook `logging.md` con query sicurezza, retention, esposizione prod (VPN/auth/OIDC). | Da `grep` su `docker logs` a indagine indicizzata multi-dimensionale (user × ip × time × event). Cardine per il prossimo step su monitoring + alerting su pattern sospetti. |
