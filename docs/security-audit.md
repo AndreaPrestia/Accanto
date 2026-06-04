@@ -607,6 +607,39 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     con magic-bytes head-only + AV (item 15) + extension whitelist
     nello storage.
 
+30. **Monitoring esterno + dead-man's switch sui job pianificati** ✅ Fatto il 2026-06-04.
+    `/health/ready` (200/503 con check DB, vedi
+    [Program.cs](../backend/src/Accanto.Api/Program.cs)) e gli
+    endpoint pubblici di vetrina/SPA esistevano gia' ma erano
+    monitorati solo internamente (Serilog → Seq). Problema noto:
+    se il backend crash-loopa o l'host e' giu', _l'unico processo
+    che dovrebbe alertare_ e' anche quello morto → blind spot.
+    Aggiunto runbook [docs/runbooks/monitoring.md](runbooks/monitoring.md):
+    Healthchecks.io (free, EU, self-hostabile) per i job interni +
+    UptimeRobot (free) per gli endpoint pubblici. Decisione di usare
+    due provider indipendenti cosi' un loro outage non azzera la
+    visibilita'. Per ogni monitor: URL, intervallo, alert routing
+    (email + Telegram), severita', smoke test post-setup.
+    Implementato il **dead-man's switch** sui due cron critici:
+    [scripts/db/backup.ps1](../scripts/db/backup.ps1) e
+    [scripts/db/restore-drill.ps1](../scripts/db/restore-drill.ps1)
+    leggono `HEARTBEAT_BACKUP_URL` / `HEARTBEAT_RESTORE_URL`
+    dall'env (opt-in, nessuna dipendenza nuova) e fanno `POST` solo
+    quando il job ha completato con successo (dump cifrato + sha256
+    OK per il backup; 13/13 check PASS per il drill). Errore di
+    rete sul ping viene loggato come warning ma non fa fallire il
+    job (il backup e' gia' su disco); l'assenza di ping triggera
+    comunque l'alert lato Healthchecks dopo la grace window. Il
+    runbook documenta esplicitamente l'antipattern "ping in
+    `finally`" (mascherebbe i fallimenti che il dead-man's switch
+    deve catturare).
+    Effetto sicurezza: chiude la classe di incident
+    "cron silenziosamente fallito" — backup notturno che dal
+    2026-04-15 non parte piu' perche' la passphrase e' stata
+    rimossa dall'env, e nessuno se ne accorge fino al disastro.
+    Sommato a item 19 (backup cifrato) + item 24 (forensic snapshot
+    + offsite) la pipeline DR e' ora end-to-end monitorata.
+
 ## Storico run
 
 | Data | Tag | Esito | Note |
@@ -631,3 +664,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-slsa | SLSA build provenance per le 3 immagini GHCR: BuildKit attestation (`provenance: mode=max` + `sbom: true`) embedded nell'OCI manifest + GitHub-signed attestation via Sigstore keyless (`actions/attest-build-provenance@v2`, push-to-registry). Verifica consumer: `gh attestation verify oci://ghcr.io/.../accanto-<img>:<tag> --repo AndreaPrestia/Accanto`. | Mitigazione tipo-squatting + dependency-confusion: criptograficamente verificabile che l'immagine viene da questa repo e da questo workflow, non da un look-alike pushato altrove. Allineato a SLSA L3. |
 | 2026-06-04 | main post-logging | `LogContextEnrichmentMiddleware` arricchisce ogni request con `UserId`/`ClientIp`/`RequestId` nel Serilog `LogContext`; backend in compose riceve `Logging__SeqUrl` come opt-in; runbook `logging.md` con query sicurezza, retention, esposizione prod (VPN/auth/OIDC). | Da `grep` su `docker logs` a indagine indicizzata multi-dimensionale (user × ip × time × event). Cardine per il prossimo step su monitoring + alerting su pattern sospetti. |
 | 2026-06-04 | main post-upload-hardening | `FileSignatureValidator.Validate` introdotto: 3 livelli di difesa (coerenza estensione/content-type, rifiuto universale di magics pericolosi MZ/ELF/Mach-O/ZIP/gzip/RAR/7z, validazione strutturale per formato — PDF `%%EOF`, PNG `IHDR`, JPEG `EOI`, UTF-8 strict per `text/plain`). 16 nuovi unit test, 2 nuove probe end-to-end (totale 7). Test 161/161 PASS. | Chiude polyglot upload e extension confusion; sommato a magic-bytes head-only + AV (item 15) il livello di difesa su upload diventa coerente con il resto della superficie. |
+| 2026-06-04 | main post-monitoring | Runbook `monitoring.md`: Healthchecks.io per job interni + UptimeRobot per endpoint pubblici (`/`, `app/`, `/api/health/ready`). Dead-man's switch implementato in `backup.ps1` e `restore-drill.ps1` (env `HEARTBEAT_BACKUP_URL` / `HEARTBEAT_RESTORE_URL`, ping POST opt-in solo a fine job riuscito). | Auto-osservazione (Seq) non basta: serve sonda esterna indipendente dall'infra monitorata. Chiude la classe "cron silenziosamente fallito" sui job DR critici. |

@@ -114,6 +114,23 @@ Write-Host "[backup] OK" -ForegroundColor Green
 Write-Host "  file   : $encPath"
 Write-Host "  size   : $([math]::Round($encBytes/1MB,2)) MB"
 Write-Host "  sha256 : $hash"
+
+# Dead-man's switch: ping verso Healthchecks.io / UptimeRobot heartbeat
+# (URL opt-in via env). Se manca il ping per N minuti il provider esterno
+# alza un alert: cosi' un cron silenziosamente fallito non passa inosservato.
+# Best-effort: errori di rete non fanno fallire il backup (gia' completato).
+if ($env:HEARTBEAT_BACKUP_URL) {
+    try {
+        $body = "size=$encBytes sha256=$hash file=$baseName"
+        Invoke-WebRequest -Uri $env:HEARTBEAT_BACKUP_URL -Method Post -Body $body `
+            -TimeoutSec 10 -UseBasicParsing | Out-Null
+        Write-Host "  ping   : heartbeat inviato"
+    }
+    catch {
+        Write-Warning "Heartbeat fallito (backup OK, dead-man's switch NON pingato): $($_.Exception.Message)"
+    }
+}
+
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  1. Carica il file .dump.enc e .sha256 su storage offsite (S3/B2/rclone)."

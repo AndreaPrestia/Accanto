@@ -220,4 +220,17 @@ finally {
     docker rm -f $containerName 2>$null | Out-Null
 }
 
+# Dead-man's switch: ping verso Healthchecks.io se il drill ha PASSATO.
+# Drill fallito -> nessun ping -> alert dopo la grace window.
+if ($exitCode -eq 0 -and $env:HEARTBEAT_RESTORE_URL) {
+    try {
+        Invoke-WebRequest -Uri $env:HEARTBEAT_RESTORE_URL -Method Post `
+            -Body "checks=$($checks.Count) passed" -TimeoutSec 10 -UseBasicParsing | Out-Null
+        Write-Host "[drill] heartbeat inviato"
+    }
+    catch {
+        Write-Warning "Heartbeat fallito (drill OK, dead-man's switch NON pingato): $($_.Exception.Message)"
+    }
+}
+
 exit $exitCode
