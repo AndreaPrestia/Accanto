@@ -80,16 +80,21 @@ public class DocumentService : IDocumentService
 
         // Difesa contro file polyglot / content-type spoofed dal client:
         // bufferizziamo l'intero stream (size gia' validata <= MaxFileSizeBytes
-        // poco sopra) e ispezioniamo i primi byte per verificare che la
-        // firma matchi il content-type dichiarato.
+        // poco sopra) e validiamo struttura, estensione e magics noti
+        // pericolosi.
         var buffer = new MemoryStream((int)request.SizeInBytes);
         await request.Content.CopyToAsync(buffer, cancellationToken);
         buffer.Position = 0;
 
-        var headLen = (int)Math.Min(FileSignatureValidator.InspectBytes, buffer.Length);
-        if (headLen <= 0 || !FileSignatureValidator.IsValid(buffer.GetBuffer().AsSpan(0, headLen), contentType))
+        var len = (int)buffer.Length;
+        var validationError = FileSignatureValidator.Validate(
+            buffer.GetBuffer().AsSpan(0, len),
+            contentType,
+            request.OriginalFileName);
+        if (validationError is not null)
         {
-            throw new AppValidationException("Il contenuto del file non corrisponde al tipo dichiarato.");
+            throw new AppValidationException(
+                $"Il contenuto del file non corrisponde al tipo dichiarato: {validationError}.");
         }
 
         // Anti-malware: noop di default, ClamAV se configurato.

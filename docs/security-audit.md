@@ -558,6 +558,54 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     `UserId`/`ClientIp` → forensica veloce, dashboard real-time, alert
     su pattern sospetti (cardine per i prossimi item su monitoring +
     2FA admin enforcement).
+29. **Upload hardening profondo: estensione, magics pericolosi, struttura per-formato** ✅ Fatto il 2026-06-04.
+    [`FileSignatureValidator`](../backend/src/Accanto.Application/Documents/FileSignatureValidator.cs)
+    era limitato a 4 magic-byte sniff sui primi 16 byte: passava
+    qualunque file iniziasse con la signature giusta, anche se il
+    resto del contenuto era un eseguibile o un archivio (es. PDF
+    polyglot, JPEG con coda ZIP, file con estensione `.pdf` ma
+    Content-Type `application/pdf` veicolante un PE). Aggiunto metodo
+    `Validate(content, contentType, fileName)` chiamato da
+    [`DocumentService`](../backend/src/Accanto.Application/Documents/DocumentService.cs)
+    sull'intero buffer (gia' materializzato per lo scan AV), che
+    applica tre livelli di difesa:
+    1. **Coerenza estensione ↔ content-type**: tabella allow-list per
+       tipo (`pdf` → `.pdf`, `jpeg` → `.jpg`/`.jpeg`, `png` → `.png`,
+       `text/plain` → `.txt`/`.log`/`.md`); mismatch ⇒ reject.
+    2. **Rifiuto universale di magic eseguibili/archivio** a
+       prescindere dal tipo dichiarato: PE/MZ (`4D 5A`), gzip
+       (`1F 8B`), ELF (`7F 45 4C 46`), ZIP (`50 4B 03 04`), Mach-O
+       (`FE ED FA CE/CF`, `CA FE BA BE`), RAR (`Rar!`), 7z
+       (`37 7A BC AF 27 1C`).
+    3. **Validazione strutturale per formato**: PDF deve avere header
+       `%PDF-` + versione `1.x`/`2.x` + marker `%%EOF` negli ultimi 1024
+       byte; PNG deve avere la signature di 8 byte seguita dal chunk
+       `IHDR` come primo chunk (lunghezza + tipo a offset 8–16); JPEG
+       deve terminare con marker EOI `FF D9` negli ultimi 16 byte;
+       `text/plain` deve essere UTF-8 valido senza fallback (decoder
+       in strict mode) e privo di byte di controllo (NUL, C0/C1 a
+       parte tab/LF/CR, DEL).
+    `IsValid(span, contentType)` resta per back-compat (head-only,
+    nessuna validazione strutturale). Errori restituiti come messaggi
+    italiani inglobati in `AppValidationException` → HTTP 422 con
+    diagnostica utile lato client ("il PDF non termina con marker
+    `%%EOF`", "estensione `.png` incoerente con `application/pdf`",
+    "il contenuto contiene magic eseguibile (rifiutato a prescindere
+    dal tipo dichiarato)", ecc.). 16 nuovi unit test
+    (`FileSignatureValidatorTests`: PDF/PNG/JPEG well-formed e malformed,
+    PE/ELF/ZIP rejection a prescindere dal tipo, UTF-8 invalido, NUL
+    byte, unicode emoji valido, mismatch estensione); fixture esistenti
+    in `DocumentServiceUploadGuardsTests` aggiornate per usare PDF
+    strutturalmente validi (`%%EOF`). Probe end-to-end
+    [scripts/security/upload-probe.ps1](../scripts/security/upload-probe.ps1)
+    estesa con 2 nuove probe (PDF + estensione `.png` ⇒ 422; PE come
+    `text/plain` ⇒ 422); totale 7 probe. Test 161/161 PASS.
+    Effetto sicurezza: chiude la classe di attacchi "polyglot upload"
+    (file che e' contemporaneamente un PDF e un ZIP/eseguibile a
+    seconda di chi lo apre) e "extension confusion" (es. browser che
+    sniffano l'estensione e ignorano `Content-Type`). Difesa cumulativa
+    con magic-bytes head-only + AV (item 15) + extension whitelist
+    nello storage.
 
 ## Storico run
 
@@ -582,3 +630,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-sbom | Job `sbom` in security.yml genera SBOM CycloneDX 1.5 JSON per backend (.NET, runtime-only) + frontend + web ad ogni push/PR/schedulazione (upload come workflow artifact, retention 90 gg). release.yml rigenera e allega le SBOM come asset della GitHub Release con sidecar `.sha256`. | Da "scan-and-fail" a "inventario versionato": consumabile da Dependency-Track/Grype/OSV-Scanner per re-scan offline su nuove CVE, e richiesto da clienti enterprise/sanitario (NTIA + EO 14028). |
 | 2026-06-04 | main post-slsa | SLSA build provenance per le 3 immagini GHCR: BuildKit attestation (`provenance: mode=max` + `sbom: true`) embedded nell'OCI manifest + GitHub-signed attestation via Sigstore keyless (`actions/attest-build-provenance@v2`, push-to-registry). Verifica consumer: `gh attestation verify oci://ghcr.io/.../accanto-<img>:<tag> --repo AndreaPrestia/Accanto`. | Mitigazione tipo-squatting + dependency-confusion: criptograficamente verificabile che l'immagine viene da questa repo e da questo workflow, non da un look-alike pushato altrove. Allineato a SLSA L3. |
 | 2026-06-04 | main post-logging | `LogContextEnrichmentMiddleware` arricchisce ogni request con `UserId`/`ClientIp`/`RequestId` nel Serilog `LogContext`; backend in compose riceve `Logging__SeqUrl` come opt-in; runbook `logging.md` con query sicurezza, retention, esposizione prod (VPN/auth/OIDC). | Da `grep` su `docker logs` a indagine indicizzata multi-dimensionale (user × ip × time × event). Cardine per il prossimo step su monitoring + alerting su pattern sospetti. |
+| 2026-06-04 | main post-upload-hardening | `FileSignatureValidator.Validate` introdotto: 3 livelli di difesa (coerenza estensione/content-type, rifiuto universale di magics pericolosi MZ/ELF/Mach-O/ZIP/gzip/RAR/7z, validazione strutturale per formato — PDF `%%EOF`, PNG `IHDR`, JPEG `EOI`, UTF-8 strict per `text/plain`). 16 nuovi unit test, 2 nuove probe end-to-end (totale 7). Test 161/161 PASS. | Chiude polyglot upload e extension confusion; sommato a magic-bytes head-only + AV (item 15) il livello di difesa su upload diventa coerente con il resto della superficie. |

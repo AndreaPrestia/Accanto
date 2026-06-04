@@ -4,6 +4,8 @@
 #   1. file con content-type spoofed (PNG bytes ma Content-Type=application/pdf)
 #   2. file con content-type non in allowlist (application/x-msdownload)
 #   3. file con magic bytes "binari" ma dichiarato text/plain
+#   6. file con estensione filename incoerente col content-type (PDF .png)
+#   7. file con magic eseguibile (PE/MZ) dichiarato come text/plain
 # e accetti:
 #   4. un PDF reale dichiarato application/pdf
 #   5. un testo ASCII reale dichiarato text/plain
@@ -96,7 +98,10 @@ $circle = (Invoke-Api -Method Post -Path "/care-circles" -Headers $H -Body @{ na
 $uploadUrl = "$BaseUrl/care-circles/$($circle.id)/documents"
 
 $pngHead = [byte[]](0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x01,0x02,0x03)
-$pdfHead = [byte[]]@(0x25,0x50,0x44,0x46,0x2D,0x31,0x2E,0x37,0x0A,0x25,0x62) + ([Text.Encoding]::ASCII.GetBytes("ody`n"))
+# PDF strutturalmente valido: header + body + marker %%EOF in coda.
+$pdfHead = [byte[]]@(0x25,0x50,0x44,0x46,0x2D,0x31,0x2E,0x37,0x0A) + ([Text.Encoding]::ASCII.GetBytes("%body`n%%EOF`n"))
+# Header PE (Windows .exe) — universalmente rifiutato dal validator.
+$peHead  = [byte[]](0x4D,0x5A,0x90,0x00,0x03,0x00,0x00,0x00,0x04,0x00,0x00,0x00)
 $ascii   = [Text.Encoding]::ASCII.GetBytes("Hello world`n")
 
 function Probe {
@@ -131,6 +136,14 @@ Probe -Label 'happy: PDF reale accettato' -Expected @(201,200) -Status $r.Status
 # 5. Testo ASCII reale -> 201 atteso
 $r = Upload-File -Url $uploadUrl -Headers $H -Bytes $ascii -FileName 'ok.txt' -DeclaredContentType 'text/plain'
 Probe -Label 'happy: text/plain reale accettato' -Expected @(201,200) -Status $r.StatusCode
+
+# 6. Estensione incoerente con content-type: PDF valido ma nome .png -> 422
+$r = Upload-File -Url $uploadUrl -Headers $H -Bytes $pdfHead -FileName 'evil.png' -DeclaredContentType 'application/pdf'
+Probe -Label 'spoof: PDF con estensione .png' -Expected @(422,400) -Status $r.StatusCode
+
+# 7. Header PE (eseguibile Windows) dichiarato come text/plain -> 422
+$r = Upload-File -Url $uploadUrl -Headers $H -Bytes $peHead -FileName 'notes.txt' -DeclaredContentType 'text/plain'
+Probe -Label 'spoof: PE eseguibile come text/plain' -Expected @(422,400) -Status $r.StatusCode
 
 Write-Host ""
 $results | Format-Table Label, Expected, Got, Result -AutoSize

@@ -69,7 +69,8 @@ public class DocumentServiceUploadGuardsTests : IDisposable
     public async Task Upload_accepts_valid_pdf()
     {
         var (svc, ownerId, circleId) = await BuildAsync();
-        var pdf = "%PDF-1.7\n%body\n"u8.ToArray();
+        // PDF strutturalmente valido: header + body + marker %%EOF in coda.
+        var pdf = "%PDF-1.7\n%body\n%%EOF\n"u8.ToArray();
         using var ms = new MemoryStream(pdf);
         var req = new UploadDocumentRequest(
             ms, "ok.pdf", "application/pdf", pdf.Length,
@@ -84,7 +85,7 @@ public class DocumentServiceUploadGuardsTests : IDisposable
     public async Task Upload_rejects_when_scanner_flags_malware()
     {
         var (svc, ownerId, circleId) = await BuildAsync(new AlwaysMalwareScanner());
-        var pdf = "%PDF-1.7\n"u8.ToArray();
+        var pdf = "%PDF-1.7\n%%EOF\n"u8.ToArray();
         using var ms = new MemoryStream(pdf);
         var req = new UploadDocumentRequest(
             ms, "evil.pdf", "application/pdf", pdf.Length,
