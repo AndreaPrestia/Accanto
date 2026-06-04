@@ -71,7 +71,12 @@ services:
     ports: !reset []
 
   caddy:
-    image: caddy:2-alpine
+    # Caddy custom: include il modulo mholt/caddy-ratelimit per rate-limit
+    # per-IP a livello edge (defense-in-depth complementare al rate-limit
+    # applicativo per-user). Vedi deploy/caddy/Dockerfile.
+    build:
+      context: ./deploy/caddy
+    image: accanto-caddy:latest
     restart: unless-stopped
     depends_on:
       - backend

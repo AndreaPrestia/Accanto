@@ -96,13 +96,66 @@
 		max_size 25MB
 	}
 
-	# /health e /health/* sono esposti dal backend SENZA il prefisso /api
-	# (controllati da UptimeRobot/Healthchecks.io e dal HEALTHCHECK Docker).
-	# Tutte le altre rotte vengono riscritte aggiungendo /api perché il
-	# backend espone i controller sotto quel prefisso (route attribute).
-	@notHealth {
-		not path /health /health/*
+	# === Rate-limit per-IP a livello edge ===
+	#
+	# Defense-in-depth: il backend ha gia' rate-limit applicativo per-utente
+	# (5/min login, 10/h register, ecc., vedi RateLimitOptions.cs). Quello
+	# applicativo non protegge da attacchi di credential stuffing distribuiti
+	# su MOLTI utenti dalla STESSA macchina (l'attaccante prova una password
+	# diversa per ogni email rubata dal data breach: ogni utente ha 1 solo
+	# tentativo, quindi il limit per-user non scatta mai).
+	#
+	# Questo blocco aggiunge un cap per-IP che limita il TOTALE di tentativi
+	# auth da un singolo IP, indipendentemente dall'username. Modulo:
+	# github.com/mholt/caddy-ratelimit, sliding window. Storage: in-memory
+	# (basta per single-node Caddy; per multi-node serve distributed).
+	#
+	# Headers in risposta quando l'IP supera la soglia: HTTP 429.
+	#
+	# Limiti scelti larghi per non bloccare utenti legittimi su NAT/proxy
+	# condivisi (es. uffici, scuole), ma stretti abbastanza per spezzare
+	# rate alto di credential-stuffing automatizzato.
+	#
+	# `route {}` forza l'esecuzione delle directive in source order: il
+	# rate_limit matcha sul path PUBBLICO (`/auth/...`) prima che il
+	# rewrite aggiunga il prefisso `/api`.
+	route {
+		@auth_login path /auth/login
+		@auth_refresh path /auth/refresh
+		@auth_register path /auth/register
+
+		rate_limit @auth_login {
+			zone login_per_ip {
+				key {remote_host}
+				events 30
+				window 1m
+			}
+		}
+
+		rate_limit @auth_refresh {
+			zone refresh_per_ip {
+				key {remote_host}
+				events 60
+				window 1m
+			}
+		}
+
+		rate_limit @auth_register {
+			zone register_per_ip {
+				key {remote_host}
+				events 5
+				window 1h
+			}
+		}
+
+		# /health e /health/* sono esposti dal backend SENZA il prefisso /api
+		# (controllati da UptimeRobot/Healthchecks.io e dal HEALTHCHECK Docker).
+		# Tutte le altre rotte vengono riscritte aggiungendo /api perché il
+		# backend espone i controller sotto quel prefisso (route attribute).
+		@notHealth {
+			not path /health /health/*
+		}
+		rewrite @notHealth /api{uri}
+		reverse_proxy backend:8080
 	}
-	rewrite @notHealth /api{uri}
-	reverse_proxy backend:8080
 }

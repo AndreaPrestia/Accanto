@@ -401,6 +401,16 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     multi-chiave gia' presente (`KeyRotationService` CLI). `Jwt__Key`
     oggi e' single-key → logout forzato documentato + TODO per
     `IssuerSigningKeyResolver` multi-`kid` come miglioramento futuro.
+21. **Rate-limit per-IP a livello edge (Caddy)** ✅ Fatto il 2026-06-04.
+    [deploy/caddy/Dockerfile](../deploy/caddy/Dockerfile) builda Caddy
+    con il modulo `github.com/mholt/caddy-ratelimit` via `xcaddy`.
+    [deploy/Caddyfile](../deploy/Caddyfile) aggiunge tre zone sliding
+    window per-IP: `/auth/login` 30/min, `/auth/refresh` 60/min,
+    `/auth/register` 5/h. Defense-in-depth complementare al rate-limit
+    applicativo per-utente (che non scatta su credential stuffing
+    distribuito su molti username dalla stessa macchina). Validato
+    funzionalmente: 5 register PASS → 6°+7° → `429 Too Many Requests`.
+    Caddyfile validato con `caddy validate`.
 
 ## Storico run
 
@@ -417,3 +427,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-tier3-hardening | Tabelle audit append-only via `REVOKE UPDATE,DELETE` su `accanto_app` (verifica manuale: `permission denied for table audit_log_entries`); ordine middleware corretto → 403 loggati come 403, non più come 500; RBAC 23/23 PASS, unit 131/131 PASS | Quick wins post-audit: difesa in profondità su audit + osservabilità log. |
 | 2026-06-04 | main post-backup-drill | Backup cifrato (`pg_dump -Fc` + AES-256-CBC PBKDF2 600k iter) e restore drill end-to-end (Postgres effimero tmpfs, 13 sanity check) implementati e validati. Primo drill: 13/13 PASS. Runbook DR completo. | Backup era teorico (best-effort `pg_dump`), ora c'è procedura cifrata + drill ripetibile + RTO/RPO documentati. |
 | 2026-06-04 | main post-secret-runbook | Secret rotation runbook formalizzato (7 segreti inventariati, procedura per-segreto, compromise scenario, drill annuale calendarizzato). | Conoscenza tribale → procedura scritta. Pronto per drill primo lunedì di gennaio. |
+| 2026-06-04 | main post-edge-ratelimit | Caddy custom con `mholt/caddy-ratelimit` + 3 zone per-IP sliding window su `/auth/login` (30/min), `/auth/refresh` (60/min), `/auth/register` (5/h). Test funzionale: 5 register PASS, 6°–7° → 429. | Defense-in-depth contro credential stuffing distribuito su molti username dalla stessa macchina (il rate-limit applicativo per-utente non scatterebbe in quello scenario). |
