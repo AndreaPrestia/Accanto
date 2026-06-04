@@ -411,6 +411,18 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     distribuito su molti username dalla stessa macchina). Validato
     funzionalmente: 5 register PASS → 6°+7° → `429 Too Many Requests`.
     Caddyfile validato con `caddy validate`.
+22. **Dependency scanning .NET + npm in CI** ✅ Fatto il 2026-06-04.
+    [.github/workflows/security.yml](../.github/workflows/security.yml) ha
+    due nuovi job: `dotnet-deps` (esegue `dotnet list package --vulnerable
+    --include-transitive`, fallisce su High/Critical) e `npm-audit` (matrix
+    su `frontend` + `web`, usa [scripts/ci/npm-audit-check.sh](../scripts/ci/npm-audit-check.sh)
+    che fallisce su High/Critical non in allowlist). Allowlist tracciate
+    per-progetto in `<project>/.npm-audit-allow` con motivo + scadenza per
+    ogni eccezione. Stato attuale: backend 0 vuln, frontend solo moderate,
+    web 1 high tollerata (GHSA-wrwg-2hg8-v723 Astro server-islands XSS
+    non esploitabile in build statico, upgrade a Astro 5.x schedulato
+    entro 2026-09-01). Complementa Trivy (che scansiona il layer OS+lib
+    delle immagini docker) con la scansione delle dipendenze sorgente.
 
 ## Storico run
 
@@ -428,3 +440,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-backup-drill | Backup cifrato (`pg_dump -Fc` + AES-256-CBC PBKDF2 600k iter) e restore drill end-to-end (Postgres effimero tmpfs, 13 sanity check) implementati e validati. Primo drill: 13/13 PASS. Runbook DR completo. | Backup era teorico (best-effort `pg_dump`), ora c'è procedura cifrata + drill ripetibile + RTO/RPO documentati. |
 | 2026-06-04 | main post-secret-runbook | Secret rotation runbook formalizzato (7 segreti inventariati, procedura per-segreto, compromise scenario, drill annuale calendarizzato). | Conoscenza tribale → procedura scritta. Pronto per drill primo lunedì di gennaio. |
 | 2026-06-04 | main post-edge-ratelimit | Caddy custom con `mholt/caddy-ratelimit` + 3 zone per-IP sliding window su `/auth/login` (30/min), `/auth/refresh` (60/min), `/auth/register` (5/h). Test funzionale: 5 register PASS, 6°–7° → 429. | Defense-in-depth contro credential stuffing distribuito su molti username dalla stessa macchina (il rate-limit applicativo per-utente non scatterebbe in quello scenario). |
+| 2026-06-04 | main post-dep-scan | Job `dotnet-deps` + `npm-audit` (matrix frontend/web) in CI con allowlist tracciata. Stato: backend 0 vuln, frontend solo moderate, web 1 high tollerata (Astro server-islands XSS, non esploitabile in build statico). | Trivy copriva solo OS+lib del runtime; ora coperta anche supply chain delle dipendenze sorgente. Allowlist con scadenza forza il follow-up. |

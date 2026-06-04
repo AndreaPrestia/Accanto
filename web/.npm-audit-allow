@@ -1,0 +1,11 @@
+# Allowlist per scripts/ci/npm-audit-check.sh — vulnerabilita' tollerate
+# perche' NON ESPLOITABILI nel nostro contesto di build/deploy.
+# Formato: <GHSA-id> # <motivo> + <scadenza> + <owner>
+
+# Astro <5.15.8 reflected XSS via server islands feature (CVE-2025-64764).
+# NON ESPLOITABILE qui: web/ e' un sito 100% statico (output: 'static' di
+# default in astro.config.mjs, nessun adapter SSR). La vulnerabilita'
+# richiede l'endpoint /_server-islands/* che esiste solo in build SSR.
+# Upgrade a Astro 5.x schedulato (richiede review breaking changes).
+# Scadenza tolleranza: 2026-09-01. Owner: andrea.
+GHSA-wrwg-2hg8-v723 # astro server-islands XSS, non esploitabile in static build, upgrade a 5.x entro 2026-09-01

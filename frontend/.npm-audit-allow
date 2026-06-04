@@ -1,0 +1,5 @@
+# Allowlist per scripts/ci/npm-audit-check.sh — vulnerabilita' tollerate
+# perche' NON ESPLOITABILI nel nostro contesto.
+# Formato: <GHSA-id> # <motivo> + <scadenza> + <owner>
+#
+# Attualmente vuota: nessuna eccezione attiva su frontend.
