@@ -33,6 +33,8 @@ public class AccantoFactory : WebApplicationFactory<Program>
         builder.UseSetting("RateLimit:InviteCreate:Window", "00:01:00");
         builder.UseSetting("RateLimit:Ai:PermitLimit", "10000");
         builder.UseSetting("RateLimit:Ai:Window", "00:01:00");
+        builder.UseSetting("RateLimit:CspReport:PermitLimit", "10000");
+        builder.UseSetting("RateLimit:CspReport:Window", "00:01:00");
 
         builder.ConfigureServices(services =>
         {

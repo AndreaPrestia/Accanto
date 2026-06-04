@@ -48,7 +48,13 @@
 	import security_headers
 
 	header {
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		# Reporting-Endpoints (moderno, Chromium): canale named per i report
+		# del browser. Il backend espone /api/security/csp-report.
+		Reporting-Endpoints "csp-endpoint=\"https://{$ACCANTO_API_DOMAIN}/security/csp-report\""
+		# CSP: enforce + report-uri (legacy, ampio supporto) + report-to
+		# (moderno). Entrambi i canali puntano allo stesso endpoint per
+		# coprire tutti i browser senza dover gestire fallback lato server.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; report-uri https://{$ACCANTO_API_DOMAIN}/security/csp-report; report-to csp-endpoint"
 	}
 
 	# Root → default locale (302). Evita la pagina di meta-refresh generata
@@ -68,7 +74,8 @@
 	import security_headers
 
 	header {
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://{$ACCANTO_API_DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
+		Reporting-Endpoints "csp-endpoint=\"https://{$ACCANTO_API_DOMAIN}/security/csp-report\""
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://{$ACCANTO_API_DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:; report-uri https://{$ACCANTO_API_DOMAIN}/security/csp-report; report-to csp-endpoint"
 	}
 
 	# SPA servita da nginx nel container frontend. Nessun proxy verso il backend qui:

@@ -402,7 +402,7 @@ Il `Caddyfile` in [deploy/Caddyfile](deploy/Caddyfile) applica per default:
 | Header | Valore | Cosa fa |
 |---|---|---|
 | `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | 2 anni di HTTPS-only, **eligibile per** [hstspreload.org](https://hstspreload.org). Submitta solo quando sei certo che HTTPS resti attivo: rimuovere il dominio dal preload list richiede mesi. |
-| `Content-Security-Policy` | allow-list per sito vetrina (Google Fonts) e per SPA (tutto self) | Blocca XSS e iniezioni di asset esterni non previsti. |
+| `Content-Security-Policy` | allow-list per sito vetrina (Google Fonts) e per SPA (tutto self) + `report-uri`/`report-to` verso `/api/security/csp-report` | Blocca XSS e iniezioni di asset esterni non previsti; le violazioni vengono raccolte dal backend e loggate (categoria `Accanto.Security.Csp`) per ASR-tuning. |
 | `X-Frame-Options` + `frame-ancestors 'none'` | DENY | Nessuno può incorporare Accanto in `<iframe>` (anti-clickjacking). |
 | `X-Content-Type-Options` | `nosniff` | Il browser non "indovina" il MIME. |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Non perde path di URL ai siti esterni. |

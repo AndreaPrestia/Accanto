@@ -465,6 +465,25 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     credenziali IONOS reali andranno in `.env.backup-offsite` (in
     `.gitignore`) appena il piano cloud sara' attivo: lo schema +
     placeholder + runbook backup-restore §2-3 sono gia' pronti.
+25. **CSP reporting endpoint (raccolta violazioni)** ✅ Fatto il 2026-06-04.
+    [SecurityReportsController.cs](../backend/src/Accanto.Api/Controllers/SecurityReportsController.cs)
+    espone `POST /api/security/csp-report` (anonimo, rate-limit 100/min
+    per-IP via policy `csp-report`, body cap 8 KB). Accetta entrambi i
+    formati del browser: legacy `application/csp-report`
+    (`{"csp-report":{...}}`) e moderno Reporting API
+    `application/reports+json` (`[{type:"csp-violation",body:{...}}]`).
+    I campi diagnostici (`violated-directive`, `blocked-uri`,
+    `document-uri`, `source-file:line:col`, `disposition`, IP, UA)
+    vengono normalizzati e emessi come log strutturati con categoria
+    `Accanto.Security.Csp` (livello Information) → consumabili da Seq /
+    Loki per dashboard e alert su pattern anomali. NON scritti su DB
+    per evitare DoS via flood. [deploy/Caddyfile](../deploy/Caddyfile)
+    aggiunge `report-uri` + `report-to csp-endpoint` alle due CSP (sito
+    vetrina + SPA) e l'header `Reporting-Endpoints`. Risposta sempre
+    `204 No Content` (anche su body invalido o vuoto: niente segnali
+    utili a chi sonda l'endpoint). Coperto da 5 test integrazione
+    (`CspReportEndpointTests`). Le CSP erano gia' in enforce dal day-1;
+    questa e' la parte mancante per chiudere il loop di osservabilita'.
 
 ## Storico run
 
@@ -485,3 +504,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-dep-scan | Job `dotnet-deps` + `npm-audit` (matrix frontend/web) in CI con allowlist tracciata. Stato: backend 0 vuln, frontend solo moderate, web 1 high tollerata (Astro server-islands XSS, non esploitabile in build statico). | Trivy copriva solo OS+lib del runtime; ora coperta anche supply chain delle dipendenze sorgente. Allowlist con scadenza forza il follow-up. |
 | 2026-06-04 | main post-jwt-multikid | JWT multi-key con `IssuerSigningKeyResolver`: schema `Jwt__Keys__<id>` + `Jwt__ActiveKeyId`, claim `kid` nell'header, validazione kid-aware con fallback per token legacy. Backward compat su `Jwt__Key`. Test 141/141 PASS (10 nuovi `JwtSigningMaterialTests`). Runbook secret-rotation §3 con procedura zero-downtime. | Ultimo TODO della sezione secret-rotation chiuso: ora ogni segreto Accanto ha procedura di rotazione zero-downtime o quasi (eccetto BACKUP_PASSPHRASE per ovvi motivi di retention). |
 | 2026-06-04 | main post-forensic | `forensic-snapshot.ps1` (bundle .tar.gz: DB enc + audit CSV 30gg + refresh attivi + users summary + docker inspect + immagini digest + log 72h + sha256 manifest). `backup-offsite.ps1` + `.env.backup-offsite.example` (wrapper amazon/aws-cli per S3-compat, IONOS placeholder, idempotente). Compromise scenario aggiornato: step 0 = forensic snapshot PRIMA di toccare segreti. | Risolve "rotare segreti distrugge prove volatili"; aggancia il futuro upload offsite IONOS senza dover scrivere codice quando il piano cloud sara' attivo. |
+| 2026-06-04 | main post-csp-reporting | Endpoint `/api/security/csp-report` (anonimo, rate-limit 100/min IP, body cap 8KB, accetta sia `application/csp-report` legacy che `application/reports+json` Reporting API moderno) → log strutturati `Accanto.Security.Csp`. Caddyfile vetrina + SPA aggiungono `report-uri` + `report-to csp-endpoint` + header `Reporting-Endpoints` puntando all'endpoint. Test 146/146 PASS (5 nuovi `CspReportEndpointTests`: legacy, Reporting API, JSON invalido, body vuoto, anonimo). | Le CSP sono gia' in enforce dal day-1; mancava il canale per RACCOGLIERE le violazioni reali (es. estensioni browser, mixed content, regressioni del frontend dopo refactor). Ora ogni violazione finisce in log strutturato per ASR-tuning. |

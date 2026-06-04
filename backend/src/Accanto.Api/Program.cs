@@ -136,6 +136,7 @@ builder.Services.AddRateLimiter(opt =>
     opt.AddPolicy("auth-sensitive", ctx => BuildPartition(UserOrIpKey(ctx, "sensitive"), rateLimits.Sensitive));
     opt.AddPolicy("invite-create", ctx => BuildPartition(UserOrIpKey(ctx, "invite"), rateLimits.InviteCreate));
     opt.AddPolicy("ai", ctx => BuildPartition(UserOrIpKey(ctx, "ai"), rateLimits.Ai));
+    opt.AddPolicy("csp-report", ctx => BuildPartition(IpKey(ctx, "csp"), rateLimits.CspReport));
 });
 
 static string IpKey(HttpContext ctx, string scope)
