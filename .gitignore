@@ -50,3 +50,10 @@ frontend/.playwright/
 
 # Security scans
 zap-reports/
+
+# Backup artifacts (mai committarli — sono cifrati ma anche solo grossi)
+backups/
+*.dump
+*.dump.enc
+*.dump.enc.sha256
+

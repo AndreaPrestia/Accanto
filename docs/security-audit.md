@@ -377,6 +377,19 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     risposta finale (`403` per `ForbiddenException`) invece
     dell'eccezione non gestita (loggata come `500`). Riduce il rumore
     nei log/alert senza cambiare la risposta HTTP al client.
+19. **Backup cifrato + restore drill testato** ✅ Fatto il 2026-06-04.
+    [scripts/db/backup.ps1](../scripts/db/backup.ps1) esegue `pg_dump -Fc`
+    + `openssl enc -aes-256-cbc -pbkdf2 -iter 600000` via container
+    `alpine/openssl` (zero dipendenze host); output
+    `backups/accanto-YYYYMMDD-HHMMSS.dump.enc` + sidecar `.sha256`.
+    [scripts/db/restore-drill.ps1](../scripts/db/restore-drill.ps1)
+    decifra, ripristina su Postgres effimero (tmpfs, porta 55432,
+    isolato dal DB di lavoro) ed esegue 13 sanity check (esistenza
+    tabelle critiche, row count, FK orfani, migration history
+    leggibile). Primo drill: 13/13 PASS in ~25 s. Runbook completo con
+    procedura DR step-by-step, RPO 24h / RTO 1h, retention
+    7d+4w+12m+7y, schedule drill mensile in
+    [docs/runbooks/backup-restore.md](runbooks/backup-restore.md).
 
 ## Storico run
 
@@ -391,3 +404,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-tier3 | JWT HS256-only fail-fast, split ruoli Postgres `accanto`/`accanto_app` con `REVOKE CREATE`, upload magic-bytes + ClamAV opzionale, probe upload 5/5 PASS, RBAC 23/23 PASS, tenant 21/21 PASS, unit 131/131 PASS | Tier 3 completo. Difesa in profondità su auth/DB/upload. |
 | 2026-06-04 | main post-tier3-ci | Workflow `zap-full-auth` (full scan autenticato, schedulato settimanale + manual dispatch) aggiunto in CI | Coverage DAST passa da baseline manuale a full scan autenticato pianificato. |
 | 2026-06-04 | main post-tier3-hardening | Tabelle audit append-only via `REVOKE UPDATE,DELETE` su `accanto_app` (verifica manuale: `permission denied for table audit_log_entries`); ordine middleware corretto → 403 loggati come 403, non più come 500; RBAC 23/23 PASS, unit 131/131 PASS | Quick wins post-audit: difesa in profondità su audit + osservabilità log. |
+| 2026-06-04 | main post-backup-drill | Backup cifrato (`pg_dump -Fc` + AES-256-CBC PBKDF2 600k iter) e restore drill end-to-end (Postgres effimero tmpfs, 13 sanity check) implementati e validati. Primo drill: 13/13 PASS. Runbook DR completo. | Backup era teorico (best-effort `pg_dump`), ora c'è procedura cifrata + drill ripetibile + RTO/RPO documentati. |
