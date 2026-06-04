@@ -27,20 +27,45 @@
    # Rotazione: ogni 12 mesi (vedi secret-rotation.md).
    ```
 
-2. **Configura lo storage offsite**. Esempio con Backblaze B2 + `rclone`:
+2. **Configura lo storage offsite**. Default consigliato: **IONOS S3** (UE, GDPR-friendly) via lo script wrapper [scripts/db/backup-offsite.ps1](../../scripts/db/backup-offsite.ps1) — non installa nulla sull'host (usa `amazon/aws-cli` via docker):
 
    ```powershell
    # Una volta:
-   rclone config   # aggiungi remote "b2-accanto-backups" con bucket privato versionato
+   Copy-Item .env.backup-offsite.example .env.backup-offsite
+   # Edita .env.backup-offsite con endpoint/region/bucket + AWS_ACCESS_KEY_ID/SECRET.
+   # Il file e' in .gitignore — NON committarlo.
+
    # Test:
+   ./scripts/db/backup-offsite.ps1
+   # Idempotente: salta i file gia' presenti su S3 (head-object pre-check).
+   ```
+
+   Alternativa con `rclone` (Backblaze B2, Wasabi, ecc.):
+
+   ```powershell
+   rclone config   # aggiungi remote "b2-accanto-backups" con bucket privato versionato
    rclone lsd b2-accanto-backups:accanto-backups
    ```
 
-3. **Setup permessi sul bucket**:
+3. **Setup permessi sul bucket** (configurati una volta nella console del provider, NON gestiti dallo script):
    - Object-lock / immutability: ON, default retention 7 anni (compliance).
    - Versioning: ON.
-   - Bucket-level encryption: ON (in aggiunta a quella applicativa — defense-in-depth).
-   - Access key dedicata, scope: solo write/list su questo bucket, NO delete.
+   - Bucket-level encryption (SSE): ON (in aggiunta a quella applicativa — defense-in-depth).
+   - Lifecycle: transizione a cold-storage dopo 90 gg, expiration delle versioni non-current dopo retention legale.
+   - Access key dedicata, scope: **solo `s3:PutObject`, `s3:GetObject`, `s3:ListBucket` su questo bucket**. NIENTE `s3:DeleteObject` → la cancellazione la fa solo il lifecycle del bucket, mai l'app. Questo rende il backup append-only anche se le credenziali offsite vengono compromesse.
+
+   Esempio policy IONOS minima (JSON):
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [{
+       "Effect": "Allow",
+       "Action": ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
+       "Resource": ["arn:aws:s3:::accanto-backups-prod", "arn:aws:s3:::accanto-backups-prod/*"]
+     }]
+   }
+   ```
 
 ## Backup manuale (ad-hoc)
 
@@ -61,6 +86,10 @@ Verifica immediata che il backup sia ripristinabile:
 Se PASS, carica offsite:
 
 ```powershell
+# Opzione 1 — IONOS S3 / AWS S3 / S3-compatible (consigliato, no install host):
+./scripts/db/backup-offsite.ps1
+
+# Opzione 2 — rclone (B2/Wasabi):
 rclone copy ./backups/accanto-20260604-093000.dump.enc     b2-accanto-backups:accanto-backups/ --progress
 rclone copy ./backups/accanto-20260604-093000.dump.enc.sha256 b2-accanto-backups:accanto-backups/
 ```

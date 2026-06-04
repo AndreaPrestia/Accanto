@@ -443,6 +443,28 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     `kid`, validazione cross-key, rifiuto dopo rimozione, validazione di
     token legacy senza kid). Runbook secret-rotation §3 aggiornato con
     procedura zero-downtime + procedura di emergenza con revoca refresh.
+24. **Forensic snapshot pre-incident + offsite S3** ✅ Fatto il 2026-06-04.
+    [scripts/security/forensic-snapshot.ps1](../scripts/security/forensic-snapshot.ps1)
+    cattura in un singolo bundle `.forensic.tar.gz` (+ `.sha256` per
+    chain of custody) lo stato del sistema PRIMA di iniziare la
+    risposta a un incidente: dump DB cifrato, audit_log + security_audit
+    in CSV (ultimi 30 gg), refresh_token attivi, users summary,
+    `docker inspect` di tutti i container, lista immagini con digest,
+    log container ultime 72h, sha256 di `.env`, manifest.json con
+    git rev + operator + sha256 per file. Risolve il problema classico
+    del "ho ruotato i segreti e restartato → ho distrutto le prove
+    volatili". Lo step 0 del compromise scenario in
+    [docs/runbooks/secret-rotation.md](../docs/runbooks/secret-rotation.md)
+    e' ora "lancia forensic-snapshot.ps1 PRIMA di toccare qualunque cosa".
+    [scripts/db/backup-offsite.ps1](../scripts/db/backup-offsite.ps1)
+    + [.env.backup-offsite.example](../.env.backup-offsite.example)
+    forniscono il wrapper per upload incrementale idempotente su S3-
+    compatible (IONOS, AWS, Backblaze) via `amazon/aws-cli` in docker.
+    Policy bucket consigliata: `s3:Put/Get/List` only (NO `Delete`),
+    object-lock + versioning + lifecycle (retention 7 anni). Le
+    credenziali IONOS reali andranno in `.env.backup-offsite` (in
+    `.gitignore`) appena il piano cloud sara' attivo: lo schema +
+    placeholder + runbook backup-restore §2-3 sono gia' pronti.
 
 ## Storico run
 
@@ -462,3 +484,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-edge-ratelimit | Caddy custom con `mholt/caddy-ratelimit` + 3 zone per-IP sliding window su `/auth/login` (30/min), `/auth/refresh` (60/min), `/auth/register` (5/h). Test funzionale: 5 register PASS, 6°–7° → 429. | Defense-in-depth contro credential stuffing distribuito su molti username dalla stessa macchina (il rate-limit applicativo per-utente non scatterebbe in quello scenario). |
 | 2026-06-04 | main post-dep-scan | Job `dotnet-deps` + `npm-audit` (matrix frontend/web) in CI con allowlist tracciata. Stato: backend 0 vuln, frontend solo moderate, web 1 high tollerata (Astro server-islands XSS, non esploitabile in build statico). | Trivy copriva solo OS+lib del runtime; ora coperta anche supply chain delle dipendenze sorgente. Allowlist con scadenza forza il follow-up. |
 | 2026-06-04 | main post-jwt-multikid | JWT multi-key con `IssuerSigningKeyResolver`: schema `Jwt__Keys__<id>` + `Jwt__ActiveKeyId`, claim `kid` nell'header, validazione kid-aware con fallback per token legacy. Backward compat su `Jwt__Key`. Test 141/141 PASS (10 nuovi `JwtSigningMaterialTests`). Runbook secret-rotation §3 con procedura zero-downtime. | Ultimo TODO della sezione secret-rotation chiuso: ora ogni segreto Accanto ha procedura di rotazione zero-downtime o quasi (eccetto BACKUP_PASSPHRASE per ovvi motivi di retention). |
+| 2026-06-04 | main post-forensic | `forensic-snapshot.ps1` (bundle .tar.gz: DB enc + audit CSV 30gg + refresh attivi + users summary + docker inspect + immagini digest + log 72h + sha256 manifest). `backup-offsite.ps1` + `.env.backup-offsite.example` (wrapper amazon/aws-cli per S3-compat, IONOS placeholder, idempotente). Compromise scenario aggiornato: step 0 = forensic snapshot PRIMA di toccare segreti. | Risolve "rotare segreti distrugge prove volatili"; aggancia il futuro upload offsite IONOS senza dover scrivere codice quando il piano cloud sara' attivo. |

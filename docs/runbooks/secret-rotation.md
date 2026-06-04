@@ -260,13 +260,22 @@ Trigger: sospetto leak di `.env`, container compromesso, dipendente uscito con a
 
 **Ordine consigliato** (dal piu' impattante al piu' contenibile):
 
-1. **`Jwt__Key`** IMMEDIATAMENTE → invalida tutte le sessioni. Procedura sezione 3 + comunicazione user "logout forzato per manutenzione sicurezza".
+0. **Snapshot forense PRIMA di toccare qualunque cosa**. Ruotare segreti / restartare container distrugge prove (sessioni attive, log volatili, refresh_tokens validi). Esegui:
+
+   ```powershell
+   $env:BACKUP_PASSPHRASE = (Get-Content ./secrets/backup.pass -Raw).Trim()
+   ./scripts/security/forensic-snapshot.ps1 -IncidentId 'INC-YYYY-MM-DD-<slug>'
+   ```
+
+   Produce un bundle `.forensic.tar.gz` (+ `.sha256` per chain of custody) con DB dump cifrato, audit log CSV ultimi 30 gg, refresh_token attivi, users summary, `docker inspect` di tutti i container, immagini con digest, log container ultime 72h, hash di `.env`. Sposta SUBITO il bundle su storage controllato (S3 object-lock o vault offline) prima di procedere.
+
+1. **`Jwt__Key`** IMMEDIATAMENTE → invalida tutte le sessioni. Procedura sezione 3 "rotazione di emergenza" + comunicazione user "logout forzato per manutenzione sicurezza".
 2. **`POSTGRES_APP_PASSWORD`** e **`POSTGRES_PASSWORD`** → impedisce accesso DB con credenziali vecchie. Procedure sezioni 1+2.
 3. **`Encryption__MasterKey`** → solo SE c'e' sospetto che la chiave sia stata esfiltrata. Procedura sezione 4 (richiede tempo CLI rotator).
 4. **`BACKUP_PASSPHRASE`** → ruota e ricontrolla che i backup offsite non siano stati scaricati da terzi (audit log del provider storage).
 5. **Cloud provider keys** → ruota via console IAM, revoca le vecchie.
 6. **Forza logout di TUTTI gli utenti** (gia' fatto al passo 1 implicitamente con Jwt rotation, ma verifica `refresh_tokens` siano tutti revocati).
-7. **Audit forense**: dump completo di `audit_log_entries` e `security_audit_log_entries` filtrato sull'intervallo del sospetto incident. Cerca pattern anomali (login da IP nuovi, mass-export di documenti, modifiche permessi). Le tabelle sono append-only a livello DB (vedi item 17 in [security-audit.md](../security-audit.md)) → l'attaccante non ha potuto cancellare le proprie tracce.
+7. **Analisi forense del bundle dello step 0**: confronta `audit_log.csv` + `security_audit_log.csv` con il timeline ipotizzato dell'incidente. Cerca pattern anomali (login da IP nuovi, mass-export di documenti, modifiche permessi). Le tabelle sono append-only a livello DB (vedi item 17 in [security-audit.md](../security-audit.md)) → l'attaccante non ha potuto cancellare le proprie tracce.
 8. **Post-mortem** entro 7 giorni: timeline incidente, vettore di compromissione, mitigazioni adottate, modifiche al runbook.
 
 ## Drill annuale

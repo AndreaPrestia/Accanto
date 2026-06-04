@@ -51,9 +51,17 @@ frontend/.playwright/
 # Security scans
 zap-reports/
 
-# Backup artifacts (mai committarli — sono cifrati ma anche solo grossi)
+# Backup artifacts (mai committarli ï¿½ sono cifrati ma anche solo grossi)
 backups/
 *.dump
 *.dump.enc
 *.dump.enc.sha256
+
+# Forensic snapshots (contengono PII, mai committare)
+forensic/
+*.forensic.tar.gz
+*.forensic.tar.gz.sha256
+
+# Local offsite credentials
+.env.backup-offsite
 
