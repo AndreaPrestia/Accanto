@@ -399,8 +399,9 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     annuale calendarizzato (primo lunedi di gennaio). La rotazione di
     `Encryption__MasterKey` e' zero-downtime grazie al supporto
     multi-chiave gia' presente (`KeyRotationService` CLI). `Jwt__Key`
-    oggi e' single-key → logout forzato documentato + TODO per
-    `IssuerSigningKeyResolver` multi-`kid` come miglioramento futuro.
+    ora supporta anch'esso multi-key via `IssuerSigningKeyResolver`
+    + claim `kid` nell'header (vedi item 23) → rotazione zero-downtime
+    anche per JWT.
 21. **Rate-limit per-IP a livello edge (Caddy)** ✅ Fatto il 2026-06-04.
     [deploy/caddy/Dockerfile](../deploy/caddy/Dockerfile) builda Caddy
     con il modulo `github.com/mholt/caddy-ratelimit` via `xcaddy`.
@@ -423,6 +424,25 @@ resource scoped al cerchio prima di qualunque accesso al DB.
     non esploitabile in build statico, upgrade a Astro 5.x schedulato
     entro 2026-09-01). Complementa Trivy (che scansiona il layer OS+lib
     delle immagini docker) con la scansione delle dipendenze sorgente.
+23. **JWT multi-key con `IssuerSigningKeyResolver` (rotazione zero-downtime)** ✅ Fatto il 2026-06-04.
+    [JwtOptions.cs](../backend/src/Accanto.Infrastructure/Security/JwtOptions.cs)
+    introduce schema multi-key `Jwt__Keys__<keyId>=<base64>` + `Jwt__ActiveKeyId`
+    con fail-fast all'avvio (chiavi <32 char, `ActiveKeyId` mancante o
+    non presente in `Keys`). Backward compat: il vecchio `Jwt__Key` viene
+    promosso al `kid` `"legacy"` e continua a funzionare.
+    [JwtTokenService.cs](../backend/src/Accanto.Infrastructure/Security/JwtTokenService.cs)
+    firma con `SymmetricSecurityKey.KeyId = ActiveKeyId` → il JWT emesso
+    porta `kid` nell'header. La validazione in
+    [Program.cs](../backend/src/Accanto.Api/Program.cs) usa
+    `IssuerSigningKeyResolver = (_, _, kid, _) => jwtSigning.Resolve(kid)`,
+    mappando il `kid` del token alla chiave corretta; token vecchi senza
+    `kid` vengono provati con TUTTE le chiavi → grace period semplice
+    (basta tenere la vecchia chiave nel dict finché tutti gli access
+    token in circolazione scadono). Coperto da 10 test unit
+    (`JwtSigningMaterialTests`: parsing config, fail-fast, propagazione
+    `kid`, validazione cross-key, rifiuto dopo rimozione, validazione di
+    token legacy senza kid). Runbook secret-rotation §3 aggiornato con
+    procedura zero-downtime + procedura di emergenza con revoca refresh.
 
 ## Storico run
 
@@ -441,3 +461,4 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-secret-runbook | Secret rotation runbook formalizzato (7 segreti inventariati, procedura per-segreto, compromise scenario, drill annuale calendarizzato). | Conoscenza tribale → procedura scritta. Pronto per drill primo lunedì di gennaio. |
 | 2026-06-04 | main post-edge-ratelimit | Caddy custom con `mholt/caddy-ratelimit` + 3 zone per-IP sliding window su `/auth/login` (30/min), `/auth/refresh` (60/min), `/auth/register` (5/h). Test funzionale: 5 register PASS, 6°–7° → 429. | Defense-in-depth contro credential stuffing distribuito su molti username dalla stessa macchina (il rate-limit applicativo per-utente non scatterebbe in quello scenario). |
 | 2026-06-04 | main post-dep-scan | Job `dotnet-deps` + `npm-audit` (matrix frontend/web) in CI con allowlist tracciata. Stato: backend 0 vuln, frontend solo moderate, web 1 high tollerata (Astro server-islands XSS, non esploitabile in build statico). | Trivy copriva solo OS+lib del runtime; ora coperta anche supply chain delle dipendenze sorgente. Allowlist con scadenza forza il follow-up. |
+| 2026-06-04 | main post-jwt-multikid | JWT multi-key con `IssuerSigningKeyResolver`: schema `Jwt__Keys__<id>` + `Jwt__ActiveKeyId`, claim `kid` nell'header, validazione kid-aware con fallback per token legacy. Backward compat su `Jwt__Key`. Test 141/141 PASS (10 nuovi `JwtSigningMaterialTests`). Runbook secret-rotation §3 con procedura zero-downtime. | Ultimo TODO della sezione secret-rotation chiuso: ora ogni segreto Accanto ha procedura di rotazione zero-downtime o quasi (eccetto BACKUP_PASSPHRASE per ovvi motivi di retention). |

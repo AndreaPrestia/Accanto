@@ -7,6 +7,7 @@ using Accanto.Application;
 using Accanto.Application.Auth;
 using Accanto.Infrastructure;
 using Accanto.Infrastructure.Persistence;
+using Accanto.Infrastructure.Security;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
@@ -74,19 +75,14 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
 
 // JWT
 var jwtSection = builder.Configuration.GetSection("Jwt");
-var jwtKey = jwtSection["Key"] ?? throw new InvalidOperationException("Jwt:Key mancante in configurazione.");
 var jwtIssuer = jwtSection["Issuer"] ?? "accanto";
 var jwtAudience = jwtSection["Audience"] ?? "accanto";
 
-// Fail-fast all'avvio: una chiave HS256 < 32 char UTF-8 (256 bit) e' debole.
-// Senza questo check l'errore emerge solo al primo Issue() di un token,
-// quindi un deploy errato passa l'health check e fallisce a runtime sul
-// primo login.
-if (jwtKey.Length < 32)
-{
-    throw new InvalidOperationException(
-        $"Jwt:Key troppo corta: {jwtKey.Length} char, minimo 32 (256 bit). Genera con: openssl rand -base64 48");
-}
+// Tutta la logica di parsing / fail-fast vive in JwtOptions.ResolveSigningMaterial:
+// supporta sia il legacy Jwt__Key che il multi-key Jwt__Keys__<id> + Jwt__ActiveKeyId.
+// Risolto qui (eagermente) per: (a) far fallire l'app all'avvio su config invalida,
+// (b) condividere lo stesso snapshot tra AddJwtBearer e JwtTokenService.
+var jwtSigning = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!.ResolveSigningMaterial();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
@@ -105,7 +101,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             RequireExpirationTime = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            // Multi-key: il resolver mappa il claim "kid" del token alla
+            // chiave corretta. Token vecchi senza kid (pre-rotazione)
+            // vengono provati con TUTTE le chiavi -> grace period
+            // configurabile semplicemente tenendo la vecchia chiave nel
+            // dizionario per il tempo necessario.
+            IssuerSigningKeyResolver = (_, _, kid, _) => jwtSigning.Resolve(kid),
             ClockSkew = TimeSpan.FromMinutes(1)
         };
     });

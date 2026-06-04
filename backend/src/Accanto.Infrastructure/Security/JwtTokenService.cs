@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using Accanto.Application.Common.Security;
 using Accanto.Domain.Entities;
 using Microsoft.Extensions.Options;
@@ -11,18 +10,25 @@ namespace Accanto.Infrastructure.Security;
 public class JwtTokenService : IJwtTokenService
 {
     private readonly JwtOptions _opt;
+    private readonly JwtSigningMaterial _signing;
 
-    public JwtTokenService(IOptions<JwtOptions> opt) { _opt = opt.Value; }
+    public JwtTokenService(IOptions<JwtOptions> opt, JwtSigningMaterial signing)
+    {
+        _opt = opt.Value;
+        _signing = signing;
+    }
+
+    private SigningCredentials BuildSigningCredentials()
+    {
+        // Microsoft.IdentityModel propaga automaticamente _signing.ActiveKey.KeyId
+        // nell'header del JWT come "kid" — confermato in test multi-key.
+        return new SigningCredentials(_signing.ActiveKey, SecurityAlgorithms.HmacSha256);
+    }
 
     public AccessToken Issue(User user)
     {
-        if (string.IsNullOrWhiteSpace(_opt.Key) || _opt.Key.Length < 32)
-            throw new InvalidOperationException("Jwt key non configurata o troppo corta (almeno 32 caratteri).");
-
         var expires = DateTimeOffset.UtcNow.AddMinutes(_opt.ExpiryMinutes);
-        var creds = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.Key)),
-            SecurityAlgorithms.HmacSha256);
+        var creds = BuildSigningCredentials();
 
         var claims = new[]
         {
@@ -49,13 +55,8 @@ public class JwtTokenService : IJwtTokenService
 
     public TwoFactorChallengeToken IssueTwoFactorChallenge(Guid userId, TimeSpan lifetime)
     {
-        if (string.IsNullOrWhiteSpace(_opt.Key) || _opt.Key.Length < 32)
-            throw new InvalidOperationException("Jwt key non configurata o troppo corta (almeno 32 caratteri).");
-
         var expires = DateTimeOffset.UtcNow.Add(lifetime);
-        var creds = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.Key)),
-            SecurityAlgorithms.HmacSha256);
+        var creds = BuildSigningCredentials();
 
         var claims = new[]
         {
@@ -94,7 +95,10 @@ public class JwtTokenService : IJwtTokenService
                 RequireExpirationTime = true,
                 ValidIssuer = _opt.Issuer,
                 ValidAudience = _opt.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.Key)),
+                // Resolver multi-kid: token col claim kid noto matcha solo
+                // quella chiave; token senza kid (legacy) vengono provati
+                // contro tutte le chiavi configurate.
+                IssuerSigningKeyResolver = (_, _, kid, _) => _signing.Resolve(kid),
                 ClockSkew = TimeSpan.FromSeconds(30)
             }, out _);
 

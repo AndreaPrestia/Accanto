@@ -8,7 +8,7 @@
 |---|---|---|---|---|
 | `POSTGRES_PASSWORD` | `.env` + Postgres `accanto` role | Letture + DDL su tutto il DB → game over | 12 mesi | Bassa (ALTER ROLE + restart migrator) |
 | `POSTGRES_APP_PASSWORD` | `.env` + Postgres `accanto_app` role | Letture + INSERT su tutto il DB; NO drop/alter (revoke + audit append-only) | 12 mesi | Bassa (ALTER ROLE + rolling restart backend) |
-| `Jwt__Key` | `.env` | Forge di JWT validi per qualsiasi utente | 6 mesi (o emergenza) | Media (oggi single-key → logout forzato; vedi sezione "miglioramento futuro") |
+| `Jwt__Key` / `Jwt__Keys__<id>` | `.env` | Forge di JWT validi per qualsiasi utente | 6 mesi (o emergenza) | Bassa (multi-key + grace period, niente logout) |
 | `Encryption__MasterKey` / `Encryption__Keys__<id>` | `.env` | Decifratura di tutti i campi at-rest (note diario, documenti, ecc.) | 12 mesi | Media (`accanto-cli rotate-keys` riscrive in background, supporta multi-chiave nativamente) |
 | `BACKUP_PASSPHRASE` | password manager (non in `.env`) | Decifratura di tutti i dump offsite | 12 mesi | Alta (ricifrare backup retention attiva — vedi sotto) |
 | `Logging__SeqApiKey` (opt-in) | `.env` se osservabilita' attiva | Spam log + lettura log su istanza Seq | 12 mesi | Bassa |
@@ -103,34 +103,75 @@ docker exec -e PGPASSWORD=$NEW accanto-db-1 psql -U accanto_app -d accanto -c "S
 
 ---
 
-### 3. `Jwt__Key`
+### 3. `Jwt__Key` / `Jwt__Keys__<keyId>`
 
-> **Limitazione corrente**: il backend valida JWT con UNA sola `IssuerSigningKey` ([JwtTokenService.cs](../../backend/src/Accanto.Infrastructure/Security/JwtTokenService.cs)). La rotazione invalida TUTTI i token in circolazione → tutti gli utenti devono rifare login.
->
-> **Miglioramento futuro** (item separato in roadmap): implementare `IssuerSigningKeyResolver` con dictionary `{ keyId → SymmetricSecurityKey }`, header JWT con `kid` claim, e supporto a `Jwt__Keys__<keyId>` + `Jwt__ActiveKeyId` come gia' fatto per `Encryption`. Permette grace period di N minuti dove vecchio e nuovo token convivono.
+Il backend supporta **multi-key con `kid`** ([JwtTokenService.cs](../../backend/src/Accanto.Infrastructure/Security/JwtTokenService.cs), [JwtOptions.cs](../../backend/src/Accanto.Infrastructure/Security/JwtOptions.cs)): ogni JWT emesso porta nell'header un `kid` che identifica la chiave usata per firmarlo, e `IssuerSigningKeyResolver` valida usando la chiave corretta. Si possono quindi tenere N chiavi attive contemporaneamente → rotazione **zero-downtime, niente logout**.
 
-**Procedura corrente** (con logout forzato):
+**Schema config**:
+
+- `Jwt__Key=<base64>` → legacy single-key. Internamente mappata al `kid` `"legacy"`. Continua a funzionare per backward compat.
+- `Jwt__Keys__<keyId>=<base64>` + `Jwt__ActiveKeyId=<keyId>` → multi-key. Si possono valorizzare entrambe le forme: la chiave legacy resta valida (i token vecchi senza `kid` provano tutte le chiavi → uno match passa).
+
+Tutte le chiavi devono essere ≥ 32 char (256 bit). Fail-fast all'avvio se invalido.
+
+**Procedura rotazione (con grace period, nessun logout)**:
 
 ```powershell
-$NEW = docker run --rm alpine/openssl rand -base64 48
+# 1. Genera la nuova chiave con keyId datato:
+$NEW_KEY_ID = (Get-Date -f 'yyyyMM')                # es. "202612"
+$NEW_KEY    = docker run --rm alpine/openssl rand -base64 48
 
-# 1. Aggiorna .env:
-(Get-Content .env) -replace "^Jwt__Key=.*", "Jwt__Key=$NEW" | Set-Content .env -Encoding utf8
+# 2. Aggiungi la nuova chiave a .env SENZA rimuovere la vecchia.
+#    Se sei ancora sul singolo Jwt__Key, promuovilo a Jwt__Keys__legacy:
+$OLD_KEY = (Get-Content .env | Select-String "^Jwt__Key=").ToString().Split('=',2)[1]
+Add-Content .env "`nJwt__Keys__legacy=$OLD_KEY"
+Add-Content .env "Jwt__Keys__$NEW_KEY_ID=$NEW_KEY"
+Add-Content .env "Jwt__ActiveKeyId=$NEW_KEY_ID"
 
-# 2. Restart backend (TUTTI gli access token esistenti diventano invalidi):
+# 3. Restart backend: i nuovi token sono firmati con la nuova chiave (kid=$NEW_KEY_ID),
+#    i token vecchi (kid=legacy o senza kid) continuano a validare grazie al resolver.
 docker compose up -d backend
 
-# 3. Invalidate refresh token table per forzare ri-autenticazione completa:
+# 4. ATTENDI la durata massima di vita di un access token (default: 8h)
+#    + qualche margine per refresh in corso (default: 1 giorno).
+#    Durante questo grace period, ogni client rinnova naturalmente al nuovo kid.
+
+# 5. Rimuovi la vecchia chiave da .env:
+(Get-Content .env) -notmatch "^Jwt__Keys__legacy=" -notmatch "^Jwt__Key=" |
+    Set-Content .env -Encoding utf8
+docker compose up -d backend
+
+# 6. Verifica:
+docker logs accanto-backend-1 --tail 20  # nessun errore di config
+```
+
+**Downtime UI**: zero. Gli utenti non si accorgono di nulla.
+
+**Frequenza**: ogni 6 mesi (rotazione preventiva). In caso di compromissione sospetta vedi sotto.
+
+**Rotazione di emergenza (logout forzato immediato)**:
+
+Se la chiave attiva e' stata compromessa, NON serve grace period — anzi va impedito ai token rubati di funzionare:
+
+```powershell
+$NEW_KEY_ID = (Get-Date -f 'yyyyMMdd')
+$NEW_KEY    = docker run --rm alpine/openssl rand -base64 48
+
+# 1. Sostituisci COMPLETAMENTE le chiavi (rimuovi vecchie + aggiungi sola nuova):
+$tmp = (Get-Content .env) -notmatch "^Jwt__Key" -notmatch "^Jwt__ActiveKeyId"
+$tmp + "Jwt__Keys__$NEW_KEY_ID=$NEW_KEY", "Jwt__ActiveKeyId=$NEW_KEY_ID" |
+    Set-Content .env -Encoding utf8
+
+# 2. Restart backend (tutti i token esistenti diventano invalidi):
+docker compose up -d backend
+
+# 3. Revoca anche i refresh token in DB:
 $OWNER_PW = (Get-Content .env | Select-String "^POSTGRES_PASSWORD=").ToString().Split('=',2)[1]
 docker exec -e PGPASSWORD=$OWNER_PW accanto-db-1 `
     psql -U accanto -d accanto -c "UPDATE refresh_tokens SET ""RevokedAt"" = now() WHERE ""RevokedAt"" IS NULL;"
 
-# 4. Comunica agli utenti: "Per motivi di sicurezza, ti chiediamo di rifare login. I dati sono intatti."
+# 4. Comunica agli utenti: "Per motivi di sicurezza, ti chiediamo di rifare login."
 ```
-
-**Downtime UI**: zero per il backend; gli utenti vedono `401` al prossimo refresh → redirect login.
-
-**Frequenza**: ogni 6 mesi (rotazione preventiva) oppure IMMEDIATA in caso di sospetta compromissione.
 
 ---
 

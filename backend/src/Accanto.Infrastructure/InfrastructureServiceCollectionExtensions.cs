@@ -21,6 +21,7 @@ using Accanto.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Accanto.Infrastructure;
 
@@ -36,6 +37,13 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IAccantoDbContext>(sp => sp.GetRequiredService<AccantoDbContext>());
 
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+        // Snapshot delle chiavi JWT calcolato una sola volta all'avvio:
+        // - fail-fast su config invalida (chiavi corte, ActiveKeyId
+        //   mancante quando >1 chiave, ecc.)
+        // - usato sia da JwtTokenService (firma) che da Program.cs
+        //   (IssuerSigningKeyResolver dell'AddJwtBearer).
+        services.AddSingleton<JwtSigningMaterial>(sp =>
+            sp.GetRequiredService<IOptions<JwtOptions>>().Value.ResolveSigningMaterial());
         services.Configure<StorageOptions>(configuration.GetSection("Storage"));
         services.Configure<EncryptionOptions>(configuration.GetSection("Encryption"));
         services.Configure<PushOptions>(configuration.GetSection("Push"));
