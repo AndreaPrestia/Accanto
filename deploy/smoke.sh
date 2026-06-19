@@ -64,8 +64,11 @@ pass "/health/ready → status=ok, db=ok"
 # ------------------------------------------------------------------
 # 2. Sito vetrina (opzionale, solo se passi WEB_URL)
 # ------------------------------------------------------------------
+# Nota: Caddy fa `redir / /it 302` (Astro statica multilingua), quindi
+# usiamo -L per seguire il redirect e validare la pagina finale come
+# farebbe un browser reale.
 if [[ -n "$WEB_URL" ]]; then
-  http_code="$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 10 "$WEB_URL/" || true)"
+  http_code="$(curl -fsSL -o /dev/null -w '%{http_code}' --max-time 10 "$WEB_URL/" || true)"
   [[ "$http_code" == "200" ]] || fail "sito vetrina $WEB_URL/ ha restituito HTTP $http_code"
   pass "sito vetrina $WEB_URL/ → 200"
 fi
@@ -74,7 +77,7 @@ fi
 # 3. SPA (opzionale, solo se passi APP_URL)
 # ------------------------------------------------------------------
 if [[ -n "$APP_URL" ]]; then
-  http_code="$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 10 "$APP_URL/" || true)"
+  http_code="$(curl -fsSL -o /dev/null -w '%{http_code}' --max-time 10 "$APP_URL/" || true)"
   [[ "$http_code" == "200" ]] || fail "SPA $APP_URL/ ha restituito HTTP $http_code"
   pass "SPA $APP_URL/ → 200"
 fi
