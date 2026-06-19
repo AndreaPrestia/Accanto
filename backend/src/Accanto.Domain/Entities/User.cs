@@ -27,4 +27,15 @@ public class User
     /// migration di rollout). NULL = nessun obbligo (utente mai stato Owner).
     /// </summary>
     public DateTimeOffset? TwoFactorRequiredFromUtc { get; set; }
+
+    /// <summary>
+    /// Tombstone GDPR. Quando true l'utente e' stato cancellato
+    /// (right-to-erasure): email/displayname sostituiti con placeholder,
+    /// password e 2FA azzerati, login impossibile. Lo storico audit
+    /// resta intatto per compliance/forensics.
+    /// </summary>
+    public bool IsErased { get; set; }
+    public DateTimeOffset? ErasedAt { get; set; }
+    /// <summary>Motivazione testuale (richiesta utente, comando admin, ...).</summary>
+    public string? ErasureReason { get; set; }
 }

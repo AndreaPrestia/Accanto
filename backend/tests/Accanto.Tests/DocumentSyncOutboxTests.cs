@@ -74,7 +74,7 @@ public class DocumentSyncOutboxTests : IDisposable
         rows[1].StoragePath.Should().Be(rows[0].StoragePath);
     }
 
-    private async Task<(DocumentService svc, AccantoDbContextLike db, Guid ownerId, Guid circleId)> BuildAsync()
+    private async Task<(DocumentService svc, Accanto.Infrastructure.Persistence.AccantoDbContext db, Guid ownerId, Guid circleId)> BuildAsync()
     {
         var db = TestDb.Create();
         var auth = new CareCircleAuthorization(db);
@@ -96,17 +96,6 @@ public class DocumentSyncOutboxTests : IDisposable
             new NoopMalwareScanner(),
             Options.Create(new DocumentStorageOptions()));
 
-        return (svc, new AccantoDbContextLike(db), ownerId, circle.Id);
-    }
-
-    /// <summary>
-    /// Wrapper sottile che riespone l'unico DbSet di interesse senza
-    /// rendere pubblico l'intero contesto al test.
-    /// </summary>
-    private sealed class AccantoDbContextLike
-    {
-        private readonly Accanto.Infrastructure.Persistence.AccantoDbContext _inner;
-        public AccantoDbContextLike(Accanto.Infrastructure.Persistence.AccantoDbContext inner) => _inner = inner;
-        public DbSet<DocumentSyncOutboxEntry> DocumentSyncOutbox => _inner.DocumentSyncOutbox;
+        return (svc, db, ownerId, circle.Id);
     }
 }

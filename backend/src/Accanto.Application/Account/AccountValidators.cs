@@ -28,5 +28,17 @@ public class DeleteAccountRequestValidator : AbstractValidator<DeleteAccountRequ
         RuleFor(x => x.CurrentPassword)
             .NotEmpty().WithMessage("Inserisci la password per confermare.")
             .MaximumLength(200);
+
+        RuleFor(x => x.Confirmation)
+            .NotEmpty().WithMessage("Conferma l'operazione digitando ERASE.")
+            .Must(c => string.Equals(c, "ERASE", StringComparison.Ordinal))
+            .WithMessage("Conferma non valida: digita esattamente ERASE.");
+
+        // TwoFactorCode e' opzionale qui (puo' essere TOTP o recovery
+        // code); la presenza-quando-richiesta e' verificata dal
+        // service in base allo stato 2FA dell'utente.
+        RuleFor(x => x.TwoFactorCode)
+            .MaximumLength(40)
+            .When(x => !string.IsNullOrEmpty(x.TwoFactorCode));
     }
 }

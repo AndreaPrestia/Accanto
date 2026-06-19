@@ -39,6 +39,7 @@ public static class Program
             {
                 "generate-key" => GenerateKey(),
                 "rotate-keys" => await RotateKeysAsync(rest),
+                "erase-user" => await EraseUserAsync(rest),
                 "--help" or "-h" or "help" => PrintUsage(),
                 _ => UnknownCommand(command),
             };
@@ -121,6 +122,113 @@ public static class Program
         return 0;
     }
 
+    /// <summary>
+    /// Cancellazione GDPR amministrativa: tombstone dell'utente con
+    /// cascade dei documenti (compresa la replica S3 via outbox).
+    /// Da usare quando l'utente non puo' usare l'endpoint API
+    /// (es. account compromesso, supporto legale).
+    /// </summary>
+    private static async Task<int> EraseUserAsync(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Console.Error.WriteLine("Manca <userId>. Uso: accanto erase-user <userId> --reason \"...\" [--yes]");
+            return 1;
+        }
+
+        if (!Guid.TryParse(args[0], out var userId))
+        {
+            Console.Error.WriteLine($"userId non valido: {args[0]}");
+            return 1;
+        }
+
+        var reason = ParseFlag(args, "--reason");
+        var skipPrompt = args.Any(a => a is "--yes" or "-y");
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            Console.Error.WriteLine("Specificare --reason \"motivazione\" (richiesto per audit log).");
+            return 1;
+        }
+
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json", optional: true)
+            .AddEnvironmentVariables()
+            .AddCommandLine(args)
+            .Build();
+
+        var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(config);
+        services.AddLogging(b => Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddSimpleConsole(b));
+        services.AddAccantoInfrastructure(config);
+        // Application layer: registra IUserErasureService + IRefreshTokenService.
+        Accanto.Application.ApplicationServiceCollectionExtensions.AddAccantoApplication(services);
+
+        await using var provider = services.BuildServiceProvider();
+
+        // Migrazioni con connection string privilegiata (come rotate-keys).
+        var migratorConn = config.GetConnectionString("PostgresMigrator")
+                           ?? config.GetConnectionString("Postgres");
+        var protector = provider.GetRequiredService<Accanto.Application.Common.Security.IFieldProtector>();
+        var migratorOptions = new DbContextOptionsBuilder<AccantoDbContext>()
+            .UseNpgsql(migratorConn)
+            .Options;
+        await using (var migratorDb = new AccantoDbContext(migratorOptions, protector))
+        {
+            await migratorDb.Database.MigrateAsync();
+        }
+
+        using var scope = provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AccantoDbContext>();
+        var user = await db.Users.AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null)
+        {
+            Console.Error.WriteLine($"Utente {userId} non trovato.");
+            return 4;
+        }
+
+        if (user.IsErased)
+        {
+            Console.WriteLine($"Utente {userId} gia' tombstonato il {user.ErasedAt:O}: nessuna azione.");
+            return 0;
+        }
+
+        Console.WriteLine($"Stai per cancellare definitivamente l'utente:");
+        Console.WriteLine($"  Id           : {user.Id}");
+        Console.WriteLine($"  Email        : {user.Email}");
+        Console.WriteLine($"  DisplayName  : {user.DisplayName}");
+        Console.WriteLine($"  Reason       : {reason}");
+        if (!skipPrompt)
+        {
+            Console.Write("Digita ERASE per confermare: ");
+            var typed = Console.ReadLine();
+            if (typed != "ERASE")
+            {
+                Console.WriteLine("Conferma non ricevuta: operazione annullata.");
+                return 5;
+            }
+        }
+
+        var erasure = scope.ServiceProvider.GetRequiredService<Accanto.Application.Account.IUserErasureService>();
+        await erasure.EraseAsync(userId, $"Admin CLI: {reason}");
+
+        Console.WriteLine($"Utente {userId} cancellato (tombstone). I blob locali sono stati rimossi e la replica S3 sara' propagata dal worker.");
+        return 0;
+    }
+
+    private static string? ParseFlag(string[] args, string flag)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+        {
+            if (string.Equals(args[i], flag, StringComparison.Ordinal))
+                return args[i + 1];
+        }
+        return null;
+    }
+
     private static int UnknownCommand(string command)
     {
         Console.Error.WriteLine($"Comando sconosciuto: {command}");
@@ -135,6 +243,8 @@ public static class Program
         Console.WriteLine("Comandi:");
         Console.WriteLine("  generate-key   Stampa una nuova chiave AES-256 in base64.");
         Console.WriteLine("  rotate-keys    Riscrive i dati cifrati usando Encryption:ActiveKeyId.");
+        Console.WriteLine("  erase-user     Cancellazione GDPR di un utente (tombstone + cascade documenti).");
+        Console.WriteLine("                 Uso: accanto erase-user <userId> --reason \"...\" [--yes]");
         Console.WriteLine("  help           Mostra questo messaggio.");
         return 0;
     }

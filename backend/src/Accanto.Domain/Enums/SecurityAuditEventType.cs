@@ -16,5 +16,6 @@ public enum SecurityAuditEventType
     PasswordChanged,
     SessionRevoked,
     AllSessionsRevoked,
+    AccountErased,
     AiCall
 }

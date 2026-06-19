@@ -26,10 +26,15 @@ public class AccountServiceTests
         var db = TestDb.Create();
         var hasher = new PasswordHasher();
         var storage = new FakeStorage();
+        var refresh = new NoOpRefreshTokenService();
+        var audit = new NoOpSecurityAuditLog();
+        var twoFactor = new NoOpTwoFactorService();
+        var erasure = new UserErasureService(
+            db, storage, refresh, audit,
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<UserErasureService>.Instance);
         var account = new AccountService(
             db, hasher, storage, new NoOpCircleEmailNotifier(),
-            new NoOpRefreshTokenService(),
-            new NoOpSecurityAuditLog(),
+            refresh, audit, twoFactor, erasure,
             new ChangePasswordRequestValidator(),
             new DeleteAccountRequestValidator());
         var auth = new Accanto.Infrastructure.Authorization.CareCircleAuthorization(db);
@@ -101,35 +106,56 @@ public class AccountServiceTests
         var (account, _, db, hasher, _) = Build();
         var userId = await SeedUser(db, hasher, "rightpass");
 
-        var act = async () => await account.DeleteAsync(userId, new DeleteAccountRequest("wrongpass"));
+        var act = async () => await account.DeleteAsync(userId, new DeleteAccountRequest("wrongpass", Confirmation: "ERASE"));
         await act.Should().ThrowAsync<ForbiddenException>();
     }
 
     [Fact]
-    public async Task DeleteAccount_refuses_when_user_shares_a_circle_with_others()
+    public async Task DeleteAccount_requires_confirmation_phrase()
+    {
+        var (account, _, db, hasher, _) = Build();
+        var userId = await SeedUser(db, hasher);
+
+        var act = async () => await account.DeleteAsync(userId, new DeleteAccountRequest("password123", Confirmation: "yes"));
+        await act.Should().ThrowAsync<AppValidationException>();
+
+        // Account NON deve essere tombstonato.
+        db.Users.Single(u => u.Id == userId).IsErased.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task DeleteAccount_tombstones_user_and_removes_membership_when_circle_is_shared()
     {
         var (account, circles, db, hasher, _) = Build();
         var userId = await SeedUser(db, hasher);
 
         var circle = await circles.CreateAsync(userId, new CreateCareCircleRequest("Mamma", null));
+        var otherUserId = Guid.NewGuid();
         db.CareCircleMembers.Add(new CareCircleMember
         {
             Id = Guid.NewGuid(),
             CareCircleId = circle.Id,
-            UserId = Guid.NewGuid(),
+            UserId = otherUserId,
             Role = CareCircleRole.Caregiver,
             CreatedAt = DateTimeOffset.UtcNow
         });
         await db.SaveChangesAsync();
 
-        var act = async () => await account.DeleteAsync(userId, new DeleteAccountRequest("password123"));
-        await act.Should().ThrowAsync<ConflictException>();
+        await account.DeleteAsync(userId, new DeleteAccountRequest("password123", Confirmation: "ERASE"));
 
-        db.Users.Any(u => u.Id == userId).Should().BeTrue();
+        // Tombstone: user resta in DB ma con PII azzerati.
+        var tomb = db.Users.Single(u => u.Id == userId);
+        tomb.IsErased.Should().BeTrue();
+        tomb.Email.Should().StartWith("erased-").And.EndWith("@accanto.invalid");
+        tomb.PasswordHash.Should().BeEmpty();
+        // Cerchio condiviso resta vivo per l'altro utente.
+        db.CareCircles.Any(c => c.Id == circle.Id).Should().BeTrue();
+        db.CareCircleMembers.Any(m => m.CareCircleId == circle.Id && m.UserId == userId).Should().BeFalse();
+        db.CareCircleMembers.Any(m => m.CareCircleId == circle.Id && m.UserId == otherUserId).Should().BeTrue();
     }
 
     [Fact]
-    public async Task DeleteAccount_cascades_solo_circles_and_removes_user()
+    public async Task DeleteAccount_cascades_solo_circles_and_tombstones_user()
     {
         var (account, circles, db, hasher, storage) = Build();
         var userId = await SeedUser(db, hasher);
@@ -159,13 +185,18 @@ public class AccountServiceTests
         });
         await db.SaveChangesAsync();
 
-        await account.DeleteAsync(userId, new DeleteAccountRequest("password123"));
+        await account.DeleteAsync(userId, new DeleteAccountRequest("password123", Confirmation: "ERASE"));
 
-        db.Users.Any(u => u.Id == userId).Should().BeFalse();
+        var tomb = db.Users.Single(u => u.Id == userId);
+        tomb.IsErased.Should().BeTrue();
+        tomb.PasswordHash.Should().BeEmpty();
         db.CareCircles.Any(c => c.Id == circle.Id).Should().BeFalse();
         db.TimelineEntries.Any(t => t.CareCircleId == circle.Id).Should().BeFalse();
         db.MedicalDocuments.Any(d => d.CareCircleId == circle.Id).Should().BeFalse();
         storage.Deleted.Should().Contain("blob/x.pdf");
+
+        // Outbox DELETE inserita per il blob (replica S3).
+        db.DocumentSyncOutbox.Should().Contain(o => o.Operation == "DELETE" && o.StoragePath == "blob/x.pdf");
     }
 
     [Fact]

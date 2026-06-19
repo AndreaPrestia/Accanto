@@ -1,4 +1,5 @@
 using Accanto.Application.Auth;
+using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
@@ -19,6 +20,8 @@ public class AccountService : IAccountService
     private readonly ICircleEmailNotifier _email;
     private readonly IRefreshTokenService _refresh;
     private readonly ISecurityAuditLog _audit;
+    private readonly ITwoFactorService _twoFactor;
+    private readonly IUserErasureService _erasure;
     private readonly IValidator<ChangePasswordRequest> _changeValidator;
     private readonly IValidator<DeleteAccountRequest> _deleteValidator;
 
@@ -29,6 +32,8 @@ public class AccountService : IAccountService
         ICircleEmailNotifier email,
         IRefreshTokenService refresh,
         ISecurityAuditLog audit,
+        ITwoFactorService twoFactor,
+        IUserErasureService erasure,
         IValidator<ChangePasswordRequest> changeValidator,
         IValidator<DeleteAccountRequest> deleteValidator)
     {
@@ -38,6 +43,8 @@ public class AccountService : IAccountService
         _email = email;
         _refresh = refresh;
         _audit = audit;
+        _twoFactor = twoFactor;
+        _erasure = erasure;
         _changeValidator = changeValidator;
         _deleteValidator = deleteValidator;
     }
@@ -78,75 +85,35 @@ public class AccountService : IAccountService
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken)
             ?? throw new NotFoundException("Utente non trovato.");
 
+        if (user.IsErased)
+            throw new ForbiddenException("Account gia' cancellato.");
+
         if (!_hasher.Verify(request.CurrentPassword, user.PasswordHash))
             throw new ForbiddenException("La password non è corretta.");
 
-        // Conservative policy: per non cancellare in modo sorprendente dati su cui altre persone
-        // stanno contando, rifiutiamo se l'utente fa parte di un cerchio condiviso con qualcun altro.
-        var myCircleIds = await _db.CareCircleMembers
-            .Where(m => m.UserId == userId)
-            .Select(m => m.CareCircleId)
-            .ToListAsync(cancellationToken);
-
-        if (myCircleIds.Count > 0)
+        // Se 2FA e' attivo: il client deve fornire un codice TOTP
+        // valido o un recovery code. Senza un secondo fattore non
+        // possiamo cancellare l'account in modo sicuro (rischio
+        // session-hijack -> erasure malevolo).
+        if (user.TwoFactorEnabled)
         {
-            var hasSharedCircle = await _db.CareCircleMembers
-                .Where(m => myCircleIds.Contains(m.CareCircleId) && m.UserId != userId)
-                .AnyAsync(cancellationToken);
-
-            if (hasSharedCircle)
+            if (string.IsNullOrWhiteSpace(request.TwoFactorCode))
             {
-                throw new ConflictException(
-                    "Fai parte di uno o più cerchi insieme ad altre persone. " +
-                    "Per eliminare l'account, esci prima da quei cerchi o rimuovi gli altri membri.");
-            }
-        }
-
-        // A questo punto tutti i cerchi a cui l'utente partecipa sono solo suoi: li elimino interamente.
-        if (myCircleIds.Count > 0)
-        {
-            var documents = await _db.MedicalDocuments
-                .Where(d => myCircleIds.Contains(d.CareCircleId))
-                .ToListAsync(cancellationToken);
-
-            // Rimuovo prima i file fisici cifrati; eventuali errori non bloccano la pulizia del DB.
-            foreach (var doc in documents)
-            {
-                try { await _storage.DeleteAsync(doc.StoragePath, cancellationToken); }
-                catch { /* file gia' assente: ignoriamo */ }
+                throw new AppValidationException(
+                    "Codice di autenticazione richiesto.",
+                    new Dictionary<string, string[]> { ["TwoFactorCode"] = new[] { "Inserisci un codice TOTP o un codice di recupero." } });
             }
 
-            _db.MedicalDocuments.RemoveRange(documents);
-
-            var timeline = await _db.TimelineEntries
-                .Where(t => myCircleIds.Contains(t.CareCircleId))
-                .ToListAsync(cancellationToken);
-            _db.TimelineEntries.RemoveRange(timeline);
-
-            var questions = await _db.DoctorQuestions
-                .Where(q => myCircleIds.Contains(q.CareCircleId))
-                .ToListAsync(cancellationToken);
-            _db.DoctorQuestions.RemoveRange(questions);
-
-            var updates = await _db.SharedUpdates
-                .Where(s => myCircleIds.Contains(s.CareCircleId))
-                .ToListAsync(cancellationToken);
-            _db.SharedUpdates.RemoveRange(updates);
-
-            var invites = await _db.CareCircleInvites
-                .Where(i => myCircleIds.Contains(i.CareCircleId))
-                .ToListAsync(cancellationToken);
-            _db.CareCircleInvites.RemoveRange(invites);
-
-            var circles = await _db.CareCircles
-                .Where(c => myCircleIds.Contains(c.Id))
-                .ToListAsync(cancellationToken);
-            // I membri vengono eliminati a cascata dalla configurazione EF su CareCircle → Members.
-            _db.CareCircles.RemoveRange(circles);
+            var ok = await _twoFactor.VerifyUserCodeAsync(userId, request.TwoFactorCode!, cancellationToken);
+            if (!ok)
+            {
+                ok = await _twoFactor.ConsumeRecoveryCodeAsync(userId, request.TwoFactorCode!, cancellationToken);
+            }
+            if (!ok) throw new ForbiddenException("Codice di autenticazione non valido.");
         }
 
-        _db.Users.Remove(user);
-        await _db.SaveChangesAsync(cancellationToken);
+        // Delegate al servizio GDPR: tombstone + cascade + outbox S3.
+        await _erasure.EraseAsync(userId, "Cancellazione richiesta dall'utente", cancellationToken);
     }
 
     private static readonly HashSet<string> SupportedLanguages = new(StringComparer.OrdinalIgnoreCase) { "it", "en", "es" };
