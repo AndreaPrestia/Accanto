@@ -116,7 +116,7 @@ if ($env:S3_OBJECT_LOCK_DAYS) {
 $retainUntil = (Get-Date).ToUniversalTime().AddDays($lockDays).ToString("yyyy-MM-ddTHH:mm:ssZ")
 
 if (-not (Test-Path $InputDir)) { throw "Cartella $InputDir non trovata." }
-$files = Get-ChildItem $InputDir -Include "accanto-*.dump.enc", "accanto-*.dump.enc.sha256" -File
+$files = Get-ChildItem -Path (Join-Path $InputDir '*') -Include "accanto-*.dump.enc", "accanto-*.dump.enc.sha256" -File
 if (-not $files) {
     Write-Host "[offsite] nessun backup in $InputDir, nulla da caricare." -ForegroundColor Yellow
     return
