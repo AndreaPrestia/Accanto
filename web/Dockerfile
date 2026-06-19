@@ -12,7 +12,7 @@ RUN npm run build
 
 # Immagine unprivileged ufficiale: utente `nginx` (UID 101), nessun setuid,
 # binding di default su porta non privilegiata 8080.
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 USER root
 # Aggiorna i pacchetti Alpine alla patch release più recente per
 # rimediare alle CVE HIGH su libxml2/musl/nghttp2/zlib presenti nei layer
