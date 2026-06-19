@@ -64,6 +64,7 @@ forensic/
 
 # Local offsite credentials
 .env.backup-offsite
+.env.s3-replica
 
 # SBOM artifacts (generati in CI, mai committare - vivono come release asset)
 sbom/

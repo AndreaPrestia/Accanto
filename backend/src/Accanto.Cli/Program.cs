@@ -40,6 +40,7 @@ public static class Program
                 "generate-key" => GenerateKey(),
                 "rotate-keys" => await RotateKeysAsync(rest),
                 "erase-user" => await EraseUserAsync(rest),
+                "smoke-s3" => await SmokeS3Async(rest),
                 "--help" or "-h" or "help" => PrintUsage(),
                 _ => UnknownCommand(command),
             };
@@ -229,6 +230,134 @@ public static class Program
         return null;
     }
 
+    /// <summary>
+    /// Smoke test della replica S3 (IONOS / AWS / S3-compatibile):
+    ///   1. Crea un file locale in Storage:RootPath/_smoke/test-{guid}.bin
+    ///   2. PutAsync due volte (per creare 2 versioni sul bucket versionato).
+    ///   3. Verifica che ci siano N>=2 versioni via ListVersionsAsync.
+    ///   4. DeleteAllVersionsAsync.
+    ///   5. Verifica che ListVersionsAsync ritorni 0 versioni residue.
+    ///   6. Cleanup file locale.
+    /// Exit code: 0 = PASS, 2 = FAIL. Non tocca il DB.
+    /// </summary>
+    private static async Task<int> SmokeS3Async(string[] args)
+    {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json", optional: true)
+            .AddEnvironmentVariables()
+            .AddCommandLine(args)
+            .Build();
+
+        var s3Section = config.GetSection("S3DocumentReplica");
+        if (!s3Section.GetValue<bool>("Enabled"))
+        {
+            Console.Error.WriteLine("S3DocumentReplica:Enabled = false. Setta S3DocumentReplica__Enabled=true (env) o appsettings per lo smoke.");
+            return 2;
+        }
+
+        var bucket = s3Section.GetValue<string>("Bucket");
+        if (string.IsNullOrWhiteSpace(bucket))
+        {
+            Console.Error.WriteLine("S3DocumentReplica:Bucket non configurato.");
+            return 2;
+        }
+
+        var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(config);
+        services.AddLogging(b => Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddSimpleConsole(b));
+        services.AddAccantoInfrastructure(config);
+
+        await using var provider = services.BuildServiceProvider();
+
+        var replica = provider.GetService<Accanto.Application.Common.Storage.IS3DocumentReplica>();
+        if (replica is null)
+        {
+            Console.Error.WriteLine("IS3DocumentReplica non risolvibile (DI gating). Verifica S3DocumentReplica:Enabled e le credenziali.");
+            return 2;
+        }
+        var s3 = provider.GetRequiredService<Amazon.S3.IAmazonS3>();
+        var storageOpts = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Accanto.Infrastructure.Storage.StorageOptions>>().Value;
+
+        var prefix = (s3Section.GetValue<string>("Prefix") ?? string.Empty).TrimEnd('/');
+        var rel = $"_smoke/test-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}.bin";
+        var key = string.IsNullOrEmpty(prefix) ? rel : $"{prefix}/{rel}";
+        var localPath = Path.Combine(storageOpts.RootPath, rel.Replace('/', Path.DirectorySeparatorChar));
+
+        Console.WriteLine($"[smoke-s3] bucket : {bucket}");
+        Console.WriteLine($"[smoke-s3] key    : {key}");
+        Console.WriteLine($"[smoke-s3] local  : {localPath}");
+
+        var exit = 0;
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(localPath)!);
+            var bytes = new byte[1024];
+            System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
+            await File.WriteAllBytesAsync(localPath, bytes);
+
+            Console.WriteLine("[smoke-s3] PUT #1 ...");
+            await replica.PutAsync(rel);
+            Console.WriteLine("[smoke-s3] PUT #2 (nuova versione) ...");
+            await replica.PutAsync(rel);
+
+            var versionsBefore = await CountVersionsAsync(s3, bucket!, key);
+            Console.WriteLine($"[smoke-s3] versioni dopo 2x PUT: {versionsBefore}");
+            if (versionsBefore < 2)
+            {
+                Console.Error.WriteLine($"[smoke-s3] FAIL: attese >= 2 versioni, trovate {versionsBefore}. Verifica che il bucket abbia Versioning ON.");
+                exit = 2;
+            }
+
+            Console.WriteLine("[smoke-s3] DeleteAllVersionsAsync ...");
+            await replica.DeleteAllVersionsAsync(rel);
+
+            var versionsAfter = await CountVersionsAsync(s3, bucket!, key);
+            Console.WriteLine($"[smoke-s3] versioni dopo delete: {versionsAfter}");
+            if (versionsAfter != 0)
+            {
+                Console.Error.WriteLine($"[smoke-s3] FAIL: attese 0 versioni residue, trovate {versionsAfter}.");
+                exit = 2;
+            }
+
+            if (exit == 0)
+                Console.WriteLine("[smoke-s3] PASS");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[smoke-s3] FAIL: {ex.GetType().Name}: {ex.Message}");
+            exit = 2;
+        }
+        finally
+        {
+            try { if (File.Exists(localPath)) File.Delete(localPath); } catch { /* best-effort */ }
+        }
+
+        return exit;
+    }
+
+    private static async Task<int> CountVersionsAsync(Amazon.S3.IAmazonS3 s3, string bucket, string key)
+    {
+        var count = 0;
+        string? marker = null;
+        do
+        {
+            var resp = await s3.ListVersionsAsync(new Amazon.S3.Model.ListVersionsRequest
+            {
+                BucketName = bucket,
+                Prefix = key,
+                MaxKeys = 1000,
+                VersionIdMarker = marker
+            });
+            if (resp.Versions is not null)
+                count += resp.Versions.Count(v => v.Key == key);
+            marker = resp.NextVersionIdMarker;
+        }
+        while (!string.IsNullOrEmpty(marker));
+        return count;
+    }
+
     private static int UnknownCommand(string command)
     {
         Console.Error.WriteLine($"Comando sconosciuto: {command}");
@@ -245,6 +374,8 @@ public static class Program
         Console.WriteLine("  rotate-keys    Riscrive i dati cifrati usando Encryption:ActiveKeyId.");
         Console.WriteLine("  erase-user     Cancellazione GDPR di un utente (tombstone + cascade documenti).");
         Console.WriteLine("                 Uso: accanto erase-user <userId> --reason \"...\" [--yes]");
+        Console.WriteLine("  smoke-s3       Smoke test della replica S3 (PUT 2 versioni + DeleteAllVersions).");
+        Console.WriteLine("                 Richiede S3DocumentReplica:Enabled=true e credenziali valide.");
         Console.WriteLine("  help           Mostra questo messaggio.");
         return 0;
     }
