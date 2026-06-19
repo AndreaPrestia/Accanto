@@ -41,7 +41,21 @@
     "twoFactorRecoveryCode": "Codice di recupero",
     "twoFactorVerify": "Verifica",
     "twoFactorUseRecovery": "Usa un codice di recupero",
-    "twoFactorUseCode": "Usa il codice dell'app"
+    "twoFactorUseCode": "Usa il codice dell'app",
+    "forgotPassword": "Password dimenticata?",
+    "forgotPasswordTitle": "Reimposta la password",
+    "forgotPasswordSubtitle": "Inserisci l'email del tuo account: ti invieremo un link per scegliere una nuova password.",
+    "forgotPasswordCta": "Invia il link",
+    "forgotPasswordSent": "Se l'email è registrata, abbiamo inviato un link per reimpostare la password. Controlla la posta (anche lo spam).",
+    "backToLogin": "Torna al login",
+    "resetPasswordTitle": "Scegli una nuova password",
+    "resetPasswordSubtitle": "Imposta la tua nuova password. Verrai disconnesso da tutti gli altri dispositivi.",
+    "newPassword": "Nuova password",
+    "confirmNewPassword": "Conferma password",
+    "resetPasswordCta": "Aggiorna password",
+    "passwordsDoNotMatch": "Le due password non coincidono.",
+    "resetPasswordSuccess": "Password aggiornata. Stiamo riportandoti al login…",
+    "resetPasswordTokenInvalid": "Link non valido o scaduto. Richiedi un nuovo link di reset."
   },
   "account": {
     "title": "Il tuo account",

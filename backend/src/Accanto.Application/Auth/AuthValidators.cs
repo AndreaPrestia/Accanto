@@ -30,3 +30,29 @@ public class LoginRequestValidator : AbstractValidator<LoginRequest>
         RuleFor(x => x.Password).NotEmpty().MaximumLength(200);
     }
 }
+
+public class ForgotPasswordRequestValidator : AbstractValidator<ForgotPasswordRequest>
+{
+    public ForgotPasswordRequestValidator()
+    {
+        RuleFor(x => x.Email)
+            .NotEmpty().WithMessage("L'email è obbligatoria.")
+            .EmailAddress().WithMessage("Inserisci un'email valida.")
+            .MaximumLength(256);
+    }
+}
+
+public class ResetPasswordRequestValidator : AbstractValidator<ResetPasswordRequest>
+{
+    public ResetPasswordRequestValidator()
+    {
+        RuleFor(x => x.Token)
+            .NotEmpty().WithMessage("Il token è obbligatorio.")
+            .MaximumLength(256);
+
+        RuleFor(x => x.NewPassword)
+            .NotEmpty().WithMessage("La password è obbligatoria.")
+            .MinimumLength(8).WithMessage("La password deve avere almeno 8 caratteri.")
+            .MaximumLength(200);
+    }
+}

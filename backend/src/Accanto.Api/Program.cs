@@ -125,6 +125,21 @@ builder.Services.Configure<LockoutOptions>(builder.Configuration.GetSection("Loc
 // 2FA TOTP: issuer per QR code + durata challenge.
 builder.Services.Configure<Accanto.Application.Auth.TwoFactor.TwoFactorOptions>(builder.Configuration.GetSection("TwoFactor"));
 
+// Reset password: PublicUrl della SPA per costruire il link di reset
+// (https://{host}/reset-password?token=...). Default: prima origin di
+// Cors:AllowedOrigins, cosi' in dev/prod minimi non serve config aggiuntiva.
+builder.Services.Configure<Accanto.Application.Auth.PasswordResetOptions>(opt =>
+{
+    builder.Configuration.GetSection("Auth:PasswordReset").Bind(opt);
+    if (string.IsNullOrWhiteSpace(opt.PublicUrl))
+    {
+        var firstCorsOrigin = (builder.Configuration["Cors:AllowedOrigins"] ?? string.Empty)
+            .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .FirstOrDefault();
+        opt.PublicUrl = firstCorsOrigin ?? string.Empty;
+    }
+});
+
 // Rate limiting su endpoint sensibili (login/register/cambio password/invio inviti)
 var rateLimits = builder.Configuration.GetSection("RateLimit").Get<RateLimitOptions>() ?? new RateLimitOptions();
 builder.Services.Configure<RateLimitOptions>(builder.Configuration.GetSection("RateLimit"));

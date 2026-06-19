@@ -27,6 +27,9 @@ public sealed record TwoFactorLoginRequest(string TwoFactorToken, string? Code, 
 public sealed record RefreshTokenRequest(string RefreshToken);
 public sealed record LogoutRequest(string RefreshToken);
 
+public sealed record ForgotPasswordRequest(string Email);
+public sealed record ResetPasswordRequest(string Token, string NewPassword);
+
 /// <summary>Metadati del client per tracciare la sessione (User-Agent, IP).</summary>
 public sealed record ClientInfo(string? UserAgent, string? IpAddress);
 

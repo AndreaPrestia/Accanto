@@ -2,12 +2,16 @@ using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Security;
+using Accanto.Application.Email;
 using Accanto.Application.Security;
 using Accanto.Domain.Entities;
 using Accanto.Domain.Enums;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Accanto.Application.Auth;
 
@@ -21,9 +25,14 @@ public class AuthService : IAuthService
     private readonly ISecurityAuditLog _audit;
     private readonly LockoutOptions _lockout;
     private readonly TwoFactorOptions _tfOpt;
+    private readonly PasswordResetOptions _pwdResetOpt;
+    private readonly IEmailService _email;
+    private readonly ILogger<AuthService> _logger;
     private readonly TimeProvider _time;
     private readonly IValidator<RegisterRequest> _registerValidator;
     private readonly IValidator<LoginRequest> _loginValidator;
+    private readonly IValidator<ForgotPasswordRequest> _forgotPasswordValidator;
+    private readonly IValidator<ResetPasswordRequest> _resetPasswordValidator;
 
     public AuthService(
         IAccantoDbContext db,
@@ -34,9 +43,14 @@ public class AuthService : IAuthService
         ISecurityAuditLog audit,
         IOptions<LockoutOptions> lockout,
         IOptions<TwoFactorOptions> twoFactorOptions,
+        IOptions<PasswordResetOptions> passwordResetOptions,
+        IEmailService email,
+        ILogger<AuthService> logger,
         TimeProvider time,
         IValidator<RegisterRequest> registerValidator,
-        IValidator<LoginRequest> loginValidator)
+        IValidator<LoginRequest> loginValidator,
+        IValidator<ForgotPasswordRequest> forgotPasswordValidator,
+        IValidator<ResetPasswordRequest> resetPasswordValidator)
     {
         _db = db;
         _hasher = hasher;
@@ -46,9 +60,14 @@ public class AuthService : IAuthService
         _audit = audit;
         _lockout = lockout.Value;
         _tfOpt = twoFactorOptions.Value;
+        _pwdResetOpt = passwordResetOptions.Value;
+        _email = email;
+        _logger = logger;
         _time = time;
         _registerValidator = registerValidator;
         _loginValidator = loginValidator;
+        _forgotPasswordValidator = forgotPasswordValidator;
+        _resetPasswordValidator = resetPasswordValidator;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
@@ -221,6 +240,167 @@ public class AuthService : IAuthService
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken)
             ?? throw new NotFoundException("Utente non trovato.");
         return ToDto(user);
+    }
+
+    public async Task RequestPasswordResetAsync(ForgotPasswordRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
+    {
+        var result = await _forgotPasswordValidator.ValidateAsync(request, cancellationToken);
+        if (!result.IsValid)
+        {
+            throw new AppValidationException(
+                "Dati non validi.",
+                result.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()));
+        }
+
+        var email = request.Email.Trim().ToLowerInvariant();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+        // Anti-enumerazione: se l'utente non esiste o e' stato cancellato (tombstone GDPR),
+        // logghiamo l'evento ma rispondiamo identico al caso "esiste". Cosi' il chiamante
+        // non puo' distinguere se un'email e' registrata o meno.
+        if (user is null || user.IsErased)
+        {
+            await _audit.LogAsync(null, SecurityAuditEventType.PasswordResetRequested, "Email sconosciuta", email, client, cancellationToken);
+            return;
+        }
+
+        // Genera token cripto-sicuro (32 bytes Base64Url ~ 43 caratteri).
+        var rawToken = GenerateUrlSafeToken();
+        var tokenHash = HashToken(rawToken);
+        var now = _time.GetUtcNow();
+        var lifetimeMinutes = Math.Max(5, _pwdResetOpt.TokenLifetimeMinutes);
+
+        _db.PasswordResetTokens.Add(new PasswordResetToken
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            TokenHash = tokenHash,
+            CreatedAt = now,
+            ExpiresAt = now.AddMinutes(lifetimeMinutes),
+            IpAddress = client?.IpAddress,
+            UserAgent = client?.UserAgent,
+        });
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var link = BuildResetLink(rawToken);
+        var subject = "Reimposta la tua password Accanto";
+        var html = BuildResetEmailHtml(user.DisplayName, link, lifetimeMinutes);
+
+        try
+        {
+            await _email.SendAsync(user.Email, user.DisplayName, subject, html, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // L'EmailService gia' cattura le eccezioni internamente; questo e' un safety net
+            // ulteriore per non rompere il flusso di richiesta reset se il sender ha bug.
+            _logger.LogWarning(ex, "Errore inatteso durante l'invio email di reset password a {UserId}", user.Id);
+        }
+
+        await _audit.LogAsync(user.Id, SecurityAuditEventType.PasswordResetRequested, client: client, cancellationToken: cancellationToken);
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordRequest request, ClientInfo? client = null, CancellationToken cancellationToken = default)
+    {
+        var result = await _resetPasswordValidator.ValidateAsync(request, cancellationToken);
+        if (!result.IsValid)
+        {
+            throw new AppValidationException(
+                "Dati non validi.",
+                result.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()));
+        }
+
+        var tokenHash = HashToken(request.Token);
+        var now = _time.GetUtcNow();
+
+        var entry = await _db.PasswordResetTokens
+            .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
+
+        if (entry is null || entry.UsedAt is not null || entry.ExpiresAt <= now)
+        {
+            throw new ForbiddenException("Token non valido o scaduto.");
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == entry.UserId, cancellationToken);
+        if (user is null || user.IsErased)
+        {
+            throw new ForbiddenException("Token non valido o scaduto.");
+        }
+
+        user.PasswordHash = _hasher.Hash(request.NewPassword);
+        // Reset stato lockout: il legittimo proprietario ha provato il reset.
+        user.FailedLoginAttempts = 0;
+        user.LockoutEndsAt = null;
+        user.LastFailedLoginAt = null;
+
+        entry.UsedAt = now;
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        // Revoca tutte le sessioni attive: chi possedeva la vecchia password e' fuori.
+        await _refresh.RevokeAllForUserAsync(user.Id, cancellationToken);
+
+        await _audit.LogAsync(user.Id, SecurityAuditEventType.PasswordResetCompleted, client: client, cancellationToken: cancellationToken);
+    }
+
+    private static string GenerateUrlSafeToken()
+    {
+        Span<byte> buf = stackalloc byte[32];
+        RandomNumberGenerator.Fill(buf);
+        return Base64UrlEncode(buf);
+    }
+
+    private static string Base64UrlEncode(ReadOnlySpan<byte> bytes)
+    {
+        var s = Convert.ToBase64String(bytes);
+        return s.TrimEnd('=').Replace('+', '-').Replace('/', '_');
+    }
+
+    private static string HashToken(string rawToken)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawToken));
+        var hex = new StringBuilder(bytes.Length * 2);
+        foreach (var b in bytes) hex.Append(b.ToString("x2"));
+        return hex.ToString();
+    }
+
+    private string BuildResetLink(string token)
+    {
+        var baseUrl = (_pwdResetOpt.PublicUrl ?? string.Empty).TrimEnd('/');
+        var path = string.IsNullOrWhiteSpace(_pwdResetOpt.ResetPath) ? "/reset-password" : _pwdResetOpt.ResetPath;
+        if (!path.StartsWith('/')) path = "/" + path;
+        return $"{baseUrl}{path}?token={Uri.EscapeDataString(token)}";
+    }
+
+    private static string BuildResetEmailHtml(string displayName, string link, int lifetimeMinutes)
+    {
+        var safeName = System.Net.WebUtility.HtmlEncode(displayName);
+        var safeLink = System.Net.WebUtility.HtmlEncode(link);
+        return $$"""
+            <!DOCTYPE html>
+            <html>
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #2b2b2b; max-width: 540px; margin: 0 auto; padding: 24px;">
+                <p>Ciao {{safeName}},</p>
+                <p>Hai richiesto di reimpostare la password del tuo account Accanto. Clicca il link qui sotto per scegliere una nuova password:</p>
+                <p style="margin: 24px 0;">
+                  <a href="{{safeLink}}" style="display: inline-block; padding: 12px 18px; background: #2f6f4f; color: #fff; text-decoration: none; border-radius: 6px;">
+                    Reimposta password
+                  </a>
+                </p>
+                <p style="font-size: 13px; color: #555;">
+                  Il link scade tra <strong>{{lifetimeMinutes}} minuti</strong>. Se non hai richiesto tu il reset, puoi ignorare questa email: il tuo account resta sicuro.
+                </p>
+                <p style="font-size: 12px; color: #888; margin-top: 32px; word-break: break-all;">
+                  Se il pulsante non funziona, copia e incolla questo URL nel browser:<br/>
+                  {{safeLink}}
+                </p>
+              </body>
+            </html>
+            """;
     }
 
     private async Task<AuthResponse> BuildResponseAsync(User user, ClientInfo? client, CancellationToken cancellationToken)

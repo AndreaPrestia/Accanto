@@ -48,6 +48,12 @@ services:
       Storage__MaxFileSizeBytes: ${Storage__MaxFileSizeBytes:-20971520}
       Encryption__MasterKey: "${Encryption__MasterKey:?Encryption__MasterKey richiesta - genera con openssl rand -base64 32}"
       Cors__AllowedOrigins: ${Cors__AllowedOrigins:-http://localhost:5173,http://localhost:8081}
+      # Reset password: base URL della SPA usata per costruire il link di reset.
+      # Default vuoto = primo origin di Cors__AllowedOrigins. In prod imposta
+      # esplicitamente https://app.<dominio> in .env per evitare ambiguita'.
+      Auth__PasswordReset__PublicUrl: ${Auth__PasswordReset__PublicUrl:-}
+      Auth__PasswordReset__ResetPath: ${Auth__PasswordReset__ResetPath:-/reset-password}
+      Auth__PasswordReset__TokenLifetimeMinutes: ${Auth__PasswordReset__TokenLifetimeMinutes:-60}
       # Rate limit: i default sicuri per produzione vivono in RateLimitOptions.cs
       # (5/min login, 10/h register, 10/min sensitive, 20/h invite, 20/h ai).
       # Per rilassare i bucket in sviluppo (es. test E2E) usare docker-compose.override.yml

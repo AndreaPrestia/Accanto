@@ -127,6 +127,9 @@ export default function LoginPage() {
         {error && <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">{error}</div>}
         <button className="btn-primary w-full" disabled={busy}>{busy ? t('auth.loggingIn') : t('auth.loginCta')}</button>
       </form>
+      <p className="mt-3 text-sm">
+        <Link to="/forgot-password" className="text-accanto-700 underline">{t('auth.forgotPassword')}</Link>
+      </p>
       <p className="mt-6 text-sm text-accanto-500">
         {t('auth.noAccount')} <Link to="/register" className="text-accanto-700 underline">{t('auth.createSpace')}</Link>
       </p>

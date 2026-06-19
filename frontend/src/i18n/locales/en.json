@@ -41,7 +41,21 @@
     "twoFactorRecoveryCode": "Recovery code",
     "twoFactorVerify": "Verify",
     "twoFactorUseRecovery": "Use a recovery code",
-    "twoFactorUseCode": "Use the app code"
+    "twoFactorUseCode": "Use the app code",
+    "forgotPassword": "Forgot your password?",
+    "forgotPasswordTitle": "Reset your password",
+    "forgotPasswordSubtitle": "Enter your account email and we will send you a link to choose a new password.",
+    "forgotPasswordCta": "Send the link",
+    "forgotPasswordSent": "If that email is registered, we sent a password reset link. Please check your inbox (and spam folder).",
+    "backToLogin": "Back to login",
+    "resetPasswordTitle": "Choose a new password",
+    "resetPasswordSubtitle": "Set your new password. You will be signed out from all other devices.",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm password",
+    "resetPasswordCta": "Update password",
+    "passwordsDoNotMatch": "The two passwords do not match.",
+    "resetPasswordSuccess": "Password updated. Taking you back to the login page…",
+    "resetPasswordTokenInvalid": "Invalid or expired link. Please request a new reset link."
   },
   "account": {
     "title": "Your account",

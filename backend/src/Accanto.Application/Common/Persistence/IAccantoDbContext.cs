@@ -16,6 +16,7 @@ public interface IAccantoDbContext
     Microsoft.EntityFrameworkCore.DbSet<AuditLogEntry> AuditLogEntries { get; }
     Microsoft.EntityFrameworkCore.DbSet<UserNotificationPreference> UserNotificationPreferences { get; }
     Microsoft.EntityFrameworkCore.DbSet<RefreshToken> RefreshTokens { get; }
+    Microsoft.EntityFrameworkCore.DbSet<PasswordResetToken> PasswordResetTokens { get; }
     Microsoft.EntityFrameworkCore.DbSet<SecurityAuditLogEntry> SecurityAuditLogEntries { get; }
     Microsoft.EntityFrameworkCore.DbSet<CaregiverCheckIn> CaregiverCheckIns { get; }
     Microsoft.EntityFrameworkCore.DbSet<AiInteraction> AiInteractions { get; }

@@ -14,6 +14,8 @@ public enum SecurityAuditEventType
     RecoveryCodeUsed,
     RecoveryCodesRegenerated,
     PasswordChanged,
+    PasswordResetRequested,
+    PasswordResetCompleted,
     SessionRevoked,
     AllSessionsRevoked,
     AccountErased,
