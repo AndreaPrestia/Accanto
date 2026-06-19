@@ -665,6 +665,110 @@ resource scoped al cerchio prima di qualunque accesso al DB.
       questa whitelist l'Owner scaduto non potrebbe MAI raggiungere
       `/api/account/2fa/setup` per uscire dal blocco → deadlock.
     - Lazy backfill: utente Owner con deadline=null (es. seed di
+
+32. **Dual-write documenti su S3-compatible (IONOS) via outbox** ✅ Fatto il 2026-06-19.
+    I documenti medici erano persistiti solo su volume locale
+    (`/data/storage`, cifrato a riposo via `IFieldProtector`). Single
+    point of failure: disk crash dell'host = perdita totale dei blob,
+    indipendentemente dal backup logico del DB. Aggiunta replica
+    sincrona-logica/asincrona-fisica su bucket S3 compatibile
+    (`accanto-backups` IONOS, prefix `storage/`, **senza Object Lock**
+    per restare compatibili con la cancellazione GDPR — il prefix
+    `backups/*` invece resta Object Lock GOVERNANCE 7y).
+    - Tabella nuova `document_sync_outbox` (`Operation` PUT/DELETE,
+      `Status` pending/in_progress/done/failed, `RetryCount`,
+      `NextAttemptAt`) con indice composito `(Status,NextAttemptAt)`.
+      Migration `AddDocumentSyncOutbox`.
+    - [`DocumentService.UploadAsync`](../backend/src/Accanto.Application/Documents/DocumentService.cs)
+      e `DeleteAsync` inseriscono la riga outbox nella **stessa
+      transazione** del SaveChangesAsync che persiste/cancella
+      `medical_documents`: se il commit fallisce, DB e replica
+      restano allineati (niente blob orfani su S3 senza riga nel DB).
+    - [`DocumentSyncWorker`](../backend/src/Accanto.Infrastructure/Storage/DocumentSyncWorker.cs)
+      `BackgroundService` poll-based (default 10s, batch 10). Risolve
+      con scope DbContext fresco per ciclo via `IServiceScopeFactory`
+      (evita il bug noto fire-and-forget + scoped DbContext →
+      `Npgsql.NpgsqlOperationInProgressException`). Backoff
+      esponenziale: 60s, 5min, 30min, 2h, 6h; oltre `MaxRetries=5`
+      la riga finisce in `failed` per intervento manuale (alert da
+      aggiungere quando il volume cresce).
+    - [`S3DocumentReplica`](../backend/src/Accanto.Infrastructure/Storage/S3DocumentReplica.cs):
+      `PutAsync` carica il blob **gia' cifrato** (no decifratura
+      lato S3) con la stessa storage path; `DeleteAllVersionsAsync`
+      pagina `ListVersionsRequest` e cancella ogni `VersionId` con
+      `DeleteObjectRequest` — necessario perche' il bucket e'
+      versionato e una semplice `DeleteObject` lascia la versione
+      originale recuperabile (gap GDPR latente).
+    - Gating completo via `S3DocumentReplica:Enabled` in
+      `appsettings.json`: a `false` (default) nemmeno l'`IAmazonS3`
+      viene istanziato in DI → zero dipendenze esterne in dev/test
+      e build CI. Production override via env
+      `S3DocumentReplica__*` (segreti AWS_ACCESS_KEY_ID/SECRET in
+      `.env` non committato).
+    - Test: 2 nuovi `DocumentSyncOutboxTests` (upload enqueue PUT;
+      delete enqueue DELETE preservando PUT). Verifica dell'invariante
+      "outbox e SaveChanges atomic" via DbContext in-memory.
+    Effetto sicurezza: doppia copia geografica del dato cifrato. RPO
+    della replica ≈ poll interval (10s) + worker latency. La chiave
+    di cifratura resta solo lato application server → un attaccante
+    che ruba il bucket S3 non puo' decifrare nulla (defense-in-depth
+    rispetto a `IFieldProtector` + `Encryption__MasterKey`).
+
+33. **GDPR right-to-erasure tombstone + cascade S3** ✅ Fatto il 2026-06-19.
+    Il vecchio `AccountService.DeleteAsync` (a) faceva hard-delete
+    dell'utente (impossibile soddisfare richieste di forense
+    successive) e (b) **rifiutava** la cancellazione se l'utente
+    partecipava a cerchi condivisi (incompatibile con il diritto
+    all'oblio: GDPR art. 17 non ammette il blocco "ti cancello solo
+    se nessun altro dipende dai tuoi dati"). Riscritto end-to-end
+    in modalita' tombstone.
+    - Nuovi campi `User.IsErased`, `ErasedAt`, `ErasureReason`
+      (migration `AddUserErasure`). Email sostituita con
+      `erased-{shortId}@accanto.invalid` (univoca, non recuperabile,
+      non risolvibile in DNS); `DisplayName`="Utente cancellato";
+      `PasswordHash` vuota (Verify() fallisce sempre); 2FA segreti
+      azzerati.
+    - [`UserErasureService`](../backend/src/Accanto.Application/Account/UserErasureService.cs):
+      per ogni documento `UploadedByUserId == userId` inserisce
+      DELETE in `document_sync_outbox` (cancella tutte le versioni
+      S3, item 32) + tenta rimozione blob locale best-effort.
+      Cerchi solo-utente: hard-delete cascade
+      timeline/questions/updates/invites/circle. Cerchi condivisi:
+      rimuove SOLO la membership, i dati restano agli altri membri.
+      Refresh tokens dell'utente revocati. Idempotente: secondo
+      EraseAsync su tombstone gia' presente e' no-op.
+    - **Audit log INTOCCATO**: nessuna anonymization di
+      `audit_log_entries` ne' `security_audit_log_entries`. La
+      tabella audit_log e' gia' WORM-protected via revoke
+      DELETE/UPDATE (item 17), quindi tecnicamente nemmeno
+      potremmo. Trade-off GDPR: art. 17(3)(e) permette di
+      mantenere PII nei record di audit per "establishment,
+      exercise or defence of legal claims". Documentato nella
+      privacy policy.
+    - Endpoint `DELETE /api/account` (esistente, semantica nuova):
+      body `{ CurrentPassword, TwoFactorCode?, Confirmation }`.
+      Richiede password verificata; se 2FA attivo richiede anche
+      TOTP o recovery code (consumato). `Confirmation` deve essere
+      esattamente `"ERASE"` (anti-fat-finger). Rate-limit
+      `auth-sensitive`. Delega a `IUserErasureService`.
+    - CLI amministrativa: `accanto erase-user <userId> --reason "..."
+      [--yes]` in [`Accanto.Cli/Program.cs`](../backend/src/Accanto.Cli/Program.cs).
+      Pensata per account compromessi (utente non puo' loggarsi
+      per usare l'endpoint), richieste legali, support escalation.
+      Conferma interattiva "ERASE" salvo `--yes`. Connessione DB
+      con `ConnectionStrings:PostgresMigrator` (owner privileges)
+      perche' la cancellazione tocca tabelle multiple.
+    - Test: 3 nuovi `UserErasureServiceTests` (tombstone PII
+      cleared, idempotenza, cascade documenti->outbox DELETE) + 5
+      `AccountServiceTests` aggiornati alla nuova semantica
+      (Confirmation richiesta, tombstone su cerchio condiviso,
+      cerchio condiviso non viene distrutto). Suite verde 173/173.
+    Effetto sicurezza/compliance: chiude la classe "richiesta GDPR
+    art. 17 non gestita end-to-end" — la cancellazione dei blob
+    propaga anche all'offsite cifrato (eliminando tutte le versioni
+    S3, non solo l'ultima), e una richiesta di erasure non puo' piu'
+    essere bloccata dalla policy conservativa. Documentato il
+    razionale del trade-off audit-log-conservato.
       test, account creato fuori dai code-path normali) riceve la
       deadline alla prima request, calcolata su `OwnerGraceHours`.
     - Hook su promozione runtime:
@@ -730,3 +834,5 @@ resource scoped al cerchio prima di qualunque accesso al DB.
 | 2026-06-04 | main post-upload-hardening | `FileSignatureValidator.Validate` introdotto: 3 livelli di difesa (coerenza estensione/content-type, rifiuto universale di magics pericolosi MZ/ELF/Mach-O/ZIP/gzip/RAR/7z, validazione strutturale per formato — PDF `%%EOF`, PNG `IHDR`, JPEG `EOI`, UTF-8 strict per `text/plain`). 16 nuovi unit test, 2 nuove probe end-to-end (totale 7). Test 161/161 PASS. | Chiude polyglot upload e extension confusion; sommato a magic-bytes head-only + AV (item 15) il livello di difesa su upload diventa coerente con il resto della superficie. |
 | 2026-06-04 | main post-monitoring | Runbook `monitoring.md`: Healthchecks.io per job interni + UptimeRobot per endpoint pubblici (`/`, `app/`, `/api/health/ready`). Dead-man's switch implementato in `backup.ps1` e `restore-drill.ps1` (env `HEARTBEAT_BACKUP_URL` / `HEARTBEAT_RESTORE_URL`, ping POST opt-in solo a fine job riuscito). | Auto-osservazione (Seq) non basta: serve sonda esterna indipendente dall'infra monitorata. Chiude la classe "cron silenziosamente fallito" sui job DR critici. |
 | 2026-06-04 | main post-2fa-owner-enforcement | `User.TwoFactorRequiredFromUtc` + migration con backfill SQL per Owner esistenti (deadline NOW+7gg). `RequireTwoFactorForOwnersMiddleware`: 403/`two_factor_required_for_owner` oltre grace, header `X-2FA-Required-By` entro. Whitelist minima (`/api/account/2fa/*`, auth, health, swagger). 3 notifiche email security (`TwoFactorRequiredForOwner`/`Enabled`/`Disabled`) via `SendSecurityEmailAsync` (bypassa preferenze topic). Hook su `CareCircleService.CreateAsync` + `InviteService.AcceptAsync`. Flag `TwoFactor:RequireForOwners` per backout. Test 167/167 PASS (6 nuovi `TwoFactorOwnerEnforcementTests`). | Chiude la classe "Owner senza 2FA → password leakata → game-over cerchio": il ruolo piu' privilegiato finalmente protetto. Rollout senza lockout grazie a backfill + grace 7gg + whitelist deadlock-free. |
+| 2026-06-19 | main post-s3-dual-write | `document_sync_outbox` + `DocumentSyncWorker` (BackgroundService) + `S3DocumentReplica` (PutAsync blob cifrato, DeleteAllVersionsAsync su bucket versionato). Outbox enqueue nella stessa transazione di `DocumentService.Upload/Delete` → DB e S3 coerenti. Gating completo via `S3DocumentReplica:Enabled` (default off, zero deps in dev/test). Bucket IONOS `accanto-backups/storage/` senza Object Lock (compatibile GDPR), `/backups/*` con Object Lock 7y. Test 171/171 PASS (2 nuovi `DocumentSyncOutboxTests`). | Da single-point-of-failure (disk locale) a copia geografica cifrata best-effort. RPO ≈ 10s + worker latency. Chiave cifratura resta solo lato app → bucket leak non decifra nulla. |
+| 2026-06-19 | main post-gdpr-erasure | `IUserErasureService` + endpoint `DELETE /api/account` riscritto in modalita' tombstone: PII azzerati (`erased-{shortId}@accanto.invalid`, password vuota, 2FA segreti rimossi), refresh tokens revocati, **audit log intatto** (GDPR 17(3)(e)). Cascade documenti via outbox DELETE → tutte le versioni S3 cancellate. Cerchi solo-utente hard-deleted; cerchi condivisi conservati per altri membri (rimossa solo la membership). Endpoint richiede password + (se 2FA) TOTP/recovery + `Confirmation == "ERASE"`. CLI `accanto erase-user <userId> --reason "..." [--yes]` per admin/legal. Migration `AddUserErasure` (`IsErased`/`ErasedAt`/`ErasureReason`). Test 173/173 PASS (3 nuovi `UserErasureServiceTests`, 5 `AccountServiceTests` aggiornati alla nuova semantica). | Chiude "richiesta GDPR art. 17 non gestita end-to-end": rimossa la vecchia conservative policy che bloccava la cancellazione su cerchio condiviso (incompatibile con il diritto all'oblio), e ora l'erasure propaga anche all'offsite S3 cancellando ogni versione (non solo l'ultima). |
