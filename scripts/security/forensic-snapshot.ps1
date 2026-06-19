@@ -115,8 +115,8 @@ Write-Host "[forensic] 2/9 export audit_log_entries ultimi $AuditDays gg..." -Fo
 Invoke-DbCsvExport -OutFile "audit_log.csv" -Sql @"
 COPY (
   SELECT * FROM audit_log_entries
-  WHERE ""Timestamp"" >= now() - interval '$AuditDays days'
-  ORDER BY ""Timestamp""
+  WHERE "Timestamp" >= now() - interval '$AuditDays days'
+  ORDER BY "Timestamp"
 ) TO STDOUT WITH CSV HEADER
 "@
 
@@ -124,8 +124,8 @@ Write-Host "[forensic] 3/9 export security_audit_log_entries ultimi $AuditDays g
 Invoke-DbCsvExport -OutFile "security_audit_log.csv" -Sql @"
 COPY (
   SELECT * FROM security_audit_log_entries
-  WHERE ""Timestamp"" >= now() - interval '$AuditDays days'
-  ORDER BY ""Timestamp""
+  WHERE "Timestamp" >= now() - interval '$AuditDays days'
+  ORDER BY "Timestamp"
 ) TO STDOUT WITH CSV HEADER
 "@
 
@@ -133,10 +133,10 @@ COPY (
 Write-Host "[forensic] 4/9 refresh_tokens attivi..." -ForegroundColor Cyan
 Invoke-DbCsvExport -OutFile "refresh_tokens_active.csv" -Sql @"
 COPY (
-  SELECT ""Id"", ""UserId"", ""CreatedAt"", ""ExpiresAt"", ""RevokedAt""
+  SELECT "Id", "UserId", "CreatedAt", "ExpiresAt", "RevokedAt"
   FROM refresh_tokens
-  WHERE ""RevokedAt"" IS NULL AND ""ExpiresAt"" > now()
-  ORDER BY ""CreatedAt""
+  WHERE "RevokedAt" IS NULL AND "ExpiresAt" > now()
+  ORDER BY "CreatedAt"
 ) TO STDOUT WITH CSV HEADER
 "@
 
@@ -144,10 +144,10 @@ COPY (
 Write-Host "[forensic] 5/9 users summary..." -ForegroundColor Cyan
 Invoke-DbCsvExport -OutFile "users_summary.csv" -Sql @"
 COPY (
-  SELECT ""Id"", ""Email"", ""DisplayName"", ""CreatedAt"",
-         ""LastFailedLoginAt"", ""FailedLoginAttempts"", ""LockoutEndsAt"",
-         ""TwoFactorEnabled""
-  FROM users ORDER BY ""CreatedAt"" DESC NULLS LAST
+  SELECT "Id", "Email", "DisplayName", "CreatedAt",
+         "LastFailedLoginAt", "FailedLoginAttempts", "LockoutEndsAt",
+         "TwoFactorEnabled"
+  FROM users ORDER BY "CreatedAt" DESC NULLS LAST
 ) TO STDOUT WITH CSV HEADER
 "@
 
