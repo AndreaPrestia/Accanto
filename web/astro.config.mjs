@@ -1,5 +1,4 @@
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
@@ -25,7 +24,6 @@ export default defineConfig({
     }
   },
   integrations: [
-    tailwind({ applyBaseStyles: false }),
     mdx(),
     sitemap({
       // Esclude la pagina root (redirect a /it) — il plugin sitemap i18n richiede
