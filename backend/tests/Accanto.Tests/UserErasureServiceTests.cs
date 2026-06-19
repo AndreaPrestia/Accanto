@@ -123,7 +123,7 @@ public class UserErasureServiceTests
 
         // Outbox: due DELETE per i documenti dell'utente.
         var deletes = db.DocumentSyncOutbox.Where(o => o.Operation == "DELETE").ToList();
-        deletes.Should().HaveCountGreaterOrEqualTo(2);
+        deletes.Should().HaveCountGreaterThanOrEqualTo(2);
         deletes.Select(o => o.StoragePath).Should().Contain(new[] { "p/a.pdf", "p/b.pdf" });
         // Disk: best-effort delete tentato per entrambi.
         storage.Deleted.Should().Contain(new[] { "p/a.pdf", "p/b.pdf" });
