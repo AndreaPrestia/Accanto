@@ -128,6 +128,7 @@ public class DocumentService : IDocumentService
         };
 
         _db.MedicalDocuments.Add(doc);
+        EnqueueOutbox(doc.Id, doc.StoragePath, "PUT");
         await _db.SaveChangesAsync(cancellationToken);
 
         _ = _audit.LogAsync(careCircleId, userId, AuditActionType.DocumentUploaded, AuditResourceType.MedicalDocument, doc.Id, doc.OriginalFileName, CancellationToken.None);
@@ -154,10 +155,16 @@ public class DocumentService : IDocumentService
             ?? throw new NotFoundException("Documento non trovato.");
 
         var name = doc.OriginalFileName;
+        var storagePath = doc.StoragePath;
+        var docId = doc.Id;
         _db.MedicalDocuments.Remove(doc);
+        // Outbox DELETE inserita nella STESSA transazione del Remove:
+        // se il save fallisce, ne' la riga ne' l'outbox vengono persistite,
+        // mantenendo S3 e DB coerenti.
+        EnqueueOutbox(docId, storagePath, "DELETE");
         await _db.SaveChangesAsync(cancellationToken);
 
-        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.DocumentDeleted, AuditResourceType.MedicalDocument, documentId, name, CancellationToken.None);
+        _ = _audit.LogAsync(careCircleId, userId, AuditActionType.DocumentDeleted, AuditResourceType.MedicalDocument, docId, name, CancellationToken.None);
 
         try
         {
@@ -182,6 +189,26 @@ public class DocumentService : IDocumentService
             .Where(t => t.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+    /// <summary>Inserisce una riga nella document_sync_outbox per il
+    /// worker S3. Stessa transazione del SaveChangesAsync chiamante:
+    /// outbox e medical_documents (Add o Remove) restano coerenti.</summary>
+    private void EnqueueOutbox(Guid documentId, string storagePath, string operation)
+    {
+        var now = DateTimeOffset.UtcNow;
+        _db.DocumentSyncOutbox.Add(new DocumentSyncOutboxEntry
+        {
+            Id = Guid.NewGuid(),
+            DocumentId = documentId,
+            StoragePath = storagePath,
+            Operation = operation,
+            Status = "pending",
+            RetryCount = 0,
+            CreatedAt = now,
+            UpdatedAt = now,
+            NextAttemptAt = now
+        });
+    }
 
     private static DocumentDto Map(MedicalDocument d) => new(
         d.Id, d.CareCircleId, d.UploadedByUserId, d.OriginalFileName, d.ContentType, d.SizeInBytes,

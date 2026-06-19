@@ -31,6 +31,7 @@ public class AccantoDbContext : DbContext, IAccantoDbContext
     public DbSet<SecurityAuditLogEntry> SecurityAuditLogEntries => Set<SecurityAuditLogEntry>();
     public DbSet<CaregiverCheckIn> CaregiverCheckIns => Set<CaregiverCheckIn>();
     public DbSet<AiInteraction> AiInteractions => Set<AiInteraction>();
+    public DbSet<DocumentSyncOutboxEntry> DocumentSyncOutbox => Set<DocumentSyncOutboxEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

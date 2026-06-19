@@ -50,6 +50,33 @@ public static class InfrastructureServiceCollectionExtensions
         services.Configure<EmailOptions>(configuration.GetSection("Email"));
         services.Configure<AiOptions>(configuration.GetSection("Ai"));
         services.Configure<ClamAvOptions>(configuration.GetSection("ClamAV"));
+        services.Configure<S3DocumentReplicaOptions>(configuration.GetSection("S3DocumentReplica"));
+
+        // Replica S3 dei documenti: opt-in via S3DocumentReplica:Enabled.
+        // Quando disabilitato non istanziamo AmazonS3Client (zero
+        // configurazione richiesta in dev/test).
+        var s3Section = configuration.GetSection("S3DocumentReplica");
+        if (string.Equals(s3Section["Enabled"], "true", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddSingleton<Amazon.S3.IAmazonS3>(sp =>
+            {
+                var opt = sp.GetRequiredService<IOptions<S3DocumentReplicaOptions>>().Value;
+                var cfg = new Amazon.S3.AmazonS3Config
+                {
+                    RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(opt.Region),
+                    // ForcePathStyle: necessario per molti S3-compatibili
+                    // (IONOS, Backblaze, MinIO). Non danneggia AWS S3.
+                    ForcePathStyle = true
+                };
+                if (!string.IsNullOrWhiteSpace(opt.ServiceUrl))
+                {
+                    cfg.ServiceURL = opt.ServiceUrl;
+                }
+                return new Amazon.S3.AmazonS3Client(opt.AccessKeyId, opt.SecretAccessKey, cfg);
+            });
+            services.AddSingleton<IS3DocumentReplica, S3DocumentReplica>();
+            services.AddHostedService<DocumentSyncWorker>();
+        }
 
         // Malware scanner: ClamAV se ClamAV:Host e' configurato, altrimenti noop.
         // La factory rilegge il binding qui (non a runtime) perche' la
