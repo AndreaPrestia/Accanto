@@ -66,6 +66,16 @@ services:
       #   Logging__SeqUrl=http://seq:5341
       Logging__SeqUrl: ${Logging__SeqUrl:-}
       Logging__SeqApiKey: ${Logging__SeqApiKey:-}
+      # Replica S3 documenti (IONOS Object Storage). Default disabilitata;
+      # attivare in .env impostando S3DocumentReplica__Enabled=true e
+      # configurando bucket + credenziali (vedi accanto-ops/backup-restore.md).
+      S3DocumentReplica__Enabled: ${S3DocumentReplica__Enabled:-false}
+      S3DocumentReplica__ServiceUrl: ${S3DocumentReplica__ServiceUrl:-}
+      S3DocumentReplica__Region: ${S3DocumentReplica__Region:-}
+      S3DocumentReplica__Bucket: ${S3DocumentReplica__Bucket:-}
+      S3DocumentReplica__Prefix: ${S3DocumentReplica__Prefix:-documents/}
+      S3DocumentReplica__AccessKeyId: ${S3DocumentReplica__AccessKeyId:-}
+      S3DocumentReplica__SecretAccessKey: ${S3DocumentReplica__SecretAccessKey:-}
     volumes:
       - ./storage:/data/storage
     ports:
