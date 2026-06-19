@@ -268,6 +268,10 @@ if (Test-Path $envFile) {
         }
 
         try {
+            # Usiamo s3api put-object: in molte versioni di aws-cli le
+            # opzioni --object-lock-* sul comando alto livello s3 cp
+            # vengono rifiutate con ParamValidation.
+
             # Bundle .tar.gz
             $keyBundle = "backups/forensic/$bundleName"
             docker run --rm `
@@ -275,7 +279,9 @@ if (Test-Path $envFile) {
                 -e AWS_SECRET_ACCESS_KEY=$($cfg['AWS_SECRET_ACCESS_KEY']) `
                 -v "${absDir}:/work:ro" `
                 amazon/aws-cli @awsArgs `
-                s3 cp "/work/$bundleName" "s3://$bucket/$keyBundle" `
+                s3api put-object `
+                --bucket $bucket --key $keyBundle `
+                --body "/work/$bundleName" `
                 --object-lock-mode GOVERNANCE `
                 --object-lock-retain-until-date $retainUntil
             if ($LASTEXITCODE -ne 0) { throw "upload bundle fallito" }
@@ -287,7 +293,9 @@ if (Test-Path $envFile) {
                 -e AWS_SECRET_ACCESS_KEY=$($cfg['AWS_SECRET_ACCESS_KEY']) `
                 -v "${absDir}:/work:ro" `
                 amazon/aws-cli @awsArgs `
-                s3 cp "/work/$bundleName.sha256" "s3://$bucket/$keySha" `
+                s3api put-object `
+                --bucket $bucket --key $keySha `
+                --body "/work/$bundleName.sha256" `
                 --object-lock-mode GOVERNANCE `
                 --object-lock-retain-until-date $retainUntil
             if ($LASTEXITCODE -ne 0) { throw "upload sha256 fallito" }

@@ -162,7 +162,15 @@ foreach ($f in $files | Sort-Object Name) {
         continue
     }
     Write-Host "[offsite] upload s3://$bucket/$key" -ForegroundColor Cyan
-    $cpArgs = @('s3', 'cp', "/work/$($f.Name)", "s3://$bucket/$key")
+    # Usiamo s3api put-object: il comando alto livello s3 cp rifiuta
+    # le opzioni --object-lock-* in molte versioni di aws-cli
+    # (ParamValidation: Unknown options).
+    $cpArgs = @(
+        's3api', 'put-object',
+        '--bucket', $bucket,
+        '--key', $key,
+        '--body', "/work/$($f.Name)"
+    )
     if ($lockEnabled) {
         # Object Lock va settato AL PUT, non e' modificabile dopo (a
         # parte estensione retention con bypass governance dall'admin).
