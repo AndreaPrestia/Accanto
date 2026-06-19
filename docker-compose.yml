@@ -24,6 +24,25 @@ services:
       timeout: 5s
       retries: 10
 
+  # Init "one-shot" che corregge l'ownership di /data/storage prima dell'avvio
+  # del backend. Necessario perche':
+  # - il container backend gira come uid/gid 1654 (utente `app` chiseled);
+  # - il bind mount `./storage` puo' avere file/dir owned by root creati da
+  #   amministrazione manuale (es. `mkdir` o un upload partito quando il
+  #   backend girava come root in passato);
+  # - in quel caso `Directory.CreateDirectory` di sottocartelle (es. `2026/`)
+  #   fallisce con "Access to the path '/data/storage/2026' is denied".
+  #
+  # Idempotente: se l'ownership e' gia' corretto, il chown e' un no-op.
+  # Termina dopo l'esecuzione (restart: "no").
+  storage-init:
+    image: busybox:1.36
+    restart: "no"
+    user: "0:0"
+    command: ["sh", "-c", "chown -R 1654:1654 /data/storage && chmod -R u+rwX /data/storage && echo 'storage ownership ok'"]
+    volumes:
+      - ./storage:/data/storage
+
   backend:
     build:
       context: .
@@ -32,6 +51,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      storage-init:
+        condition: service_completed_successfully
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://+:8080}
