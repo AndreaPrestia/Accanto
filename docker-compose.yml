@@ -76,6 +76,29 @@ services:
       S3DocumentReplica__Prefix: ${S3DocumentReplica__Prefix:-documents/}
       S3DocumentReplica__AccessKeyId: ${S3DocumentReplica__AccessKeyId:-}
       S3DocumentReplica__SecretAccessKey: ${S3DocumentReplica__SecretAccessKey:-}
+      # Email SMTP (notifiche: verifica email, password reset, inviti).
+      # Default vuoto = EmailSender no-op (utile in dev). In prod imposta
+      # SmtpHost + credenziali in .env (es. provider transactional come
+      # SendGrid, Mailgun, Postmark, oppure SMTP gestito).
+      Email__SmtpHost: ${Email__SmtpHost:-}
+      Email__SmtpPort: ${Email__SmtpPort:-587}
+      Email__Username: ${Email__Username:-}
+      Email__Password: ${Email__Password:-}
+      Email__UseStartTls: ${Email__UseStartTls:-true}
+      Email__FromAddress: ${Email__FromAddress:-}
+      Email__FromName: ${Email__FromName:-Accanto}
+      # Web Push (VAPID). Default vuoto = push disabilitato. Per generare
+      # le chiavi: `npx web-push generate-vapid-keys`. Subject e' un mailto:
+      # o URL https usato dal browser per contattare il publisher.
+      Push__VapidPublicKey: ${Push__VapidPublicKey:-}
+      Push__VapidPrivateKey: ${Push__VapidPrivateKey:-}
+      Push__VapidSubject: ${Push__VapidSubject:-mailto:andrea.prestia@accanto.care}
+      # ClamAV (scan antivirus upload). Default vuoto = NoopMalwareScanner.
+      # Per attivare: `docker compose --profile av up -d` e in .env:
+      #   ClamAV__Host=clamav  (nome del servizio nel compose)
+      ClamAV__Host: ${ClamAV__Host:-}
+      ClamAV__Port: ${ClamAV__Port:-3310}
+      ClamAV__TimeoutSeconds: ${ClamAV__TimeoutSeconds:-30}
     volumes:
       - ./storage:/data/storage
     ports:
