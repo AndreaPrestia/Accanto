@@ -16,11 +16,26 @@
     `.env.backup-offsite.example`):
 
       S3_ENDPOINT_URL       (opzionale per AWS, RICHIESTO per IONOS/B2/MinIO)
-      S3_BUCKET             (es. "accanto-backups-prod")
+      S3_BUCKET             (es. "accanto-backups")
       S3_REGION             (es. "de" per IONOS Francoforte, "us-east-1" per AWS)
-      S3_PREFIX             (opzionale, default vuoto; es. "daily/")
+      S3_PREFIX             (opzionale, default vuoto; es. "backups/daily/")
       AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY
+
+    Object Lock (anti-ransomware / anti-insider, defense-in-depth oltre
+    alla cifratura AES applicativa):
+
+      S3_OBJECT_LOCK_ENABLED  ("true" / "false", default "true")
+      S3_OBJECT_LOCK_MODE     ("GOVERNANCE" / "COMPLIANCE", default
+                              "GOVERNANCE"). Governance ammette override
+                              da admin del contratto IONOS in caso di
+                              GDPR erasure obbligatorio. Compliance e'
+                              irreversibile fino a scadenza.
+      S3_OBJECT_LOCK_DAYS     numero di giorni di retention. Default 2555
+                              (7 anni, allineato a retention sanitaria).
+
+    Object Lock va settato AL PUT — non puo' essere aggiunto a posteriori.
+    Il bucket deve avere Object Lock enabled e Versioning ON.
 
 .PARAMETER InputDir
     Cartella sorgente con i backup. Default: ./backups.
@@ -39,11 +54,13 @@
     Pre-requisiti sul bucket (configurati una volta nella console del
     provider, NON da questo script — sono permission-sensitive):
       - Versioning ON
-      - Object lock / immutability ON con retention 7 anni (compliance)
+      - Object lock enabled (la retention per-object la setta questo
+        script al PUT — vedi S3_OBJECT_LOCK_* sopra)
       - Server-side encryption ON (AES-256 o KMS)
-      - Lifecycle: transizione a cold-storage dopo 90 giorni
-      - Access key dedicata: write/list ONLY su questo bucket, NO delete
-        (la cancellazione vecchi backup la fa il lifecycle, non l'app)
+      - Block public access ON
+      - Access key dedicata: PutObject/GetObject/ListBucket ONLY, NO
+        DeleteObject (la chiave non puo' cancellare a prescindere; il
+        lock impedisce delete anche all'admin entro la retention)
 
     Vedi accanto-ops/backup-restore.md sezione "Storage offsite (IONOS S3)".
 #>
@@ -79,6 +96,25 @@ $region   = if ($env:S3_REGION) { $env:S3_REGION } else { "us-east-1" }
 $prefix   = if ($env:S3_PREFIX) { $env:S3_PREFIX.TrimEnd('/') + '/' } else { '' }
 $endpoint = $env:S3_ENDPOINT_URL  # vuoto => AWS S3 default
 
+# Object Lock: opt-out esplicito con S3_OBJECT_LOCK_ENABLED=false.
+# Default ON: il bucket deve avere ObjectLockEnabled=Enabled.
+$lockEnabled = $true
+if ($env:S3_OBJECT_LOCK_ENABLED -and $env:S3_OBJECT_LOCK_ENABLED.ToLower() -eq 'false') {
+    $lockEnabled = $false
+}
+$lockMode = if ($env:S3_OBJECT_LOCK_MODE) { $env:S3_OBJECT_LOCK_MODE.ToUpper() } else { 'GOVERNANCE' }
+if ($lockMode -notin @('GOVERNANCE', 'COMPLIANCE')) {
+    throw "S3_OBJECT_LOCK_MODE deve essere GOVERNANCE o COMPLIANCE (valore: $lockMode)."
+}
+$lockDays = 2555  # 7 anni
+if ($env:S3_OBJECT_LOCK_DAYS) {
+    if (-not [int]::TryParse($env:S3_OBJECT_LOCK_DAYS, [ref]$lockDays) -or $lockDays -le 0) {
+        throw "S3_OBJECT_LOCK_DAYS deve essere intero positivo (valore: $($env:S3_OBJECT_LOCK_DAYS))."
+    }
+}
+# Data UTC ISO 8601 (formato richiesto da aws-cli per --object-lock-retain-until-date).
+$retainUntil = (Get-Date).ToUniversalTime().AddDays($lockDays).ToString("yyyy-MM-ddTHH:mm:ssZ")
+
 if (-not (Test-Path $InputDir)) { throw "Cartella $InputDir non trovata." }
 $files = Get-ChildItem $InputDir -Include "accanto-*.dump.enc", "accanto-*.dump.enc.sha256" -File
 if (-not $files) {
@@ -109,6 +145,11 @@ function Invoke-Aws {
 }
 
 $uploaded = 0; $skipped = 0
+if ($lockEnabled) {
+    Write-Host "[offsite] Object Lock: $lockMode, retention $lockDays gg (fino al $retainUntil)" -ForegroundColor Cyan
+} else {
+    Write-Host "[offsite] Object Lock: DISABILITATO (S3_OBJECT_LOCK_ENABLED=false)" -ForegroundColor Yellow
+}
 foreach ($f in $files | Sort-Object Name) {
     $key = "$prefix$($f.Name)"
     # Check esistenza: head-object esce 0 se esiste, 254/255 altrimenti.
@@ -121,7 +162,16 @@ foreach ($f in $files | Sort-Object Name) {
         continue
     }
     Write-Host "[offsite] upload s3://$bucket/$key" -ForegroundColor Cyan
-    Invoke-Aws @('s3', 'cp', "/work/$($f.Name)", "s3://$bucket/$key") | Out-Host
+    $cpArgs = @('s3', 'cp', "/work/$($f.Name)", "s3://$bucket/$key")
+    if ($lockEnabled) {
+        # Object Lock va settato AL PUT, non e' modificabile dopo (a
+        # parte estensione retention con bypass governance dall'admin).
+        $cpArgs += @(
+            '--object-lock-mode', $lockMode,
+            '--object-lock-retain-until-date', $retainUntil
+        )
+    }
+    Invoke-Aws $cpArgs | Out-Host
     if ($LASTEXITCODE -ne 0) { throw "upload fallito per $($f.Name)." }
     $uploaded++
 }
@@ -132,3 +182,6 @@ Write-Host "  bucket   : s3://$bucket/$prefix"
 Write-Host "  endpoint : $(if ($endpoint) { $endpoint } else { 'AWS default' })"
 Write-Host "  uploaded : $uploaded"
 Write-Host "  skipped  : $skipped (gia' presenti)"
+if ($lockEnabled) {
+    Write-Host "  lock     : $lockMode fino al $retainUntil"
+}

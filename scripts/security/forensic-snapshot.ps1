@@ -219,9 +219,104 @@ Write-Host "[forensic] OK" -ForegroundColor Green
 Write-Host "  bundle  : $bundle"
 Write-Host "  size    : $sizeMB MB"
 Write-Host "  sha256  : $bundleHash"
+
+# Upload automatico in S3 con Object Lock GOVERNANCE 7 anni -----------
+# Se .env.backup-offsite e' configurato, carichiamo subito in
+# s3://<bucket>/backups/forensic/. I forensic bundle DEVONO essere
+# immutabili per chain of custody (no tampering, no delete prima
+# dell'expiry legale).
+$envFile = ".env.backup-offsite"
+$uploaded = $false
+if (Test-Path $envFile) {
+    Write-Host ""
+    Write-Host "[forensic] upload offsite con Object Lock GOVERNANCE 7y ..." -ForegroundColor Cyan
+    # Carica .env in vars locali (NON pollute il process env).
+    $cfg = @{}
+    Get-Content $envFile | Where-Object { $_ -match '^\s*[A-Z_]+\s*=' -and $_ -notmatch '^\s*#' } | ForEach-Object {
+        $kv = $_ -split '=', 2
+        $cfg[$kv[0].Trim()] = $kv[1].Trim().Trim('"').Trim("'")
+    }
+    # Override env presenti (priorita' al processo).
+    foreach ($k in 'S3_ENDPOINT_URL','S3_REGION','S3_BUCKET','AWS_ACCESS_KEY_ID','AWS_SECRET_ACCESS_KEY') {
+        $v = (Get-Item "env:$k" -ErrorAction SilentlyContinue).Value
+        if ($v) { $cfg[$k] = $v }
+    }
+
+    $reqOk = $true
+    foreach ($req in 'S3_BUCKET','AWS_ACCESS_KEY_ID','AWS_SECRET_ACCESS_KEY') {
+        if (-not $cfg[$req]) {
+            Write-Warning "[forensic] $req non impostato — upload offsite SALTATO."
+            $reqOk = $false
+        }
+    }
+
+    if ($reqOk) {
+        $awsArgs = @()
+        if ($cfg['S3_ENDPOINT_URL']) { $awsArgs += @('--endpoint-url', $cfg['S3_ENDPOINT_URL']) }
+        $awsArgs += @('--region', ($cfg['S3_REGION'] | Where-Object { $_ } | Select-Object -First 1 | ForEach-Object { $_ }))
+        if (-not $cfg['S3_REGION']) { $awsArgs += @('--region', 'us-east-1') }
+
+        $bucket = $cfg['S3_BUCKET']
+        $retainUntil = (Get-Date).ToUniversalTime().AddDays(2555).ToString("yyyy-MM-ddTHH:mm:ssZ")
+        $absBundle = (Resolve-Path $bundle).Path
+        $absDir = Split-Path $absBundle -Parent
+        $bundleName = Split-Path $bundle -Leaf
+
+        docker image inspect amazon/aws-cli >$null 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            docker pull --quiet amazon/aws-cli | Out-Null
+        }
+
+        try {
+            # Bundle .tar.gz
+            $keyBundle = "backups/forensic/$bundleName"
+            docker run --rm `
+                -e AWS_ACCESS_KEY_ID=$($cfg['AWS_ACCESS_KEY_ID']) `
+                -e AWS_SECRET_ACCESS_KEY=$($cfg['AWS_SECRET_ACCESS_KEY']) `
+                -v "${absDir}:/work:ro" `
+                amazon/aws-cli @awsArgs `
+                s3 cp "/work/$bundleName" "s3://$bucket/$keyBundle" `
+                --object-lock-mode GOVERNANCE `
+                --object-lock-retain-until-date $retainUntil
+            if ($LASTEXITCODE -ne 0) { throw "upload bundle fallito" }
+
+            # Sidecar .sha256
+            $keySha = "backups/forensic/$bundleName.sha256"
+            docker run --rm `
+                -e AWS_ACCESS_KEY_ID=$($cfg['AWS_ACCESS_KEY_ID']) `
+                -e AWS_SECRET_ACCESS_KEY=$($cfg['AWS_SECRET_ACCESS_KEY']) `
+                -v "${absDir}:/work:ro" `
+                amazon/aws-cli @awsArgs `
+                s3 cp "/work/$bundleName.sha256" "s3://$bucket/$keySha" `
+                --object-lock-mode GOVERNANCE `
+                --object-lock-retain-until-date $retainUntil
+            if ($LASTEXITCODE -ne 0) { throw "upload sha256 fallito" }
+
+            $uploaded = $true
+            Write-Host "[forensic] upload offsite OK (lockato fino al $retainUntil)" -ForegroundColor Green
+            Write-Host "  s3://$bucket/$keyBundle"
+            Write-Host "  s3://$bucket/$keySha"
+        }
+        catch {
+            Write-Warning "[forensic] upload offsite FALLITO: $($_.Exception.Message)"
+            Write-Warning "[forensic] il bundle locale e' integro: carica manualmente."
+        }
+    }
+} else {
+    Write-Host ""
+    Write-Host "[forensic] $envFile non trovato - upload offsite SALTATO." -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "Next steps (chain of custody):" -ForegroundColor Yellow
-Write-Host "  1. Sposta SUBITO il bundle su storage controllato (S3 object-lock o vault)."
-Write-Host "  2. Apri ticket incident e allega: nome bundle, sha256, gitRev=$gitRev."
-Write-Host "  3. Annota chi ha accesso al bundle (PII al suo interno)."
-Write-Host "  4. SOLO ORA procedi con rotazione segreti (secret-rotation.md compromise scenario)."
+if ($uploaded) {
+    Write-Host "  1. Bundle gia' in s3://$($cfg['S3_BUCKET'])/backups/forensic/ con lock GOVERNANCE 7y."
+    Write-Host "  2. Apri ticket incident e allega: nome bundle, sha256, gitRev=$gitRev."
+    Write-Host "  3. Annota chi ha accesso al bundle (PII al suo interno)."
+    Write-Host "  4. SOLO ORA procedi con rotazione segreti (secret-rotation.md compromise scenario)."
+} else {
+    Write-Host "  1. Sposta SUBITO il bundle su storage controllato (S3 object-lock o vault)."
+    Write-Host "  2. Apri ticket incident e allega: nome bundle, sha256, gitRev=$gitRev."
+    Write-Host "  3. Annota chi ha accesso al bundle (PII al suo interno)."
+    Write-Host "  4. SOLO ORA procedi con rotazione segreti (secret-rotation.md compromise scenario)."
+}
