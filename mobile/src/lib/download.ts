@@ -1,4 +1,6 @@
-import * as FileSystem from 'expo-file-system';
+// SDK 54 espone una API modulare nuova (Paths/Directory/File); manteniamo
+// l'API classica via il sub-path /legacy finché non migriamo i call site.
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { getToken } from '../storage/secureStorage';
 import { API_BASE_URL } from '../config/env';
