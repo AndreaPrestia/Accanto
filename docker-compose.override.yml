@@ -12,6 +12,12 @@
 
 services:
   backend:
+    # Espone il backend su 8088 sull'host invece del default 8080 per evitare
+    # conflitti con un'eventuale istanza di Apache/XAMPP gia' in ascolto su 8080.
+    # La porta interna del container resta 8080 (ASPNETCORE_URLS), il mapping
+    # cambia solo lato host. Aggiorna mobile/.env.local di conseguenza.
+    ports: !override
+      - "8088:8080"
     environment:
       # Bucket molto larghi: in prod questi NON vengono applicati.
       RateLimit__Login__PermitLimit: ${RateLimit__Login__PermitLimit:-10000}
