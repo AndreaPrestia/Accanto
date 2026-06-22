@@ -1,0 +1,27 @@
+# Smoke flow: apre l'app via deep link su un invite token e verifica
+# che venga mostrato lo schermo di accettazione.
+#
+# Funziona sia da link "scheme" custom sia da universal link HTTPS
+# se il device ha già installato l'app firmata. Per il flow universal
+# link servono assetlinks.json (Android) o apple-app-site-association
+# (iOS) verificati — vedi web/public/.well-known/.
+#
+#   maestro test \
+#     -e MAESTRO_APP_ID=app.accanto.mobile.dev \
+#     -e MAESTRO_SCHEME=accanto.dev \
+#     -e INVITE_TOKEN=<token-staging> \
+#     .maestro/deeplink-invite.yaml
+appId: ${MAESTRO_APP_ID}
+env:
+  SCHEME: ${MAESTRO_SCHEME}
+  INVITE_TOKEN: ${INVITE_TOKEN}
+---
+- launchApp:
+    clearState: true
+- openLink: "${SCHEME}://invite/${INVITE_TOKEN}"
+# Lo screen di accettazione invito ha un titolo tradotto:
+#   it: "Accetta l'invito"  en: "Accept invite"  es: "Aceptar invitación"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Accetta|Accept|Aceptar).*"
+    timeout: 8000

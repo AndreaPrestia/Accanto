@@ -12,6 +12,8 @@ interface ButtonProps {
   fullWidth?: boolean;
   /** Type semantico per accessibilità. */
   accessibilityLabel?: string;
+  /** ID stabile per test E2E (Maestro / Detox). */
+  testID?: string;
   children: ReactNode;
 }
 
@@ -41,6 +43,7 @@ export default function Button({
   variant = 'primary',
   fullWidth = true,
   accessibilityLabel,
+  testID,
   children
 }: ButtonProps) {
   const isDisabled = disabled || busy;
@@ -50,6 +53,7 @@ export default function Button({
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy }}
       accessibilityLabel={accessibilityLabel}
+      testID={testID}
       onPress={isDisabled ? undefined : onPress}
       className={`rounded-md px-4 py-3 ${v.bg} ${v.border} ${
         fullWidth ? 'w-full' : ''

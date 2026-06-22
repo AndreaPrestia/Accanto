@@ -61,6 +61,28 @@ jobs:
           VITE_API_BASE_URL: /api
         run: npm run build
 
+  mobile:
+    name: Mobile (typecheck + jest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install monorepo deps
+        run: npm ci --legacy-peer-deps
+
+      - name: Typecheck mobile
+        working-directory: mobile
+        run: npm run typecheck
+
+      - name: Jest mobile
+        working-directory: mobile
+        run: npm test -- --ci --reporters=default
+
   e2e:
     name: E2E (Playwright)
     runs-on: ubuntu-latest

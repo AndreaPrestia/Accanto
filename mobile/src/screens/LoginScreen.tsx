@@ -79,6 +79,7 @@ export default function LoginScreen({ navigation }: Props) {
               textContentType="oneTimeCode"
               maxLength={8}
               autoFocus
+              testID="login-2fa-code"
             />
           ) : (
             <TextField
@@ -89,6 +90,7 @@ export default function LoginScreen({ navigation }: Props) {
               autoCorrect={false}
               autoComplete="off"
               autoFocus
+              testID="login-2fa-recovery"
             />
           )}
 
@@ -138,6 +140,7 @@ export default function LoginScreen({ navigation }: Props) {
             autoCorrect={false}
             autoComplete="email"
             textContentType="emailAddress"
+            testID="login-email"
           />
           <TextField
             label={t('auth.password')}
@@ -147,12 +150,13 @@ export default function LoginScreen({ navigation }: Props) {
             autoCapitalize="none"
             autoComplete="password"
             textContentType="password"
+            testID="login-password"
           />
 
           <ErrorBanner message={error} />
 
           <View className="mt-2">
-            <Button onPress={submit} busy={busy} disabled={busy}>
+            <Button onPress={submit} busy={busy} disabled={busy} testID="login-submit">
               {busy ? t('auth.loggingIn') : t('auth.loginCta')}
             </Button>
           </View>
