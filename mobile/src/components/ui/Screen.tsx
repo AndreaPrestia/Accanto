@@ -7,7 +7,7 @@ import {
   ViewStyle,
   StyleProp
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 interface ScreenProps {
   children: ReactNode;
@@ -16,6 +16,12 @@ interface ScreenProps {
   /** Padding orizzontale interno. Default: px-4 */
   padded?: boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
+  /**
+   * SafeArea edges. Di default escludiamo `top` perché il header di
+   * React Navigation gestisce già lo status bar / notch. Gli screen senza
+   * header (es. Login) devono passare `['top','bottom','left','right']`.
+   */
+  edges?: ReadonlyArray<Edge>;
 }
 
 /**
@@ -27,7 +33,8 @@ export default function Screen({
   children,
   scroll = true,
   padded = true,
-  contentContainerStyle
+  contentContainerStyle,
+  edges = ['bottom', 'left', 'right']
 }: ScreenProps) {
   const inner = padded ? (
     <View className="flex-1 px-4 py-4">{children}</View>
@@ -36,7 +43,7 @@ export default function Screen({
   );
 
   return (
-    <SafeAreaView edges={['bottom', 'left', 'right']} className="flex-1 bg-accanto-50">
+    <SafeAreaView edges={edges} className="flex-1 bg-accanto-50">
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}

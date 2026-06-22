@@ -62,8 +62,8 @@ export default function LoginScreen({ navigation }: Props) {
 
   if (twoFactorToken) {
     return (
-      <Screen>
-        <View className="max-w-md w-full self-center pt-2">
+      <Screen edges={['top', 'bottom', 'left', 'right']}>
+        <View className="max-w-md w-full self-center pt-6">
           <Text className="text-2xl font-semibold text-accanto-900 mb-2">
             {t('auth.twoFactorTitle')}
           </Text>
@@ -123,8 +123,8 @@ export default function LoginScreen({ navigation }: Props) {
   }
 
   return (
-    <Screen>
-      <View className="max-w-md w-full self-center pt-2">
+    <Screen edges={['top', 'bottom', 'left', 'right']}>
+      <View className="max-w-md w-full self-center pt-6">
         <Text className="text-2xl font-semibold text-accanto-900 mb-2">
           {t('auth.loginTitle')}
         </Text>
