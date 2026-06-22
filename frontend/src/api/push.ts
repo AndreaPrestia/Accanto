@@ -9,6 +9,22 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
   return out;
 }
 
+/**
+ * Confronto byte-a-byte fra la chiave VAPID corrente del server e quella
+ * memorizzata nella subscription esistente del browser. Serve per capire
+ * se la subscription cachata e' stata creata con la chiave attuale o con
+ * una vecchia (in tal caso va dismessa prima di crearne una nuova,
+ * altrimenti pushManager.subscribe() ritorna NotAllowedError
+ * "Registration failed - permission denied").
+ */
+function sameKey(a: ArrayBuffer | null | undefined, b: Uint8Array): boolean {
+  if (!a) return false;
+  const av = new Uint8Array(a);
+  if (av.length !== b.length) return false;
+  for (let i = 0; i < av.length; i++) if (av[i] !== b[i]) return false;
+  return true;
+}
+
 export function isPushSupported(): boolean {
   return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 }
@@ -27,19 +43,51 @@ export async function subscribeToPush(): Promise<PushSubscription> {
   if (!isPushSupported()) throw new Error('Notifiche push non supportate da questo browser.');
 
   const permission = await Notification.requestPermission();
-  if (permission !== 'granted') throw new Error('Permesso per le notifiche non concesso.');
+  if (permission !== 'granted') {
+    throw new Error(
+      `Permesso per le notifiche non concesso (stato: ${permission}). ` +
+        'Sblocca le notifiche per questo sito dalle impostazioni del browser e riprova.'
+    );
+  }
 
   const keyRes = await api.get<{ publicKey: string }>('/push/vapid-public-key');
   const publicKey = keyRes.data.publicKey;
   if (!publicKey) throw new Error('Notifiche non configurate sul server.');
+  const applicationServerKey = urlBase64ToUint8Array(publicKey);
 
   const reg = await navigator.serviceWorker.ready;
   let sub = await reg.pushManager.getSubscription();
+
+  // Se la subscription esistente e' stata creata con una chiave VAPID
+  // diversa (cambio di server, rigenerazione chiavi, residuo da test
+  // precedenti), dobbiamo rimuoverla prima di chiederne una nuova. Il
+  // browser non permette due subscription attive con chiavi diverse
+  // sullo stesso Service Worker e fallirebbe con
+  // "Registration failed - permission denied".
+  if (sub && !sameKey(sub.options.applicationServerKey, applicationServerKey)) {
+    try {
+      await api.post('/push/unsubscribe', { endpoint: sub.endpoint });
+    } catch {
+      // best-effort: continuiamo anche se il backend non conosce piu' l'endpoint
+    }
+    await sub.unsubscribe();
+    sub = null;
+  }
+
   if (!sub) {
-    sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey).buffer as ArrayBuffer
-    });
+    try {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey
+      });
+    } catch (err) {
+      const name = (err as { name?: string })?.name ?? 'Error';
+      const msg = (err as Error)?.message ?? String(err);
+      throw new Error(
+        `Impossibile registrare il dispositivo per le notifiche (${name}: ${msg}). ` +
+          'Prova a chiudere e riaprire il browser, oppure ad annullare la registrazione del Service Worker da DevTools \u2192 Application.'
+      );
+    }
   }
 
   const json = sub.toJSON();

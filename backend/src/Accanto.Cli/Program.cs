@@ -38,6 +38,7 @@ public static class Program
             return command switch
             {
                 "generate-key" => GenerateKey(),
+                "generate-vapid-keys" => GenerateVapidKeys(),
                 "rotate-keys" => await RotateKeysAsync(rest),
                 "erase-user" => await EraseUserAsync(rest),
                 "smoke-s3" => await SmokeS3Async(rest),
@@ -57,6 +58,35 @@ public static class Program
         var key = new byte[32];
         RandomNumberGenerator.Fill(key);
         Console.WriteLine(Convert.ToBase64String(key));
+        return 0;
+    }
+
+    /// <summary>
+    /// Genera una coppia di chiavi VAPID (ECDSA P-256) usabile per le Web
+    /// Push notification. Stampa una sezione JSON pronta da incollare in
+    /// appsettings o nei segreti di ambiente.
+    ///
+    /// Le chiavi devono restare segrete (la private key in particolare); in
+    /// produzione vanno passate via variabili di ambiente
+    /// Push__VapidPublicKey / Push__VapidPrivateKey / Push__VapidSubject,
+    /// non commitate nel repository.
+    /// </summary>
+    private static int GenerateVapidKeys()
+    {
+        var keys = WebPush.VapidHelper.GenerateVapidKeys();
+        Console.WriteLine("# Nuova coppia di chiavi VAPID (ECDSA P-256).");
+        Console.WriteLine("# Incolla nella sezione 'Push' di appsettings (locale) o esporta via env (prod).");
+        Console.WriteLine();
+        Console.WriteLine("\"Push\": {");
+        Console.WriteLine($"  \"VapidPublicKey\":  \"{keys.PublicKey}\",");
+        Console.WriteLine($"  \"VapidPrivateKey\": \"{keys.PrivateKey}\",");
+        Console.WriteLine("  \"VapidSubject\":    \"mailto:admin@example.com\"");
+        Console.WriteLine("}");
+        Console.WriteLine();
+        Console.WriteLine("# Equivalente env vars (Docker / Kubernetes):");
+        Console.WriteLine($"#   Push__VapidPublicKey={keys.PublicKey}");
+        Console.WriteLine($"#   Push__VapidPrivateKey={keys.PrivateKey}");
+        Console.WriteLine("#   Push__VapidSubject=mailto:admin@example.com");
         return 0;
     }
 
@@ -370,8 +400,9 @@ public static class Program
         Console.WriteLine("Uso: accanto <comando>");
         Console.WriteLine();
         Console.WriteLine("Comandi:");
-        Console.WriteLine("  generate-key   Stampa una nuova chiave AES-256 in base64.");
-        Console.WriteLine("  rotate-keys    Riscrive i dati cifrati usando Encryption:ActiveKeyId.");
+        Console.WriteLine("  generate-key          Stampa una nuova chiave AES-256 in base64.");
+        Console.WriteLine("  generate-vapid-keys   Stampa una nuova coppia VAPID (Web Push).");
+        Console.WriteLine("  rotate-keys           Riscrive i dati cifrati usando Encryption:ActiveKeyId.");
         Console.WriteLine("  erase-user     Cancellazione GDPR di un utente (tombstone + cascade documenti).");
         Console.WriteLine("                 Uso: accanto erase-user <userId> --reason \"...\" [--yes]");
         Console.WriteLine("  smoke-s3       Smoke test della replica S3 (PUT 2 versioni + DeleteAllVersions).");
