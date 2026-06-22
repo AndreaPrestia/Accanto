@@ -1,0 +1,30 @@
+<!--
+  Accanto · adaptive icon foreground (Android).
+
+  Specifiche Google: l'asset adaptive ha una "safe zone" centrale di ~432×432 px
+  su un canvas 1024×1024 trasparente. Tutto ciò che esce dalla safe zone può
+  essere croppato dal launcher (cerchio / squircle / quadrato).
+
+  Lo sfondo è dichiarato in app.config.ts (`adaptiveIcon.backgroundColor:
+  '#f8fafc'`) — quindi qui mostriamo solo le figure, SENZA quadrato di sfondo
+  colorato.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- safe zone visuale (commentata: solo guida) -->
+  <!-- <circle cx="512" cy="512" r="216" fill="none" stroke="#cbd5e1" stroke-width="2"/> -->
+
+  <!-- Stesso simbolo dell'icona master, scalato al ~70% per stare nella safe
+       zone, su sfondo trasparente. -->
+  <g transform="translate(296,296) scale(0.42)">
+    <circle cx="420" cy="380" r="92" fill="#475569"/>
+    <path d="M260 720c0-90 72-150 160-150s160 60 160 150v40H260z" fill="#475569"/>
+    <circle cx="640" cy="430" r="76" fill="#a3825a"/>
+    <path d="M500 740c0-78 62-130 140-130s140 52 140 130v30H500z" fill="#a3825a"/>
+    <path
+      d="M270 800 Q 512 870 770 800"
+      stroke="#475569"
+      stroke-width="22"
+      stroke-linecap="round"
+      fill="none"/>
+  </g>
+</svg>

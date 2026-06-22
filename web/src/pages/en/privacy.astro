@@ -3,58 +3,73 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { routeUrl } from '../../i18n';
 
 const lang = 'en' as const;
+const lastUpdated = 'June 22, 2026';
 ---
 <BaseLayout
   title="Privacy · Accanto"
-  description="How Accanto handles your data: minimum necessary, no profiling, full export, self-hosting option."
+  description="How Accanto handles your personal data: minimum collection, no profiling, full export, self-hosting option."
 >
   <article class="container-page container-prose">
     <p class="eyebrow mb-3">Privacy</p>
-    <h1 class="text-3xl sm:text-4xl font-semibold mb-6">Your data, your rules</h1>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Privacy summary</h1>
+    <p class="text-sm text-accanto-500 mb-6">Last updated: {lastUpdated}</p>
 
-    <nav aria-label="Page index" class="mb-8">
-      <p class="eyebrow mb-2">On this page</p>
-      <ul class="text-sm text-accanto-600 space-y-1">
-        <li>• <a href="#what-we-collect" class="underline">What we collect</a></li>
-        <li>• <a href="#what-we-dont-do" class="underline">What we don't do</a></li>
-        <li>• <a href="#self-hosting" class="underline">Self-hosting</a></li>
-        <li>• <a href="#your-rights" class="underline">Your rights</a></li>
-        <li>• <a href="#security" class="underline">Security</a></li>
-        <li>• <a href="#medical-notice" class="underline">Medical notice</a></li>
-      </ul>
-    </nav>
+    <aside class="rounded-lg border border-accanto-200 bg-accanto-50 p-4 mb-8 text-sm">
+      The authoritative, GDPR-compliant version of this notice is published in Italian at
+      <a href="/it/privacy" class="underline font-semibold">/it/privacy</a>. The English summary below
+      mirrors its key points; in case of conflicting interpretations, the Italian text prevails.
+    </aside>
 
-    <p>Accanto handles sensitive information about the health of the person you care for.
-    That is why we chose a "privacy by design" approach from day one.</p>
-
-    <h2 id="what-we-collect">What we collect</h2>
+    <h2>What we collect</h2>
     <ul>
-      <li>The information you enter (notes, symptoms, documents, contacts).</li>
-      <li>The data strictly required for the account to work (email, password hash, essential logs).</li>
+      <li>Account data: email, hashed password, display name, language preference, optional 2FA.</li>
+      <li>Your content: notes, timeline, symptoms, doctor questions, uploaded documents, members of
+      your "care circles". May include health-related data of the person you assist (special
+      category under art. 9 GDPR).</li>
+      <li>Technical data: IP address, user-agent, session timestamps, audit logs.</li>
+      <li>Push tokens (only when notifications are explicitly enabled).</li>
     </ul>
 
-    <h2 id="what-we-dont-do">What we don't do</h2>
+    <h2>What we don't do</h2>
     <ul>
-      <li>We do not sell your data.</li>
-      <li>We do not run advertising profiling.</li>
-      <li>We do not embed third-party trackers for commercial purposes.</li>
+      <li>We don't sell your data.</li>
+      <li>We don't run advertising profiling.</li>
+      <li>We don't embed third-party analytics or trackers.</li>
     </ul>
 
-    <h2 id="self-hosting">Self-hosting</h2>
-    <p>Accanto can be installed on your own server. In that case the data stays physically in your environment.
-    AI mode is optional and can be connected to a local model (for example via Ollama).</p>
+    <h2>Controller</h2>
+    <p>
+      <strong>PRESTIA.DEV S.A.S. DI PRESTIA ANDREA</strong> — Viale Bruno Rizzieri 199C, 00173 Rome
+      (RM), Italy. VAT IT17486541000. REA RM-1721153.<br />
+      Privacy contact: <a href="mailto:support@accanto.care">support@accanto.care</a>.
+    </p>
 
-    <h2 id="your-rights">Your rights</h2>
-    <p>You can export your data or request deletion at any time from your personal area.
-    For specific requests reach us via the <a href={routeUrl('contact', lang)}>contact</a> page.</p>
+    <h2>Your rights</h2>
+    <p>You can exercise the rights granted by GDPR (access, rectification, erasure, restriction,
+    portability, objection, consent withdrawal) at any time. Most of them are available directly
+    inside the Account section of the app. For specific requests email
+    <a href="mailto:support@accanto.care">support@accanto.care</a>. You may also file a complaint
+    with the Italian Data Protection Authority
+    (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>).</p>
 
-    <h2 id="security">Security</h2>
-    <p>Passwords are stored only as hashes. Sessions are signed and revocable. Connections use HTTPS.
-    We work to keep the attack surface small and well watched.</p>
+    <h2>Sub-processors</h2>
+    <ul>
+      <li>IONOS Cloud (Germany, EU) — hosting and database.</li>
+      <li>Expo / 650 Industries (US) — push notification delivery.</li>
+      <li>Apple APNs (US), Google FCM (US) — push delivery on iOS/Android.</li>
+      <li>App Store and Play Store — app distribution.</li>
+    </ul>
+    <p>Transfers outside the EU rely on the EU–U.S. Data Privacy Framework or Standard Contractual
+    Clauses.</p>
 
-    <h2 id="medical-notice">Medical notice</h2>
-    <p>Accanto is not a medical device. The information in the application does not replace qualified medical advice.</p>
+    <h2>Medical disclaimer</h2>
+    <p>Accanto is <strong>not a medical device</strong> within the meaning of Regulation (EU) 2017/745
+    and does not replace professional medical advice. In case of emergency call 112 (EU) or your
+    local emergency number.</p>
 
-    <p class="text-sm text-accanto-500 mt-10">This page is an orientation summary, not a complete privacy notice — that can be requested via the contact page.</p>
+    <p class="text-sm text-accanto-500 mt-10">
+      For any privacy-related question contact <a href="mailto:support@accanto.care">support@accanto.care</a>
+      or visit our <a href={routeUrl('contact', lang)}>Contact</a> page.
+    </p>
   </article>
 </BaseLayout>

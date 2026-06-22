@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'en' as const;
+const lastUpdated = 'June 22, 2026';
+---
+<BaseLayout
+  title="Support · Accanto"
+  description="Need help with Accanto? Email support@accanto.care. Answers to frequently asked questions about accounts, security, care circles and your data."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Support</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">How can we help</h1>
+    <p class="text-sm text-accanto-500 mb-8">Last updated: {lastUpdated}</p>
+
+    <section class="rounded-lg border border-accanto-200 bg-accanto-50 p-5 mb-10">
+      <h2 class="text-lg font-semibold mb-2">Email us</h2>
+      <p class="mb-2">For any issue, question or feedback:</p>
+      <p class="text-lg">
+        <a href="mailto:support@accanto.care" class="font-semibold underline">support@accanto.care</a>
+      </p>
+      <p class="text-sm text-accanto-600 mt-3">
+        We usually reply within 2 business days. Privacy-related requests
+        (access, rectification, deletion, portability) are handled within the
+        30-day window required by GDPR.
+      </p>
+    </section>
+
+    <section>
+      <h2>What to include</h2>
+      <ul>
+        <li>The email of the account you used.</li>
+        <li>Device and OS version (e.g. iPhone 15 / iOS 26, Pixel 8 / Android 15).</li>
+        <li>App version (visible in Account → About or on the login screen).</li>
+        <li>A short description of the problem with steps to reproduce.</li>
+        <li>Screenshots when relevant (please avoid including third-party personal data).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Frequently asked questions</h2>
+
+      <h3>I forgot my password</h3>
+      <p>Tap "Forgot password?" on the sign-in screen and follow the email instructions. The reset link is time-limited.</p>
+
+      <h3>What is a "care circle"?</h3>
+      <p>A shared space dedicated to the person you care for. You are the admin and can invite other people (family, caregivers) with a role each. All members see the same content, in sync.</p>
+
+      <h3>Can I export my data?</h3>
+      <p>Yes. The Account section of the app offers a complete export of your content (timeline, documents, doctor questions, care circles) in a structured, machine-readable format, as required by GDPR art. 20 (right to portability).</p>
+
+      <h3>How do I delete my account?</h3>
+      <p>Account → Delete account in the app. We remove your data from active systems within 30 days, and from cyclic backups within an additional 60 days. See the <a href={routeUrl('privacy', lang)}>Privacy notice</a>.</p>
+
+      <h3>I'm not receiving push notifications</h3>
+      <p>Check, in order: 1) Accanto has the notification permission in the OS settings; 2) Do Not Disturb / Focus modes are not blocking it; 3) you have network connectivity. Signing out and back in renegotiates the push token.</p>
+
+      <h3>Is Accanto a medical device?</h3>
+      <p>No. It is an organizational support tool for caregivers. It does not provide diagnosis or clinical advice and does not replace professional medical opinion. In case of emergency call 112 (EU) or your local emergency number.</p>
+
+      <h3>Reporting a security issue</h3>
+      <p>Email <a href="mailto:support@accanto.care">support@accanto.care</a> with subject "Security report". We follow a responsible-disclosure policy. See also <a href="/.well-known/security.txt"><code>/.well-known/security.txt</code></a>.</p>
+    </section>
+
+    <section>
+      <h2>Useful pages</h2>
+      <ul>
+        <li><a href={routeUrl('privacy', lang)}>Privacy notice</a></li>
+        <li><a href={routeUrl('terms', lang)}>Terms of service</a></li>
+        <li><a href={routeUrl('faq', lang)}>General FAQ</a></li>
+        <li><a href={routeUrl('contact', lang)}>Contact</a></li>
+      </ul>
+    </section>
+  </article>
+</BaseLayout>

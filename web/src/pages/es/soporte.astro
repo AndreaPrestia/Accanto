@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'es' as const;
+const lastUpdated = '22 de junio de 2026';
+---
+<BaseLayout
+  title="Soporte · Accanto"
+  description="¿Necesitas ayuda con Accanto? Escríbenos a support@accanto.care. Respuestas a preguntas frecuentes sobre cuenta, seguridad, círculos de cuidado y datos."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Soporte</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">¿Cómo podemos ayudarte?</h1>
+    <p class="text-sm text-accanto-500 mb-8">Última actualización: {lastUpdated}</p>
+
+    <section class="rounded-lg border border-accanto-200 bg-accanto-50 p-5 mb-10">
+      <h2 class="text-lg font-semibold mb-2">Escríbenos</h2>
+      <p class="mb-2">Para cualquier consulta, problema o sugerencia:</p>
+      <p class="text-lg">
+        <a href="mailto:support@accanto.care" class="font-semibold underline">support@accanto.care</a>
+      </p>
+      <p class="text-sm text-accanto-600 mt-3">
+        Solemos responder en un plazo de 2 días laborables. Las solicitudes relativas al tratamiento
+        de datos personales (acceso, rectificación, supresión, portabilidad) se gestionan dentro
+        del plazo máximo de 30 días previsto por el RGPD.
+      </p>
+    </section>
+
+    <section>
+      <h2>Qué incluir en tu mensaje</h2>
+      <ul>
+        <li>El email de la cuenta con la que has accedido.</li>
+        <li>Dispositivo y versión del sistema operativo (p. ej. iPhone 15 / iOS 26, Pixel 8 / Android 15).</li>
+        <li>Versión de la app (en Cuenta → Información, o en la pantalla de acceso).</li>
+        <li>Una descripción breve del problema, con pasos para reproducirlo si es posible.</li>
+        <li>Capturas de pantalla si son relevantes (evita incluir datos personales de terceros).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Preguntas frecuentes</h2>
+
+      <h3>He olvidado mi contraseña</h3>
+      <p>Toca "¿Has olvidado la contraseña?" en la pantalla de acceso y sigue las instrucciones del email. El enlace de restablecimiento tiene una duración limitada.</p>
+
+      <h3>¿Qué es un "círculo de cuidado"?</h3>
+      <p>Es un espacio compartido dedicado a la persona cuidada. Tú eres el administrador y puedes invitar a otras personas (familia, cuidadores) con un rol cada uno. Todos los miembros ven los mismos contenidos, de forma sincronizada.</p>
+
+      <h3>¿Puedo exportar mis datos?</h3>
+      <p>Sí. Desde la sección Cuenta de la app puedes solicitar una exportación completa de tus contenidos en un formato estructurado y legible por máquina, conforme al derecho de portabilidad (art. 20 RGPD).</p>
+
+      <h3>¿Cómo elimino mi cuenta?</h3>
+      <p>Cuenta → Eliminar cuenta en la app. Los datos se borran de los sistemas activos en 30 días y de las copias de seguridad cíclicas en otros 60 días, como se detalla en el <a href={routeUrl('privacy', lang)}>Aviso de privacidad</a>.</p>
+
+      <h3>No recibo las notificaciones push</h3>
+      <p>Comprueba, en este orden: 1) que Accanto tiene permiso de notificaciones en los ajustes del teléfono; 2) que no está activado "No molestar" o "Focus"; 3) que tienes conexión a internet. Cerrar sesión y volver a entrar renegocia el token push.</p>
+
+      <h3>¿Accanto es un producto sanitario?</h3>
+      <p>No. Es una herramienta de apoyo organizativo para cuidadores. No proporciona diagnóstico ni recomendaciones clínicas y no sustituye la opinión de un profesional. En caso de emergencia llama al 112 (UE) o al número local.</p>
+
+      <h3>Reportar un problema de seguridad</h3>
+      <p>Escribe a <a href="mailto:support@accanto.care">support@accanto.care</a> con el asunto "Reporte de seguridad". Aplicamos una política de divulgación responsable. Ver también <a href="/.well-known/security.txt"><code>/.well-known/security.txt</code></a>.</p>
+    </section>
+
+    <section>
+      <h2>Páginas útiles</h2>
+      <ul>
+        <li><a href={routeUrl('privacy', lang)}>Aviso de privacidad</a></li>
+        <li><a href={routeUrl('terms', lang)}>Términos del servicio</a></li>
+        <li><a href={routeUrl('faq', lang)}>Preguntas frecuentes</a></li>
+        <li><a href={routeUrl('contact', lang)}>Contacto</a></li>
+      </ul>
+    </section>
+  </article>
+</BaseLayout>

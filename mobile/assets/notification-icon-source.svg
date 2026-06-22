@@ -1,0 +1,15 @@
+<!--
+  Accanto · notification icon (Android).
+
+  Specifiche: bianco/trasparente, silhouette piatta, senza dettagli sottili.
+  Il sistema lo renderizza in monocolore. Dimensione 96×96 finale; SVG 1:1 per
+  flessibilità di export.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- due teste affiancate + base, tutto bianco pieno su trasparente -->
+  <g fill="#ffffff">
+    <circle cx="36" cy="34" r="10"/>
+    <circle cx="60" cy="38" r="8"/>
+    <path d="M18 72c0-14 12-22 24-22s24 8 24 22v6H18z"/>
+  </g>
+</svg>

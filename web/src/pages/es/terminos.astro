@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'es' as const;
+const lastUpdated = '22 de junio de 2026';
+---
+<BaseLayout
+  title="Términos del servicio · Accanto"
+  description="Términos que regulan el uso de la app Accanto: alcance del servicio, cuenta, contenidos del usuario, responsabilidad, baja."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Términos</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Términos del servicio</h1>
+    <p class="text-sm text-accanto-500 mb-6">Última actualización: {lastUpdated}</p>
+
+    <aside class="rounded-lg border border-accanto-200 bg-accanto-50 p-4 mb-8 text-sm">
+      La versión vinculante de estos términos se publica en italiano en
+      <a href="/it/termini" class="underline font-semibold">/it/termini</a>. Este resumen en español
+      refleja sus puntos clave; en caso de conflicto prevalece el texto italiano.
+    </aside>
+
+    <h2>Proveedor del servicio</h2>
+    <p>
+      <strong>PRESTIA.DEV S.A.S. DI PRESTIA ANDREA</strong> — Viale Bruno Rizzieri 199C, 00173 Roma (RM),
+      Italia. NIF IT17486541000. REA RM-1721153.<br />
+      Contacto: <a href="mailto:support@accanto.care">support@accanto.care</a>.
+    </p>
+
+    <h2>Alcance</h2>
+    <p>Accanto es una herramienta digital para organizar información, notas, documentos y tareas
+    relacionadas con el cuidado de un familiar. Se comparte dentro de "círculos de cuidado" con
+    los miembros que invitas. No es un producto sanitario ni proporciona diagnósticos o consejos
+    clínicos.</p>
+
+    <h2>Cuenta</h2>
+    <ul>
+      <li>Necesitas un email válido y una contraseña para usar el servicio.</li>
+      <li>Eres responsable de proteger tus credenciales; recomendamos activar la 2FA con TOTP.</li>
+      <li>Debes tener al menos 16 años (los menores necesitan el consentimiento de un tutor).</li>
+    </ul>
+
+    <h2>Contenidos del usuario</h2>
+    <p>Todo lo que introduces en Accanto sigue siendo tuyo. Nos concedes una licencia limitada para
+    almacenarlo, procesarlo y mostrarlo estrictamente para el funcionamiento del servicio. Eres
+    responsable de los contenidos aportados y, en particular, de tener título para tratar los datos
+    de terceros (por ejemplo, la persona asistida) conforme a la normativa aplicable.</p>
+
+    <h2>Uso aceptable</h2>
+    <p>No intentes vulnerar la seguridad del servicio, hacer scraping masivo, suplantar usuarios o
+    usar la app para fines ilícitos.</p>
+
+    <h2>Precio</h2>
+    <p>Accanto es gratuita durante la fase de lanzamiento. Cualquier futuro plan de pago se
+    comunicará con antelación y se regirá por condiciones comerciales específicas.</p>
+
+    <h2>Cancelación</h2>
+    <p>Puedes eliminar tu cuenta en cualquier momento desde la sección Cuenta de la app. Tus datos
+    se borran de los sistemas activos en 30 días y de las copias de seguridad cíclicas en otros
+    60 días, según se detalla en el <a href={routeUrl('privacy', lang)}>Aviso de privacidad</a>.</p>
+
+    <h2>Limitación de responsabilidad</h2>
+    <p>El servicio se ofrece "tal cual" y "según disponibilidad". En la medida en que la ley lo
+    permita, no garantizamos la ausencia de errores o interrupciones. Quedan a salvo los derechos
+    irrenunciables del consumidor.</p>
+
+    <h2>Aviso médico</h2>
+    <p>Accanto <strong>no es un producto sanitario</strong> en el sentido del Reglamento (UE)
+    2017/745 y no sustituye el consejo médico cualificado. En caso de emergencia llama al 112 (UE)
+    o al número de emergencias local.</p>
+
+    <h2>Ley aplicable</h2>
+    <p>Estos términos se rigen por la ley italiana. Para cualquier controversia será competente,
+    de forma exclusiva, el foro de Roma, sin perjuicio del foro del consumidor cuando sea
+    aplicable.</p>
+
+    <p class="text-sm text-accanto-500 mt-10">
+      ¿Preguntas? Escribe a <a href="mailto:support@accanto.care">support@accanto.care</a> o visita
+      la página de <a href={routeUrl('contact', lang)}>contacto</a>.
+    </p>
+  </article>
+</BaseLayout>

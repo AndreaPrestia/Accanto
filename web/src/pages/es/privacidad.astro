@@ -3,54 +3,75 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { routeUrl } from '../../i18n';
 
 const lang = 'es' as const;
+const lastUpdated = '22 de junio de 2026';
 ---
 <BaseLayout
   title="Privacidad · Accanto"
-  description="Cómo Accanto trata tus datos: lo mínimo necesario, sin perfilado, exportación completa, opción de self-hosting."
+  description="Cómo Accanto trata tus datos personales: recogida mínima, sin perfilado, exportación completa, opción de self-hosting."
 >
   <article class="container-page container-prose">
     <p class="eyebrow mb-3">Privacidad</p>
-    <h1>Tus datos, tus reglas</h1>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Resumen de privacidad</h1>
+    <p class="text-sm text-accanto-500 mb-6">Última actualización: {lastUpdated}</p>
 
-    <nav aria-label="Índice de la página" class="mb-8">
-      <p class="eyebrow mb-2">En esta página</p>
-      <ul class="text-sm text-accanto-600 space-y-1">
-        <li>• <a href="#que-recogemos" class="underline">Qué recogemos</a></li>
-        <li>• <a href="#que-no-hacemos" class="underline">Qué no hacemos</a></li>
-        <li>• <a href="#self-hosting" class="underline">Self-hosting</a></li>
-        <li>• <a href="#derechos" class="underline">Tus derechos</a></li>
-        <li>• <a href="#seguridad" class="underline">Seguridad</a></li>
-        <li>• <a href="#aviso-medico" class="underline">Aviso médico</a></li>
-      </ul>
-    </nav>
+    <aside class="rounded-lg border border-accanto-200 bg-accanto-50 p-4 mb-8 text-sm">
+      La versión completa y conforme al RGPD de este aviso se publica en italiano en
+      <a href="/it/privacy" class="underline font-semibold">/it/privacy</a>. El resumen en español
+      refleja sus puntos clave; en caso de discrepancia, prevalece el texto italiano.
+    </aside>
 
-    <p>Accanto trata información sensible sobre la salud de la persona cuidada. Por eso desde el inicio elegimos un enfoque "privacy by design".</p>
-
-    <h2 id="que-recogemos">Qué recogemos</h2>
+    <h2>Qué recogemos</h2>
     <ul>
-      <li>La información que tú introduces (notas, síntomas, documentos, contactos).</li>
-      <li>Los datos estrictamente necesarios para el funcionamiento de la cuenta (email, hash de contraseña, logs esenciales).</li>
+      <li>Datos de cuenta: email, hash de contraseña, nombre visible, idioma preferido, 2FA opcional.</li>
+      <li>Tus contenidos: notas, línea de tiempo, síntomas, preguntas para el médico, documentos subidos
+      y miembros de tus "círculos de cuidado". Pueden incluir datos de salud de la persona asistida
+      (categoría especial, art. 9 RGPD).</li>
+      <li>Datos técnicos: dirección IP, user-agent, marcas de tiempo de sesión, registros de auditoría.</li>
+      <li>Tokens de notificaciones push (sólo si activas las notificaciones).</li>
     </ul>
 
-    <h2 id="que-no-hacemos">Qué no hacemos</h2>
+    <h2>Lo que no hacemos</h2>
     <ul>
       <li>No vendemos tus datos.</li>
       <li>No hacemos perfilado publicitario.</li>
-      <li>No integramos rastreadores de terceros con fines comerciales.</li>
+      <li>No integramos analytics ni rastreadores de terceros.</li>
     </ul>
 
-    <h2 id="self-hosting">Self-hosting</h2>
-    <p>Accanto puede instalarse en tu propio servidor. En ese caso los datos permanecen físicamente en tu entorno. El modo IA es opcional y puede conectarse a un modelo local (por ejemplo con Ollama).</p>
+    <h2>Responsable del tratamiento</h2>
+    <p>
+      <strong>PRESTIA.DEV S.A.S. DI PRESTIA ANDREA</strong> — Viale Bruno Rizzieri 199C, 00173 Roma (RM),
+      Italia. NIF IT17486541000. REA RM-1721153.<br />
+      Contacto privacidad: <a href="mailto:support@accanto.care">support@accanto.care</a>.
+    </p>
 
-    <h2 id="derechos">Tus derechos</h2>
-    <p>Puedes exportar tus datos o solicitar su eliminación en cualquier momento desde tu área personal. Para consultas específicas escríbenos desde la página de <a href={routeUrl('contact', lang)}>contacto</a>.</p>
+    <h2>Tus derechos</h2>
+    <p>Puedes ejercer los derechos reconocidos por el RGPD (acceso, rectificación, supresión, limitación,
+    portabilidad, oposición, retirada del consentimiento) en cualquier momento. La mayoría están
+    disponibles directamente en la sección Cuenta de la app. Para solicitudes específicas escribe a
+    <a href="mailto:support@accanto.care">support@accanto.care</a>. También puedes presentar una
+    reclamación ante la autoridad de control italiana
+    (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>) o
+    ante la autoridad de tu país de residencia.</p>
 
-    <h2 id="seguridad">Seguridad</h2>
-    <p>Las contraseñas se guardan solo como hash. Las sesiones están firmadas y son revocables. Las conexiones usan HTTPS. Trabajamos para mantener una superficie de ataque reducida y vigilada.</p>
+    <h2>Subencargados</h2>
+    <ul>
+      <li>IONOS Cloud (Alemania, UE) — hosting y base de datos.</li>
+      <li>Expo / 650 Industries (EE. UU.) — entrega de notificaciones push.</li>
+      <li>Apple APNs (EE. UU.), Google FCM (EE. UU.) — entrega en iOS/Android.</li>
+      <li>App Store y Play Store — distribución de la app.</li>
+    </ul>
+    <p>Las transferencias fuera de la UE se basan en el EU–U.S. Data Privacy Framework o en
+    Cláusulas Contractuales Tipo.</p>
 
-    <h2 id="aviso-medico">Aviso médico</h2>
-    <p>Accanto no es un dispositivo médico. La información de la aplicación no sustituye el consejo médico cualificado.</p>
+    <h2>Aviso médico</h2>
+    <p>Accanto <strong>no es un producto sanitario</strong> en el sentido del Reglamento (UE) 2017/745
+    y no sustituye una opinión médica cualificada. En caso de emergencia llama al 112 (UE) o al
+    número de emergencias local.</p>
 
-    <p class="text-sm text-accanto-500 mt-10">Esta página es un resumen orientativo, no sustituye una política de privacidad completa que puede solicitarse a través de la página de contacto.</p>
+    <p class="text-sm text-accanto-500 mt-10">
+      Para cualquier consulta sobre el tratamiento de tus datos escribe a
+      <a href="mailto:support@accanto.care">support@accanto.care</a> o visita la página de
+      <a href={routeUrl('contact', lang)}>contacto</a>.
+    </p>
   </article>
 </BaseLayout>

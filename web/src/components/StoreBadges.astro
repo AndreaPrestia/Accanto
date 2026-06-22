@@ -1,0 +1,71 @@
+---
+// Accanto · badge "App mobile in arrivo".
+// Mostra due placeholder per App Store e Play Store con label "Coming soon".
+// Quando le app saranno pubblicate, sostituire href="#" con l'URL store e
+// passare `available={true}` per nascondere la pillola "Coming soon".
+interface Props {
+  title: string;
+  subtitle?: string;
+  iosLabel: string;
+  androidLabel: string;
+  comingSoonLabel: string;
+  iosHref?: string;
+  androidHref?: string;
+  available?: boolean;
+}
+
+const {
+  title,
+  subtitle,
+  iosLabel,
+  androidLabel,
+  comingSoonLabel,
+  iosHref = '#',
+  androidHref = '#',
+  available = false
+} = Astro.props as Props;
+---
+<section class="container-page bg-accanto-50 border-y border-accanto-100">
+  <div class="mx-auto max-w-3xl text-center">
+    <p class="eyebrow mb-3">{title}</p>
+    {subtitle && <p class="text-accanto-600 leading-relaxed mb-6">{subtitle}</p>}
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+      <a
+        href={iosHref}
+        class="inline-flex items-center gap-3 rounded-xl bg-accanto-900 text-white px-5 py-3 no-underline hover:opacity-90 transition-opacity"
+        aria-disabled={!available}
+        tabindex={available ? 0 : -1}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
+          <path d="M16.365 1.43c0 1.14-.42 2.22-1.18 3.02-.77.82-2 1.46-3.16 1.36-.13-1.14.43-2.32 1.16-3.06.81-.82 2.16-1.42 3.18-1.32zM20.5 17.13c-.55 1.26-.81 1.82-1.51 2.94-1.01 1.62-2.45 3.64-4.22 3.66-1.58.02-1.99-1.02-4.13-1.02-2.14 0-2.59 1-4.17 1.02-1.79.04-3.16-1.76-4.18-3.39-2.92-4.69-3.23-10.2-1.42-13.13 1.27-2.06 3.28-3.27 5.17-3.27 1.92 0 3.13 1.07 4.71 1.07 1.54 0 2.49-1.07 4.7-1.07 1.66 0 3.42.9 4.66 2.46-4.09 2.27-3.42 8.04.39 9.73z"/>
+        </svg>
+        <span class="flex flex-col items-start leading-tight">
+          <span class="text-xs opacity-75">{comingSoonLabel}</span>
+          <span class="text-base font-semibold">{iosLabel}</span>
+        </span>
+      </a>
+
+      <a
+        href={androidHref}
+        class="inline-flex items-center gap-3 rounded-xl bg-accanto-900 text-white px-5 py-3 no-underline hover:opacity-90 transition-opacity"
+        aria-disabled={!available}
+        tabindex={available ? 0 : -1}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+          <path fill="#3DDC84" d="M17.523 15.34l1.84-3.19a.38.38 0 10-.66-.38l-1.86 3.22a11.41 11.41 0 00-9.69 0L5.3 11.77a.38.38 0 10-.66.38l1.84 3.19A10.84 10.84 0 001.5 22.5h21a10.84 10.84 0 00-4.977-7.16zM7.5 19.9a.95.95 0 11.95-.95.95.95 0 01-.95.95zm9 0a.95.95 0 11.95-.95.95.95 0 01-.95.95z"/>
+        </svg>
+        <span class="flex flex-col items-start leading-tight">
+          <span class="text-xs opacity-75">{comingSoonLabel}</span>
+          <span class="text-base font-semibold">{androidLabel}</span>
+        </span>
+      </a>
+    </div>
+
+    {!available && (
+      <p class="mt-4 text-sm text-accanto-500">
+        <span aria-hidden="true">·</span>
+      </p>
+    )}
+  </div>
+</section>

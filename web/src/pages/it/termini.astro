@@ -1,0 +1,177 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'it' as const;
+const lastUpdated = '22 giugno 2026';
+---
+<BaseLayout
+  title="Termini di servizio · Accanto"
+  description="Termini di utilizzo dell'app Accanto: scopo del servizio, account, contenuti dell'utente, limiti di responsabilità, recesso."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Termini</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Termini di servizio</h1>
+    <p class="text-sm text-accanto-500 mb-8">Ultimo aggiornamento: {lastUpdated}</p>
+
+    <nav aria-label="Indice della pagina" class="mb-10">
+      <p class="eyebrow mb-2">In questa pagina</p>
+      <ul class="text-sm text-accanto-600 space-y-1">
+        <li>• <a href="#fornitore" class="underline">Chi fornisce il servizio</a></li>
+        <li>• <a href="#oggetto" class="underline">Oggetto e scopo</a></li>
+        <li>• <a href="#account" class="underline">Account e accesso</a></li>
+        <li>• <a href="#contenuti" class="underline">Contenuti dell'utente</a></li>
+        <li>• <a href="#regole" class="underline">Regole d'uso</a></li>
+        <li>• <a href="#prezzi" class="underline">Prezzi e pagamenti</a></li>
+        <li>• <a href="#recesso" class="underline">Cancellazione e recesso</a></li>
+        <li>• <a href="#disponibilita" class="underline">Disponibilità e modifiche</a></li>
+        <li>• <a href="#responsabilita" class="underline">Limiti di responsabilità</a></li>
+        <li>• <a href="#avviso-medico" class="underline">Avviso medico</a></li>
+        <li>• <a href="#legge" class="underline">Legge applicabile e foro</a></li>
+        <li>• <a href="#contatti" class="underline">Contatti</a></li>
+      </ul>
+    </nav>
+
+    <section id="fornitore">
+      <h2>Chi fornisce il servizio</h2>
+      <p>Il servizio "Accanto" è fornito da:</p>
+      <p>
+        <strong>PRESTIA.DEV S.A.S. DI PRESTIA ANDREA</strong><br />
+        Viale Bruno Rizzieri 199C, 00173 Roma (RM), Italia<br />
+        P.IVA / Codice Fiscale: <strong>IT17486541000</strong><br />
+        REA Roma: <strong>RM-1721153</strong><br />
+        Contatto: <a href="mailto:support@accanto.care">support@accanto.care</a>
+      </p>
+      <p>Nel seguito ci riferiremo a noi come "Accanto", "noi" o "il fornitore"; a te come "utente" o "tu".</p>
+    </section>
+
+    <section id="oggetto">
+      <h2>Oggetto e scopo</h2>
+      <p>Accanto è uno strumento digitale di supporto alla cura familiare. Permette di
+      organizzare informazioni, note, domande, documenti e attività relative all'assistenza
+      di una persona cara, condividendole all'interno di "cerchi di cura" composti dai membri
+      che inviti tu.</p>
+      <p>Il servizio non è un dispositivo medico, non eroga prestazioni sanitarie, non fornisce
+      diagnosi né raccomandazioni cliniche. Vedi <a href="#avviso-medico">Avviso medico</a>.</p>
+    </section>
+
+    <section id="account">
+      <h2>Account e accesso</h2>
+      <ul>
+        <li>Per usare Accanto devi creare un account con un'email valida e una password.</li>
+        <li>Sei responsabile di mantenere riservate le tue credenziali. Ti consigliamo di
+        attivare l'autenticazione a due fattori (TOTP) dalle impostazioni del tuo account.</li>
+        <li>Devi avere almeno 16 anni. Se sei minore puoi usare il servizio solo con il
+        consenso del titolare della responsabilità genitoriale.</li>
+        <li>Ogni accesso non autorizzato di cui vieni a conoscenza va segnalato a
+        <a href="mailto:support@accanto.care">support@accanto.care</a>.</li>
+      </ul>
+    </section>
+
+    <section id="contenuti">
+      <h2>Contenuti dell'utente</h2>
+      <p>Tutto ciò che inserisci in Accanto (note, timeline, documenti, foto, domande,
+      contatti dei membri del cerchio) rimane di tua titolarità. Tu ci concedi una licenza
+      strettamente funzionale all'erogazione del servizio: memorizzare, processare e mostrare
+      i tuoi contenuti agli altri membri del cerchio di cura che hai autorizzato.</p>
+      <p>Sei responsabile dei contenuti che inserisci e in particolare di:</p>
+      <ul>
+        <li>aver titolo a trattare i dati di terzi (es. la persona assistita) ai sensi della
+        normativa vigente, informandola e raccogliendo il suo consenso quando richiesto;</li>
+        <li>non inserire contenuti illeciti, diffamatori, o lesivi della dignità altrui;</li>
+        <li>non condividere contenuti sanitari di terzi al di fuori del cerchio di cura
+        autorizzato.</li>
+      </ul>
+      <p>Ci riserviamo il diritto di rimuovere contenuti manifestamente illeciti su segnalazione
+      motivata, ma non monitoriamo proattivamente i contenuti privati degli utenti.</p>
+    </section>
+
+    <section id="regole">
+      <h2>Regole d'uso</h2>
+      <p>Quando usi Accanto ti impegni a non:</p>
+      <ul>
+        <li>tentare di compromettere la sicurezza dell'app, del sito o dell'infrastruttura;</li>
+        <li>effettuare scansioni automatiche, scraping massivo o reverse engineering finalizzato
+        ad aggirare i controlli (è invece consentito ispezionare il codice sorgente pubblicato);</li>
+        <li>impersonare altre persone o aggirare i meccanismi di invito ai cerchi di cura;</li>
+        <li>utilizzare il servizio per attività illecite o contrarie alla legge italiana o UE.</li>
+      </ul>
+      <p>In caso di violazione possiamo sospendere temporaneamente o chiudere l'account, dandoti
+      ove possibile la facoltà di esportare i tuoi dati.</p>
+    </section>
+
+    <section id="prezzi">
+      <h2>Prezzi e pagamenti</h2>
+      <p>L'app è attualmente offerta in modalità gratuita durante la fase di lancio. Eventuali
+      piani a pagamento futuri saranno comunicati con preavviso adeguato, mostrati chiaramente
+      prima dell'attivazione e disciplinati da condizioni economiche dedicate.</p>
+      <p>Resta sempre disponibile la modalità self-hosted di Accanto, distribuita come software
+      open source secondo la licenza indicata sul repository pubblico.</p>
+    </section>
+
+    <section id="recesso">
+      <h2>Cancellazione e recesso</h2>
+      <p>Puoi cancellare il tuo account in qualunque momento dall'area Account dell'app. La
+      cancellazione comporta l'eliminazione dei tuoi dati entro 30 giorni dai sistemi attivi
+      (e dai backup ciclici entro ulteriori 60 giorni), nei tempi e modi indicati nell'<a href={routeUrl('privacy', lang)}>Informativa privacy</a>.</p>
+      <p>Nei rapporti tra consumatore e fornitore, e qualora siano applicabili, restano impregiudicati
+      i diritti riconosciuti dal Codice del Consumo (D.lgs. 206/2005) e in particolare il diritto
+      di recesso entro 14 giorni dalla sottoscrizione di un eventuale contratto a pagamento.</p>
+    </section>
+
+    <section id="disponibilita">
+      <h2>Disponibilità e modifiche</h2>
+      <p>Facciamo del nostro meglio per mantenere il servizio disponibile, ma non garantiamo un
+      livello di servizio (SLA) specifico per la versione gratuita. Potremmo:</p>
+      <ul>
+        <li>aggiornare o modificare l'app (funzionalità, interfaccia, requisiti tecnici);</li>
+        <li>sospendere temporaneamente il servizio per manutenzione o per ragioni di sicurezza;</li>
+        <li>interrompere singole funzionalità con preavviso ragionevole.</li>
+      </ul>
+      <p>In caso di modifiche sostanziali a questi termini, te le comunicheremo con un avviso in
+      app e/o via email almeno 30 giorni prima della loro entrata in vigore. Se non sei d'accordo,
+      potrai cessare l'uso del servizio ed esportare i tuoi dati.</p>
+    </section>
+
+    <section id="responsabilita">
+      <h2>Limiti di responsabilità</h2>
+      <p>Il servizio è offerto "così com'è" ("as-is") e "come disponibile" ("as-available").
+      Nei limiti consentiti dalla legge applicabile:</p>
+      <ul>
+        <li>non garantiamo l'assenza di errori o di interruzioni del servizio;</li>
+        <li>non siamo responsabili per perdite indirette, mancato profitto, perdita di dati
+        derivante da fattori esterni (es. malfunzionamenti del dispositivo, del network, dei
+        fornitori terzi);</li>
+        <li>non rispondiamo per le decisioni cliniche o assistenziali assunte dall'utente sulla
+        base delle informazioni inserite o suggerite dall'app.</li>
+      </ul>
+      <p>Restano impregiudicate le responsabilità che, per legge, non possono essere escluse
+      (in particolare quelle derivanti da dolo o colpa grave).</p>
+    </section>
+
+    <section id="avviso-medico">
+      <h2>Avviso medico</h2>
+      <p>Accanto <strong>non è un dispositivo medico</strong> ai sensi del Regolamento (UE) 2017/745.
+      Non sostituisce una diagnosi, un consulto medico o una terapia. In caso di emergenza
+      sanitaria contatta il numero unico per le emergenze (112 in Italia) o recati al pronto
+      soccorso più vicino.</p>
+    </section>
+
+    <section id="legge">
+      <h2>Legge applicabile e foro competente</h2>
+      <p>I presenti termini sono regolati dalla legge italiana. Per qualunque controversia che
+      non sia possibile risolvere amichevolmente è competente in via esclusiva il Foro di Roma,
+      salvo l'inderogabile foro del consumatore, qualora applicabile, ai sensi dell'art. 66-bis
+      del Codice del Consumo.</p>
+      <p>Per la risoluzione alternativa delle controversie nei rapporti con i consumatori è
+      disponibile la piattaforma europea ODR all'indirizzo
+      <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">ec.europa.eu/consumers/odr</a>.</p>
+    </section>
+
+    <section id="contatti">
+      <h2>Contatti</h2>
+      <p>Per qualunque richiesta scrivi a <a href="mailto:support@accanto.care">support@accanto.care</a>
+      oppure utilizza la pagina <a href={routeUrl('contact', lang)}>Contatti</a>.</p>
+    </section>
+  </article>
+</BaseLayout>

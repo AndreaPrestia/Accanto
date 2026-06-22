@@ -2,10 +2,12 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import FeatureCard from '../../components/FeatureCard.astro';
-import { routeUrl } from '../../i18n';
+import StoreBadges from '../../components/StoreBadges.astro';
+import { routeUrl, useT } from '../../i18n';
 
 const appUrl = import.meta.env.PUBLIC_APP_URL;
 const lang = 'en' as const;
+const t = useT(lang);
 
 const features = [
   { title: 'Care circles', description: 'A circle per person you care for: invite who you want and decide what to share.' },
@@ -52,6 +54,14 @@ const features = [
       <a href={routeUrl('features', lang)} class="btn-ghost">See all features</a>
     </div>
   </section>
+
+  <StoreBadges
+    title={t('mobile.title')}
+    subtitle={t('mobile.subtitle')}
+    comingSoonLabel={t('mobile.comingSoon')}
+    iosLabel={t('mobile.ios')}
+    androidLabel={t('mobile.android')}
+  />
 
   <section class="container-page">
     <div class="mx-auto max-w-3xl text-center">
