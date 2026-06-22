@@ -20,7 +20,7 @@ import type { AuthResponse } from '@accanto/shared/types';
 // Risolve la baseURL da app.config.ts -> extra.apiBaseUrl, con override via
 // EXPO_PUBLIC_API_BASE_URL al build / runtime.
 const extra = (Constants.expoConfig?.extra ?? {}) as { apiBaseUrl?: string };
-const baseURL = extra.apiBaseUrl ?? 'https://api.accanto.app';
+const baseURL = extra.apiBaseUrl ?? 'https://api.accanto.care';
 
 export const api = axios.create({ baseURL });
 

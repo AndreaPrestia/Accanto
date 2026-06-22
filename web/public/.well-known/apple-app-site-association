@@ -1,0 +1,21 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["REPLACE_WITH_APPLE_TEAM_ID.app.accanto.mobile"],
+        "components": [
+          { "/": "/invite/*", "comment": "Inviti care circle" },
+          { "/": "/reset-password*", "comment": "Reset password" },
+          { "/": "/care-circles/*", "comment": "Deep link al cerchio" },
+          { "/": "/account*", "comment": "Account" },
+          { "/": "/self-care*", "comment": "Self-care" },
+          { "/": "/support*", "comment": "Support" }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["REPLACE_WITH_APPLE_TEAM_ID.app.accanto.mobile"]
+  }
+}
