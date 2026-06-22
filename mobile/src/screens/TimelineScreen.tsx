@@ -7,13 +7,17 @@ import {
   View
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import Screen from '../components/ui/Screen';
 import Button from '../components/ui/Button';
 import TextField from '../components/ui/TextField';
 import SelectField from '../components/ui/SelectField';
 import DateField from '../components/ui/DateField';
 import ErrorBanner from '../components/ui/ErrorBanner';
+import AiAssistPanel from '../components/AiAssistPanel';
 import { api, extractError } from '../api/client';
+import { timelineSummary } from '../api/ai';
+import { useAiContext } from '../hooks/useAiContext';
 import { useCircleId } from '../navigation/CircleContext';
 import type {
   TimelineEntry,
@@ -45,6 +49,10 @@ export default function TimelineScreen() {
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
   const [showForm, setShowForm] = useState(false);
+
+  // Bulk select
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     setError(null);
@@ -165,6 +173,34 @@ export default function TimelineScreen() {
         />
       ) : null}
 
+      <View className="mb-4">
+        <TimelineAiSection circleId={circleId} />
+      </View>
+
+      <BulkSelectBar
+        selectMode={selectMode}
+        selectedCount={selected.size}
+        totalCount={entries?.length ?? 0}
+        onToggle={() => {
+          setSelectMode((m) => !m);
+          setSelected(new Set());
+        }}
+        onSelectAll={() =>
+          setSelected(new Set(entries?.map((e) => e.id) ?? []))
+        }
+      />
+
+      {selectMode ? (
+        <BulkEditForm
+          circleId={circleId}
+          selectedIds={selected}
+          onApplied={() => {
+            setSelected(new Set());
+            load();
+          }}
+        />
+      ) : null}
+
       <View className="mb-3">
         <ErrorBanner message={error} />
       </View>
@@ -183,6 +219,16 @@ export default function TimelineScreen() {
               entry={e}
               circleId={circleId}
               onDeleted={load}
+              selectMode={selectMode}
+              selected={selected.has(e.id)}
+              onToggleSelect={() =>
+                setSelected((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(e.id)) next.delete(e.id);
+                  else next.add(e.id);
+                  return next;
+                })
+              }
             />
           ))}
         </View>
@@ -194,11 +240,17 @@ export default function TimelineScreen() {
 function EntryCard({
   entry,
   circleId,
-  onDeleted
+  onDeleted,
+  selectMode,
+  selected,
+  onToggleSelect
 }: {
   entry: TimelineEntry;
   circleId: string;
   onDeleted: () => void;
+  selectMode: boolean;
+  selected: boolean;
+  onToggleSelect: () => void;
 }) {
   const [busy, setBusy] = useState(false);
 
@@ -226,22 +278,44 @@ function EntryCard({
   const when = new Date(entry.occurredAt).toLocaleString('it-IT');
 
   return (
-    <View className="rounded-lg border border-accanto-100 bg-white p-4">
+    <Pressable
+      onPress={selectMode ? onToggleSelect : undefined}
+      className={`rounded-lg border bg-white p-4 ${
+        selectMode && selected
+          ? 'border-accanto-700 bg-accanto-50'
+          : 'border-accanto-100'
+      }`}
+    >
       <View className="flex-row items-start justify-between gap-2">
-        <View className="flex-1">
-          <Text className="font-medium text-accanto-900">{entry.title}</Text>
-          <Text className="text-xs text-accanto-500 mt-0.5">
-            {when} \u2022 {TimelineTypeLabel[entry.type]} \u2022{' '}
-            {VisibilityLabel[entry.visibility]}
-          </Text>
+        <View className="flex-row flex-1 items-start gap-2">
+          {selectMode ? (
+            <View
+              className={`mt-0.5 h-5 w-5 rounded border items-center justify-center ${
+                selected
+                  ? 'bg-accanto-700 border-accanto-700'
+                  : 'border-accanto-300 bg-white'
+              }`}
+            >
+              {selected ? <Text className="text-white text-xs">\u2713</Text> : null}
+            </View>
+          ) : null}
+          <View className="flex-1">
+            <Text className="font-medium text-accanto-900">{entry.title}</Text>
+            <Text className="text-xs text-accanto-500 mt-0.5">
+              {when} \u2022 {TimelineTypeLabel[entry.type]} \u2022{' '}
+              {VisibilityLabel[entry.visibility]}
+            </Text>
+          </View>
         </View>
-        <Pressable
-          onPress={del}
-          disabled={busy}
-          className="px-2 py-1"
-        >
-          <Text className="text-sm text-accanto-500">Elimina</Text>
-        </Pressable>
+        {selectMode ? null : (
+          <Pressable
+            onPress={del}
+            disabled={busy}
+            className="px-2 py-1"
+          >
+            <Text className="text-sm text-accanto-500">Elimina</Text>
+          </Pressable>
+        )}
       </View>
       <Text className="mt-2 text-accanto-900">{entry.content}</Text>
       {entry.tags.length > 0 ? (
@@ -256,7 +330,7 @@ function EntryCard({
           ))}
         </View>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
 
@@ -370,5 +444,197 @@ function NewEntryForm({
         {busy ? 'Salvataggio\u2026' : 'Salva voce'}
       </Button>
     </View>
+  );
+}
+
+function BulkSelectBar({
+  selectMode,
+  selectedCount,
+  totalCount,
+  onToggle,
+  onSelectAll
+}: {
+  selectMode: boolean;
+  selectedCount: number;
+  totalCount: number;
+  onToggle: () => void;
+  onSelectAll: () => void;
+}) {
+  return (
+    <View className="flex-row items-center gap-4 mb-3">
+      <Pressable onPress={onToggle} className="py-1">
+        <Text className="text-sm text-accanto-700 underline">
+          {selectMode
+            ? 'Esci da selezione multipla'
+            : `Selezione multipla${
+                selectedCount > 0 ? ` (${selectedCount})` : ''
+              }`}
+        </Text>
+      </Pressable>
+      {selectMode && totalCount > 0 ? (
+        <Pressable onPress={onSelectAll} className="py-1">
+          <Text className="text-sm text-accanto-500 underline">
+            Seleziona tutte ({totalCount})
+          </Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+function BulkEditForm({
+  circleId,
+  selectedIds,
+  onApplied
+}: {
+  circleId: string;
+  selectedIds: Set<string>;
+  onApplied: () => void;
+}) {
+  const [bulkAddTags, setBulkAddTags] = useState('');
+  const [bulkRemoveTags, setBulkRemoveTags] = useState('');
+  const [bulkVisibility, setBulkVisibility] = useState<'' | TimelineVisibility>(
+    ''
+  );
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkMsg, setBulkMsg] = useState<string | null>(null);
+
+  const visOptions = useMemo(
+    () => VIS.map((v) => ({ value: v, label: VisibilityLabel[v] })),
+    []
+  );
+
+  const apply = async () => {
+    const addTags = bulkAddTags
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const removeTags = bulkRemoveTags
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (addTags.length === 0 && removeTags.length === 0 && !bulkVisibility) {
+      setBulkMsg('Specifica almeno una modifica.');
+      return;
+    }
+    if (selectedIds.size === 0) return;
+    Alert.alert(
+      'Applicare le modifiche?',
+      `Saranno aggiornate ${selectedIds.size} voci.`,
+      [
+        { text: 'Annulla', style: 'cancel' },
+        {
+          text: 'Applica',
+          onPress: async () => {
+            setBulkBusy(true);
+            setBulkMsg(null);
+            try {
+              const { data } = await api.patch<{
+                updated: number;
+                skipped: number;
+              }>(`/care-circles/${circleId}/timeline/bulk`, {
+                entryIds: Array.from(selectedIds),
+                tagsToAdd: addTags.length ? addTags : null,
+                tagsToRemove: removeTags.length ? removeTags : null,
+                newVisibility: bulkVisibility || null
+              });
+              setBulkMsg(
+                `${data.updated} aggiornate, ${data.skipped} saltate.`
+              );
+              setBulkAddTags('');
+              setBulkRemoveTags('');
+              setBulkVisibility('');
+              onApplied();
+            } catch (e) {
+              setBulkMsg(extractError(e));
+            } finally {
+              setBulkBusy(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  return (
+    <View className="rounded-lg border border-accanto-100 bg-white p-4 mb-4 gap-3">
+      <Text className="font-medium text-accanto-900">
+        Modifica selezionate ({selectedIds.size})
+      </Text>
+      <View className="flex-row gap-2">
+        <View className="flex-1">
+          <TextField
+            label="Aggiungi tag"
+            value={bulkAddTags}
+            onChangeText={setBulkAddTags}
+            placeholder="urgente, controllo"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
+        <View className="flex-1">
+          <TextField
+            label="Rimuovi tag"
+            value={bulkRemoveTags}
+            onChangeText={setBulkRemoveTags}
+            placeholder="vecchio"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
+      </View>
+      <SelectField
+        label="Visibilit\u00e0"
+        value={bulkVisibility}
+        onChange={(v) => setBulkVisibility(v as '' | TimelineVisibility)}
+        options={visOptions}
+        emptyLabel="Non modificare"
+      />
+      {bulkMsg ? (
+        <Text className="text-sm text-accanto-700">{bulkMsg}</Text>
+      ) : null}
+      <Button
+        onPress={apply}
+        busy={bulkBusy}
+        disabled={bulkBusy || selectedIds.size === 0}
+      >
+        {bulkBusy ? 'Applicazione\u2026' : 'Applica modifiche'}
+      </Button>
+    </View>
+  );
+}
+
+function TimelineAiSection({ circleId }: { circleId: string }) {
+  const { t } = useTranslation();
+  const [days, setDays] = useState('7');
+  const { systemAvailable, enabledForCircle, loading } = useAiContext(circleId);
+
+  if (loading) return null;
+  const disabled = !systemAvailable || !enabledForCircle;
+  const disabledReason = !systemAvailable
+    ? (t('ai.disabledSystem') as string)
+    : (t('ai.disabledCircle') as string);
+
+  return (
+    <AiAssistPanel
+      title={t('ai.timelineSummary.title') as string}
+      description={t('ai.timelineSummary.description') as string}
+      ctaLabel={t('ai.timelineSummary.cta') as string}
+      disabled={disabled}
+      disabledReason={disabledReason}
+      onGenerate={() =>
+        timelineSummary(
+          circleId,
+          Math.max(1, Math.min(60, Number(days) || 7))
+        )
+      }
+    >
+      <TextField
+        label={t('ai.timelineSummary.daysLabel') as string}
+        value={days}
+        onChangeText={setDays}
+        keyboardType="number-pad"
+      />
+    </AiAssistPanel>
   );
 }

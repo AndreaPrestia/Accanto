@@ -26,3 +26,12 @@ export function useCircleId(): string {
   if (!v) throw new Error('useCircleId() usato fuori da CircleProvider');
   return v.circleId;
 }
+
+/**
+ * Variante "soft" di useCircleId: ritorna `null` quando lo screen \u00e8 fuori
+ * dal CircleProvider (es. AiHistoryScreen aperto dal drawer globale).
+ */
+export function useOptionalCircleId(): string | null {
+  const v = useContext(Ctx);
+  return v?.circleId ?? null;
+}

@@ -10,13 +10,17 @@ import {
   View
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import * as Clipboard from 'expo-clipboard';
 import Screen from '../components/ui/Screen';
 import Button from '../components/ui/Button';
 import TextField from '../components/ui/TextField';
 import SelectField from '../components/ui/SelectField';
 import ErrorBanner from '../components/ui/ErrorBanner';
+import AiAssistPanel from '../components/AiAssistPanel';
 import { api, extractError } from '../api/client';
+import { rephrase } from '../api/ai';
+import { useAiContext } from '../hooks/useAiContext';
 import { useCircleId } from '../navigation/CircleContext';
 import type {
   SharedUpdate,
@@ -142,6 +146,10 @@ export default function SharedUpdatesScreen() {
           }}
         />
       ) : null}
+
+      <View className="mb-4">
+        <SharedUpdatesAiSection circleId={circleId} />
+      </View>
 
       {templates.length > 0 ? (
         <View className="rounded-lg border border-accanto-100 bg-white mb-4 overflow-hidden">
@@ -293,5 +301,62 @@ function NewForm({
         {busy ? 'Salvataggio\u2026' : 'Salva aggiornamento'}
       </Button>
     </View>
+  );
+}
+
+function SharedUpdatesAiSection({ circleId }: { circleId: string }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState('');
+  const [tone, setTone] = useState<'neutral' | 'warm' | 'concise'>('warm');
+  const { systemAvailable, enabledForCircle, loading } = useAiContext(circleId);
+
+  const toneOptions = useMemo(
+    () => [
+      {
+        value: 'neutral',
+        label: t('ai.rephrase.toneOptions.neutral') as string
+      },
+      {
+        value: 'warm',
+        label: t('ai.rephrase.toneOptions.warm') as string
+      },
+      {
+        value: 'concise',
+        label: t('ai.rephrase.toneOptions.concise') as string
+      }
+    ],
+    [t]
+  );
+
+  if (loading) return null;
+  const disabled = !systemAvailable || !enabledForCircle;
+  const disabledReason = !systemAvailable
+    ? (t('ai.disabledSystem') as string)
+    : (t('ai.disabledCircle') as string);
+
+  return (
+    <AiAssistPanel
+      title={t('ai.rephrase.title') as string}
+      description={t('ai.rephrase.description') as string}
+      ctaLabel={t('ai.rephrase.cta') as string}
+      disabled={disabled}
+      disabledReason={disabledReason}
+      onGenerate={() => rephrase(circleId, text.trim(), tone)}
+    >
+      <TextField
+        label={t('ai.rephrase.textLabel') as string}
+        value={text}
+        onChangeText={setText}
+        multiline
+        numberOfLines={3}
+        style={{ minHeight: 80, textAlignVertical: 'top' }}
+      />
+      <SelectField
+        label={t('ai.rephrase.toneLabel') as string}
+        value={tone}
+        onChange={(v) => v && setTone(v as 'neutral' | 'warm' | 'concise')}
+        options={toneOptions}
+      />
+    </AiAssistPanel>
   );
 }

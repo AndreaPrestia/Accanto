@@ -10,12 +10,16 @@ import {
   View
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import Screen from '../components/ui/Screen';
 import Button from '../components/ui/Button';
 import TextField from '../components/ui/TextField';
 import SelectField from '../components/ui/SelectField';
 import ErrorBanner from '../components/ui/ErrorBanner';
+import AiAssistPanel from '../components/AiAssistPanel';
 import { api, extractError } from '../api/client';
+import { doctorQuestionDraft } from '../api/ai';
+import { useAiContext } from '../hooks/useAiContext';
 import { useCircleId } from '../navigation/CircleContext';
 import type {
   DoctorQuestion,
@@ -165,6 +169,10 @@ export default function DoctorQuestionsScreen() {
           }}
         />
       ) : null}
+
+      <View className="mb-4">
+        <DoctorQuestionsAiSection circleId={circleId} />
+      </View>
 
       {templates.length > 0 ? (
         <View className="rounded-lg border border-accanto-100 bg-white mb-4 overflow-hidden">
@@ -340,5 +348,46 @@ function NewForm({
         {busy ? 'Salvataggio\u2026' : 'Aggiungi domanda'}
       </Button>
     </View>
+  );
+}
+
+function DoctorQuestionsAiSection({ circleId }: { circleId: string }) {
+  const { t } = useTranslation();
+  const [topic, setTopic] = useState('');
+  const [notes, setNotes] = useState('');
+  const { systemAvailable, enabledForCircle, loading } = useAiContext(circleId);
+
+  if (loading) return null;
+  const disabled = !systemAvailable || !enabledForCircle;
+  const disabledReason = !systemAvailable
+    ? (t('ai.disabledSystem') as string)
+    : (t('ai.disabledCircle') as string);
+
+  return (
+    <AiAssistPanel
+      title={t('ai.doctorQuestionDraft.title') as string}
+      description={t('ai.doctorQuestionDraft.description') as string}
+      ctaLabel={t('ai.doctorQuestionDraft.cta') as string}
+      disabled={disabled}
+      disabledReason={disabledReason}
+      onGenerate={() =>
+        doctorQuestionDraft(circleId, topic.trim(), notes.trim() || undefined)
+      }
+    >
+      <TextField
+        label={t('ai.doctorQuestionDraft.topicLabel') as string}
+        placeholder={t('ai.doctorQuestionDraft.topicPlaceholder') as string}
+        value={topic}
+        onChangeText={setTopic}
+      />
+      <TextField
+        label={t('ai.doctorQuestionDraft.notesLabel') as string}
+        value={notes}
+        onChangeText={setNotes}
+        multiline
+        numberOfLines={2}
+        style={{ minHeight: 60, textAlignVertical: 'top' }}
+      />
+    </AiAssistPanel>
   );
 }
