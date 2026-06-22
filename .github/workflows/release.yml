@@ -127,7 +127,7 @@ jobs:
       # commit (proteggge da tipo-squatting + dependency confusion sui
       # consumatori delle immagini).
       - name: SLSA build provenance attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/accanto-${{ matrix.image.name }}
           subject-digest: ${{ steps.build.outputs.digest }}
