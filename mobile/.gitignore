@@ -1,0 +1,33 @@
+# Build / cache
+node_modules/
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.log
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Native
+ios/
+android/
+*.apk
+*.aab
+*.ipa
+*.app
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# EAS
+.easignore
+credentials.json

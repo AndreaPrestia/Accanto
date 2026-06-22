@@ -1,0 +1,44 @@
+{
+  "name": "@accanto/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./src/types.ts",
+      "default": "./src/types.ts"
+    },
+    "./data/supportResources": {
+      "types": "./src/data/supportResources.ts",
+      "default": "./src/data/supportResources.ts"
+    },
+    "./i18n/constants": {
+      "types": "./src/i18n/constants.ts",
+      "default": "./src/i18n/constants.ts"
+    },
+    "./i18n/locales": {
+      "types": "./src/i18n/locales.ts",
+      "default": "./src/i18n/locales.ts"
+    },
+    "./i18n/locales/it": "./src/i18n/locales/it.json",
+    "./i18n/locales/en": "./src/i18n/locales/en.json",
+    "./i18n/locales/es": "./src/i18n/locales/es.json",
+    "./constants/storageKeys": {
+      "types": "./src/constants/storageKeys.ts",
+      "default": "./src/constants/storageKeys.ts"
+    },
+    "./time/dayOfYear": {
+      "types": "./src/time/dayOfYear.ts",
+      "default": "./src/time/dayOfYear.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}
