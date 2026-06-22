@@ -6,6 +6,7 @@ import Screen from '../components/ui/Screen';
 import Button from '../components/ui/Button';
 import ErrorBanner from '../components/ui/ErrorBanner';
 import InvitesPanel from '../components/InvitesPanel';
+import CircleExportPdfButton from '../components/CircleExportPdfButton';
 import { api, extractError } from '../api/client';
 import { setCircleAiEnabled } from '../api/ai';
 import { useAiContext } from '../hooks/useAiContext';
@@ -134,7 +135,7 @@ export default function CircleOverviewScreen() {
         />
       ) : null}
 
-      {/* TODO P5.6: Export PDF (FileSystem + Sharing) */}
+      <CircleExportPdfButton circleId={circle.id} circleName={circle.name} />
 
       {isOwner && isActive ? (
         <View className="mt-8">

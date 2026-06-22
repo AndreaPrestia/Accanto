@@ -14,6 +14,7 @@ interface SelectFieldProps<T extends string> {
   /** Etichetta della voce vuota (es: "Tutti"). Se omessa, l'opzione non viene mostrata. */
   emptyLabel?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -27,7 +28,8 @@ export default function SelectField<T extends string>({
   onChange,
   options,
   emptyLabel,
-  placeholder = 'Seleziona\u2026'
+  placeholder = 'Seleziona\u2026',
+  disabled = false
 }: SelectFieldProps<T>) {
   const [open, setOpen] = useState(false);
 
@@ -44,8 +46,10 @@ export default function SelectField<T extends string>({
         </Text>
       ) : null}
       <Pressable
-        onPress={() => setOpen(true)}
-        className="rounded-md border border-accanto-100 bg-white px-3 py-2.5"
+        onPress={() => !disabled && setOpen(true)}
+        className={`rounded-md border border-accanto-100 bg-white px-3 py-2.5 ${
+          disabled ? 'opacity-60' : ''
+        }`}
       >
         <Text
           className={`text-base ${
