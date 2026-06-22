@@ -54,6 +54,12 @@ export async function subscribeToPush(): Promise<PushSubscription> {
   const publicKey = keyRes.data.publicKey;
   if (!publicKey) throw new Error('Notifiche non configurate sul server.');
   const applicationServerKey = urlBase64ToUint8Array(publicKey);
+  // Cast esplicito ad ArrayBuffer: in lib.dom.d.ts pi\u00f9 recenti
+  // PushSubscriptionOptionsInit.applicationServerKey accetta solo
+  // BufferSource con ArrayBuffer "puro", non Uint8Array<ArrayBufferLike>
+  // (che potrebbe in teoria essere un SharedArrayBuffer). Passare .buffer
+  // \u00e8 sempre stato il modo standard di passare la chiave VAPID.
+  const appServerKeyBuffer = applicationServerKey.buffer as ArrayBuffer;
 
   const reg = await navigator.serviceWorker.ready;
   let sub = await reg.pushManager.getSubscription();
@@ -78,7 +84,7 @@ export async function subscribeToPush(): Promise<PushSubscription> {
     try {
       sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey
+        applicationServerKey: appServerKeyBuffer
       });
     } catch (err) {
       const name = (err as { name?: string })?.name ?? 'Error';
