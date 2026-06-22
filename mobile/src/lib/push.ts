@@ -114,7 +114,38 @@ export function configureForegroundHandler() {
       shouldShowBanner: true,
       shouldShowList: true,
       shouldPlaySound: true,
-      shouldSetBadge: false
+      // true: se il payload Expo contiene `badge`, l'OS lo applica
+      // automaticamente. Quando invece il backend non manda il count
+      // (caso attuale), incrementiamo a mano sotto via
+      // addNotificationReceivedListener -> incrementBadge().
+      shouldSetBadge: true
     })
   });
+}
+
+/**
+ * Incrementa di 1 il badge sull'icona app. Usato dal listener globale
+ * registrato in App.tsx quando arriva una push e l'app non è attiva
+ * (o il payload non porta `badge`).
+ */
+export async function incrementBadgeAsync(): Promise<void> {
+  try {
+    const current = await Notifications.getBadgeCountAsync();
+    await Notifications.setBadgeCountAsync(current + 1);
+  } catch (err) {
+    console.warn('[push] increment badge fallito', err);
+  }
+}
+
+/**
+ * Azzera il badge sull'icona app. Da chiamare quando l'utente apre
+ * l'app (AppState transitions a 'active') o quando ha appena letto
+ * tutto il diario / le notifiche.
+ */
+export async function resetBadgeAsync(): Promise<void> {
+  try {
+    await Notifications.setBadgeCountAsync(0);
+  } catch (err) {
+    console.warn('[push] reset badge fallito', err);
+  }
 }
