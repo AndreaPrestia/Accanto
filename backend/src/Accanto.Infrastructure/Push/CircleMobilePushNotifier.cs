@@ -83,6 +83,41 @@ public class CircleMobilePushNotifier : ICircleMobilePushNotifier
         }
     }
 
+    public async Task SendTestAsync(
+        Guid userId,
+        string title,
+        string body,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var scope = _scopeFactory.CreateAsyncScope();
+            var db = scope.ServiceProvider.GetRequiredService<IAccantoDbContext>();
+            var tokenService = scope.ServiceProvider.GetRequiredService<IDevicePushTokenService>();
+
+            // Bypassa le preferenze: il test della connessione non deve
+            // essere gated dai topic flags.
+            var tokens = await db.DevicePushTokens
+                .Where(t => t.UserId == userId)
+                .Select(t => t.Token)
+                .ToListAsync(cancellationToken);
+            if (tokens.Count == 0) return;
+
+            var data = new Dictionary<string, string> { ["kind"] = "test" };
+            // Riusa InviteAccepted come topic-envelope (lato client non usato per il test).
+            var message = new ExpoPushMessage(title, body, data, NotificationTopic.InviteAccepted);
+            var invalid = await _expo.SendAsync(tokens, message, cancellationToken);
+            if (invalid.Count > 0)
+            {
+                await tokenService.RemoveInvalidTokensAsync(invalid, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Errore invio push di test a utente {User}", userId);
+        }
+    }
+
     private async Task SendToUsersAsync(
         IAccantoDbContext db,
         IDevicePushTokenService tokenService,

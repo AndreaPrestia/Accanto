@@ -113,6 +113,20 @@ export default function PushDevicesSection() {
     );
   };
 
+  const sendTest = async () => {
+    setBusy(true);
+    setError(null);
+    setMsg(null);
+    try {
+      await api.post('/account/push-devices/test');
+      setMsg('Notifica di prova inviata. Dovrebbe arrivarti tra pochi secondi.');
+    } catch (e) {
+      setError(extractError(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const list = devices ?? [];
   const currentToken = getCurrentPushToken();
   const hasCurrentDevice = currentToken
@@ -190,6 +204,11 @@ export default function PushDevicesSection() {
 
       <ErrorBanner message={error} />
       {msg ? <Text className="text-sm text-accanto-700">{msg}</Text> : null}
+      {!loading && list.length > 0 ? (
+        <Button onPress={sendTest} busy={busy} disabled={busy}>
+          Invia notifica di prova
+        </Button>
+      ) : null}
     </View>
   );
 }

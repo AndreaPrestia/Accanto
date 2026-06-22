@@ -36,4 +36,16 @@ public interface ICircleMobilePushNotifier
         string body,
         IReadOnlyDictionary<string, string>? data = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Invia una notifica diagnostica di test a tutti i device dell'utente,
+    /// IGNORANDO le preferenze (un "test della connessione" non deve essere
+    /// silenziato dalle preferenze di topic). Usata dal bottone
+    /// "Invia notifica di prova" nelle impostazioni account.
+    /// </summary>
+    Task SendTestAsync(
+        Guid userId,
+        string title,
+        string body,
+        CancellationToken cancellationToken = default);
 }

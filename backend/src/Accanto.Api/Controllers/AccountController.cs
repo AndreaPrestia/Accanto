@@ -27,6 +27,7 @@ public class AccountController : ControllerBase
     private readonly ISecurityAuditQueryService _auditQuery;
     private readonly ICheckInService _checkIns;
     private readonly IDevicePushTokenService _devicePushTokens;
+    private readonly ICircleMobilePushNotifier _mobilePush;
     private readonly ICurrentUser _currentUser;
 
     public AccountController(
@@ -39,6 +40,7 @@ public class AccountController : ControllerBase
         ISecurityAuditQueryService auditQuery,
         ICheckInService checkIns,
         IDevicePushTokenService devicePushTokens,
+        ICircleMobilePushNotifier mobilePush,
         ICurrentUser currentUser)
     {
         _svc = svc;
@@ -50,6 +52,7 @@ public class AccountController : ControllerBase
         _auditQuery = auditQuery;
         _checkIns = checkIns;
         _devicePushTokens = devicePushTokens;
+        _mobilePush = mobilePush;
         _currentUser = currentUser;
     }
     [HttpPost("change-password")]
@@ -208,6 +211,24 @@ public class AccountController : ControllerBase
         if (request is null || string.IsNullOrWhiteSpace(request.Token)) return BadRequest();
         await _devicePushTokens.RemoveByTokenAsync(_currentUser.RequireUserId(), request.Token, ct);
         return NoContent();
+    }
+
+    /// <summary>
+    /// Invia una notifica push di prova a tutti i device dell'utente
+    /// corrente. Bypassa le preferenze (testare la connessione non deve
+    /// essere silenziato dai topic flags). Utile per validare end-to-end
+    /// la pipeline (token registrato, Expo push service, APNs/FCM).
+    /// </summary>
+    [HttpPost("push-devices/test")]
+    [EnableRateLimiting("auth-sensitive")]
+    public async Task<IActionResult> SendTestPush(CancellationToken ct)
+    {
+        await _mobilePush.SendTestAsync(
+            _currentUser.RequireUserId(),
+            "Accanto",
+            "Notifica di prova: tutto funziona \ud83c\udf89",
+            ct);
+        return Accepted();
     }
 
     private ClientInfo BuildClientInfo()
