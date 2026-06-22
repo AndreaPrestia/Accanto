@@ -6,6 +6,7 @@ import Screen from '../components/ui/Screen';
 import LanguageSection from '../components/account/LanguageSection';
 import ChangePasswordSection from '../components/account/ChangePasswordSection';
 import NotificationPreferencesSection from '../components/account/NotificationPreferencesSection';
+import PushDevicesSection from '../components/account/PushDevicesSection';
 import ActiveSessionsSection from '../components/account/ActiveSessionsSection';
 import TwoFactorSection from '../components/account/TwoFactorSection';
 import SecurityAuditSection from '../components/account/SecurityAuditSection';
@@ -56,14 +57,7 @@ export default function AccountScreen() {
 
         <ChangePasswordSection />
 
-        <View className="gap-2 border-t border-accanto-100 pt-6">
-          <Text className="text-base font-semibold text-accanto-900">
-            Notifiche push
-          </Text>
-          <Text className="text-sm text-accanto-500">
-            Disponibili in una versione successiva dell'app mobile.
-          </Text>
-        </View>
+        <PushDevicesSection />
 
         <NotificationPreferencesSection />
 

@@ -13,6 +13,12 @@ import {
 import { initI18n } from './src/i18n';
 import { AuthProvider } from './src/auth/AuthContext';
 import RootNavigator from './src/navigation/RootNavigator';
+import { configureForegroundHandler } from './src/lib/push';
+
+// Handler globale per la visualizzazione delle push in foreground.
+// Va eseguito una volta sola, fuori dal componente, perché
+// setNotificationHandler è un side-effect a livello modulo.
+configureForegroundHandler();
 
 export default function App() {
   const [i18nReady, setI18nReady] = useState(false);

@@ -6,6 +6,7 @@ import {
   CommonActions
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import * as Notifications from 'expo-notifications';
 import type { RootStackParamList } from './types';
 import { linking } from './linking';
 import AuthStack from './AuthStack';
@@ -111,6 +112,26 @@ export default function RootNavigator() {
     return () => {
       cancelled = true;
     };
+  }, [user, needsBiometricUnlock]);
+
+  // Push notification tap: leggo data.circleId e navigo a Circle. Anche
+  // qui aspetto che user sia autenticato (altrimenti l'utente tocca la
+  // notifica ma siamo in login → ignoro, sarà lui a re-aprire dopo).
+  useEffect(() => {
+    if (!user || needsBiometricUnlock) return;
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as Record<string, unknown> | undefined;
+      const circleId = typeof data?.circleId === 'string' ? data.circleId : null;
+      if (!circleId) return;
+      if (!navigationRef.isReady()) return;
+      navigationRef.dispatch(
+        CommonActions.navigate({
+          name: 'App',
+          params: { screen: 'Circle', params: { circleId } }
+        })
+      );
+    });
+    return () => sub.remove();
   }, [user, needsBiometricUnlock]);
 
   if (loading) {

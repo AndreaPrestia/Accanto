@@ -10,7 +10,16 @@ type Topic =
   | 'DoctorQuestionAnswered'
   | 'InviteAccepted';
 
-type Pref = { topic: Topic; emailEnabled: boolean };
+interface Pref {
+  topic: Topic;
+  emailEnabled: boolean;
+  /**
+   * Nullable lato DTO server (retro-compat con client web), ma il GET
+   * lo restituisce sempre valorizzato. Trattato come bool con
+   * fallback a true se null/undefined.
+   */
+  pushEnabled: boolean | null;
+}
 
 const TOPIC_LABEL: Record<Topic, string> = {
   TimelineEntryCreated: 'Nuove voci nel diario',
@@ -18,6 +27,37 @@ const TOPIC_LABEL: Record<Topic, string> = {
   DoctorQuestionAnswered: 'Risposte alle domande al medico',
   InviteAccepted: 'Nuove persone entrate in un cerchio'
 };
+
+type Channel = 'email' | 'push';
+
+function Switch({
+  on,
+  label,
+  onPress
+}: {
+  on: boolean;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="switch"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: on }}
+      className="flex-row items-center gap-2"
+    >
+      <View
+        className={`w-12 h-7 rounded-full justify-center px-1 ${on ? 'bg-accanto-700' : 'bg-accanto-100'}`}
+      >
+        <View
+          className={`w-5 h-5 rounded-full bg-white ${on ? 'self-end' : 'self-start'}`}
+        />
+      </View>
+      <Text className="text-xs text-accanto-500">{label}</Text>
+    </Pressable>
+  );
+}
 
 export default function NotificationPreferencesSection() {
   const [prefs, setPrefs] = useState<Pref[] | null>(null);
@@ -45,12 +85,15 @@ export default function NotificationPreferencesSection() {
     };
   }, []);
 
-  const toggle = (topic: Topic) => {
+  const toggle = (topic: Topic, channel: Channel) => {
     setMsg(null);
     setPrefs((cur) =>
-      (cur ?? []).map((p) =>
-        p.topic === topic ? { ...p, emailEnabled: !p.emailEnabled } : p
-      )
+      (cur ?? []).map((p) => {
+        if (p.topic !== topic) return p;
+        if (channel === 'email') return { ...p, emailEnabled: !p.emailEnabled };
+        const current = p.pushEnabled ?? true;
+        return { ...p, pushEnabled: !current };
+      })
     );
   };
 
@@ -76,11 +119,11 @@ export default function NotificationPreferencesSection() {
   return (
     <View className="gap-3 border-t border-accanto-100 pt-6">
       <Text className="text-base font-semibold text-accanto-900">
-        Notifiche email
+        Preferenze notifiche
       </Text>
       <Text className="text-sm text-accanto-700">
-        Scegli quali email vuoi ricevere. Le email di sicurezza (es. cambio
-        password) vengono inviate sempre.
+        Scegli quali notifiche ricevere via email e via push. Le email di
+        sicurezza (es. cambio password) vengono inviate sempre.
       </Text>
 
       {loading ? (
@@ -89,30 +132,31 @@ export default function NotificationPreferencesSection() {
         </View>
       ) : (
         <View className="gap-2">
-          {(prefs ?? []).map((p) => (
-            <Pressable
-              key={p.topic}
-              onPress={() => toggle(p.topic)}
-              accessibilityRole="switch"
-              accessibilityState={{ checked: p.emailEnabled }}
-              className="flex-row items-center justify-between gap-3 border border-accanto-100 rounded-lg px-3 py-3"
-            >
-              <Text className="text-sm text-accanto-800 flex-1">
-                {TOPIC_LABEL[p.topic]}
-              </Text>
+          {(prefs ?? []).map((p) => {
+            const pushOn = p.pushEnabled ?? true;
+            return (
               <View
-                className={`w-12 h-7 rounded-full justify-center px-1 ${
-                  p.emailEnabled ? 'bg-accanto-700' : 'bg-accanto-100'
-                }`}
+                key={p.topic}
+                className="gap-2 border border-accanto-100 rounded-lg px-3 py-3"
               >
-                <View
-                  className={`w-5 h-5 rounded-full bg-white ${
-                    p.emailEnabled ? 'self-end' : 'self-start'
-                  }`}
-                />
+                <Text className="text-sm text-accanto-800">
+                  {TOPIC_LABEL[p.topic]}
+                </Text>
+                <View className="flex-row gap-4 flex-wrap">
+                  <Switch
+                    on={p.emailEnabled}
+                    label="Email"
+                    onPress={() => toggle(p.topic, 'email')}
+                  />
+                  <Switch
+                    on={pushOn}
+                    label="Push"
+                    onPress={() => toggle(p.topic, 'push')}
+                  />
+                </View>
               </View>
-            </Pressable>
-          ))}
+            );
+          })}
         </View>
       )}
 

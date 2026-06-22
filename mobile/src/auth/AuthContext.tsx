@@ -25,6 +25,11 @@ import {
   authenticateBiometric,
   isBiometricEnabled
 } from './biometric';
+import {
+  registerForPushNotificationsAsync,
+  unregisterPushTokenAsync,
+  getCurrentPushToken
+} from '../lib/push';
 import type {
   AuthResponse,
   LoginRequest,
@@ -76,6 +81,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const bioOn = await isBiometricEnabled();
           if (bioOn) {
             setNeedsBiometricUnlock(true);
+          } else {
+            // Sessione già autorizzata: registra il device per le push
+            // (best-effort, post-hydration).
+            registerForPushNotificationsAsync().catch(() => {
+              /* ignore */
+            });
           }
           setUser(storedUser);
         }
@@ -106,6 +117,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(res.user);
     setNeedsBiometricUnlock(false);
+    // Best-effort: registra il device per le push. Esegue dopo che
+    // l'access token è in storage in modo che l'interceptor lo
+    // alleghi alla POST /account/push-devices.
+    registerForPushNotificationsAsync().catch(() => {
+      /* ignore */
+    });
   }, []);
 
   const login = useCallback(
@@ -141,6 +158,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     const refreshToken = await getRefreshToken();
+    // Deregistra il push token PRIMA di azzerare i token locali, così
+    // l'interceptor allega ancora l'Authorization. Best-effort: errori
+    // non bloccano il logout.
+    const tk = getCurrentPushToken();
+    if (tk) {
+      await unregisterPushTokenAsync(tk);
+    }
     if (refreshToken) {
       // Fire-and-forget: revoca lato server senza bloccare l'UI.
       api.post('/auth/logout', { refreshToken }).catch(() => {
@@ -173,6 +197,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (r.success) {
       setNeedsBiometricUnlock(false);
+      // Sblocco riuscito: ora siamo in sessione attiva → registra push.
+      registerForPushNotificationsAsync().catch(() => {
+        /* ignore */
+      });
       return true;
     }
     return false;
