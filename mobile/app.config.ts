@@ -56,13 +56,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-secure-store',
     'expo-local-authentication',
     'expo-localization',
-    'expo-font'
+    'expo-font',
+    '@react-native-community/datetimepicker'
   ],
   extra: {
     eas: {
       projectId: process.env.EAS_PROJECT_ID ?? ''
     },
-    apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://api.accanto.app'
+    apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://api.accanto.app',
+    webBaseUrl: process.env.EXPO_PUBLIC_WEB_BASE_URL ?? 'https://accanto.app'
   },
   experiments: {
     typedRoutes: false
