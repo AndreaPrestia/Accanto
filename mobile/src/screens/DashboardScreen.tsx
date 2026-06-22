@@ -8,9 +8,9 @@ import ErrorBanner from '../components/ui/ErrorBanner';
 import { api, extractError } from '../api/client';
 import type { CareCircle } from '@accanto/shared/types';
 import { RoleLabel } from '@accanto/shared/types';
-import type { AppStackParamList } from '../navigation/types';
+import type { MainStackParamList } from '../navigation/types';
 
-type Nav = NativeStackNavigationProp<AppStackParamList>;
+type Nav = NativeStackNavigationProp<MainStackParamList>;
 
 export default function DashboardScreen() {
   // useNavigation tipizzata sull'AppStack (parente del drawer): da qui

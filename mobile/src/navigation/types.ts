@@ -31,46 +31,54 @@ export type CircleStackParamList = {
   AiHistoryCircle: undefined;
 };
 
-// ---- AppDrawer (utente autenticato) ---------------------------------------
-export type AppDrawerParamList = {
+// ---- MainStack (native stack interno al Drawer: contiene Dashboard, ------
+// flussi push come Circle / NewCircle / accettazione invito) ---------------
+export type MainStackParamList = {
   Dashboard: undefined;
+  NewCircle: undefined;
+  Circle: { circleId: string };
+  InviteAccept: { token: string };
+};
+
+// ---- AppDrawer (root per utenti autenticati) ------------------------------
+// "Main" ospita il MainStack (che a sua volta apre il singolo cerchio).
+// Le altre voci sono pagine "globali" accessibili dal drawer da qualunque
+// punto, anche da dentro un cerchio (l'hamburger viene reso in MainStack
+// e in CircleStack via getParent('AppDrawer').openDrawer()).
+export type AppDrawerParamList = {
+  Main: NavigatorScreenParams<MainStackParamList> | undefined;
   Account: undefined;
   AiHistory: undefined;
   Support: undefined;
   SelfCare: undefined;
 };
 
-// ---- AppStack (root per utenti autenticati: drawer + sotto-flussi) --------
-export type AppStackParamList = {
-  AppDrawer: NavigatorScreenParams<AppDrawerParamList> | undefined;
-  NewCircle: undefined;
-  Circle: { circleId: string };
-  InviteAccept: { token: string };
-};
-
 // ---- RootStack (auth vs app) ----------------------------------------------
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList> | undefined;
-  App: NavigatorScreenParams<AppStackParamList> | undefined;
+  App: NavigatorScreenParams<AppDrawerParamList> | undefined;
 };
 
 // ---- Helper screen prop types ---------------------------------------------
 export type AuthScreenProps<T extends keyof AuthStackParamList> =
   NativeStackScreenProps<AuthStackParamList, T>;
 
-export type AppScreenProps<T extends keyof AppStackParamList> =
-  NativeStackScreenProps<AppStackParamList, T>;
+// Schermi dentro al MainStack: ricevono navigation con accesso composito
+// al MainStack + drawer parente (utile per `navigation.openDrawer()` o
+// per navigare a sibling drawer-screen come 'Account').
+export type AppScreenProps<T extends keyof MainStackParamList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<MainStackParamList, T>,
+    DrawerScreenProps<AppDrawerParamList>
+  >;
 
 export type DrawerScreen<T extends keyof AppDrawerParamList> =
-  CompositeScreenProps<
-    DrawerScreenProps<AppDrawerParamList, T>,
-    NativeStackScreenProps<AppStackParamList>
-  >;
+  DrawerScreenProps<AppDrawerParamList, T>;
 
 export type CircleStackScreen<T extends keyof CircleStackParamList> =
   CompositeScreenProps<
     NativeStackScreenProps<CircleStackParamList, T>,
-    NativeStackScreenProps<AppStackParamList>
+    AppScreenProps<keyof MainStackParamList>
   >;
 
 export type CircleTabScreen<T extends keyof CircleTabParamList> =
@@ -78,3 +86,4 @@ export type CircleTabScreen<T extends keyof CircleTabParamList> =
     BottomTabScreenProps<CircleTabParamList, T>,
     CircleStackScreen<keyof CircleStackParamList>
   >;
+

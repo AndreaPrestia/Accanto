@@ -13,13 +13,13 @@ import type { CareCircleInvitePreview } from '@accanto/shared/types';
 import { RoleLabel } from '@accanto/shared/types';
 import type {
   AuthStackParamList,
-  AppStackParamList
+  MainStackParamList
 } from '../navigation/types';
 
-// La schermata è registrata sia in AuthStack che in AppStack: usiamo i tipi
+// La schermata è registrata sia in AuthStack che in MainStack: usiamo i tipi
 // di entrambi via union per le route params (token è uguale in tutte e due).
 type AnyNav = NativeStackNavigationProp<
-  AuthStackParamList & AppStackParamList
+  AuthStackParamList & MainStackParamList
 >;
 type RouteParams = RouteProp<
   { InviteAccept: { token: string } },
@@ -65,8 +65,8 @@ export default function InviteAcceptScreen() {
               variant="ghost"
               onPress={() => {
                 if (user) {
-                  (navigation as NativeStackNavigationProp<AppStackParamList>).navigate(
-                    'AppDrawer'
+                  (navigation as NativeStackNavigationProp<MainStackParamList>).navigate(
+                    'Dashboard'
                   );
                 } else {
                   (navigation as NativeStackNavigationProp<AuthStackParamList>).navigate(
@@ -107,7 +107,7 @@ export default function InviteAcceptScreen() {
         `/invites/${token}/accept`,
         {}
       );
-      (navigation as NativeStackNavigationProp<AppStackParamList>).reset({
+      (navigation as NativeStackNavigationProp<MainStackParamList>).reset({
         index: 0,
         routes: [{ name: 'Circle', params: { circleId: data.careCircleId } }]
       });
@@ -154,8 +154,8 @@ export default function InviteAcceptScreen() {
             <Button
               variant="ghost"
               onPress={() =>
-                (navigation as NativeStackNavigationProp<AppStackParamList>).navigate(
-                  'AppDrawer'
+                (navigation as NativeStackNavigationProp<MainStackParamList>).navigate(
+                  'Dashboard'
                 )
               }
             >

@@ -37,34 +37,34 @@ export const linking: LinkingOptions<RootStackParamList> = {
       },
       App: {
         screens: {
-          NewCircle: 'care-circles/new',
-          InviteAccept: 'invite/:token',
-          AppDrawer: {
+          Main: {
             screens: {
               Dashboard: '',
-              Account: 'account',
-              AiHistory: 'ai/history',
-              Support: 'support',
-              SelfCare: 'self-care'
+              NewCircle: 'care-circles/new',
+              InviteAccept: 'invite/:token',
+              Circle: {
+                path: 'care-circles/:circleId',
+                screens: {
+                  CircleTabs: {
+                    screens: {
+                      CircleOverview: '',
+                      Timeline: 'timeline',
+                      Documents: 'documents',
+                      DoctorQuestions: 'questions',
+                      SharedUpdates: 'shared-updates'
+                    }
+                  },
+                  DifficultDay: 'difficult-day',
+                  Audit: 'audit',
+                  AiHistoryCircle: 'ai/history'
+                }
+              }
             }
           },
-          Circle: {
-            path: 'care-circles/:circleId',
-            screens: {
-              CircleTabs: {
-                screens: {
-                  CircleOverview: '',
-                  Timeline: 'timeline',
-                  Documents: 'documents',
-                  DoctorQuestions: 'questions',
-                  SharedUpdates: 'shared-updates'
-                }
-              },
-              DifficultDay: 'difficult-day',
-              Audit: 'audit',
-              AiHistoryCircle: 'ai/history'
-            }
-          }
+          Account: 'account',
+          AiHistory: 'ai/history',
+          Support: 'support',
+          SelfCare: 'self-care'
         }
       }
     }

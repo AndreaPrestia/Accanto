@@ -10,7 +10,7 @@ import * as Notifications from 'expo-notifications';
 import type { RootStackParamList } from './types';
 import { linking } from './linking';
 import AuthStack from './AuthStack';
-import AppStack from './AppStack';
+import AppDrawer from './AppDrawer';
 import { useAuth } from '../auth/AuthContext';
 import { authenticateBiometric } from '../auth/biometric';
 import { getPendingInvite, setPendingInvite } from '../auth/pendingInvite';
@@ -68,7 +68,7 @@ export default function RootNavigator() {
   const screens = useMemo(() => {
     if (user) {
       return (
-        <Stack.Screen name="App" component={AppStack} />
+        <Stack.Screen name="App" component={AppDrawer} />
       );
     }
     return (
@@ -93,8 +93,8 @@ export default function RootNavigator() {
             CommonActions.navigate({
               name: 'App',
               params: {
-                screen: 'InviteAccept',
-                params: { token }
+                screen: 'Main',
+                params: { screen: 'InviteAccept', params: { token } }
               }
             })
           );
@@ -103,7 +103,10 @@ export default function RootNavigator() {
         navigationRef.dispatch(
           CommonActions.navigate({
             name: 'App',
-            params: { screen: 'InviteAccept', params: { token } }
+            params: {
+              screen: 'Main',
+              params: { screen: 'InviteAccept', params: { token } }
+            }
           })
         );
       }
@@ -127,7 +130,10 @@ export default function RootNavigator() {
       navigationRef.dispatch(
         CommonActions.navigate({
           name: 'App',
-          params: { screen: 'Circle', params: { circleId } }
+          params: {
+            screen: 'Main',
+            params: { screen: 'Circle', params: { circleId } }
+          }
         })
       );
     });

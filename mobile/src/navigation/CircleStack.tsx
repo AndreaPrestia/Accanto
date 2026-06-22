@@ -1,19 +1,34 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import type { AppScreenProps, CircleStackParamList } from './types';
+import { getFocusedRouteNameFromRoute, type RouteProp } from '@react-navigation/native';
+import type { AppScreenProps, CircleStackParamList, CircleTabParamList } from './types';
 import CircleTabs from './CircleTabs';
 import { CircleProvider } from './CircleContext';
 import DifficultDayScreen from '../screens/DifficultDayScreen';
 import AuditScreen from '../screens/AuditScreen';
 import AiHistoryScreen from '../screens/AiHistoryScreen';
+import MenuButton from './MenuButton';
 
 const Stack = createNativeStackNavigator<CircleStackParamList>();
 
+const tabTitles: Record<keyof CircleTabParamList, string> = {
+  CircleOverview: 'Panoramica',
+  Timeline: 'Diario',
+  Documents: 'Documenti',
+  DoctorQuestions: 'Domande',
+  SharedUpdates: 'Aggiornamenti'
+};
+
+function getTabsHeaderTitle(route: RouteProp<CircleStackParamList, 'CircleTabs'>): string {
+  const focused = (getFocusedRouteNameFromRoute(route) ?? 'CircleOverview') as keyof CircleTabParamList;
+  return tabTitles[focused] ?? 'Panoramica';
+}
+
 /**
- * Stack interno a una care circle: la tab bar \u00e8 la home, sotto-pagine
+ * Stack interno a una care circle: la tab bar è la home, sotto-pagine
  * (difficult day, audit, AI history filtrata sul cerchio) si aprono in push.
  *
- * Riceve `circleId` come route param dal parent AppStack e lo propaga ai
- * children tramite `CircleProvider` (cos\u00ec ogni screen pu\u00f2 leggerlo con
+ * Riceve `circleId` come route param dal parent MainStack e lo propaga ai
+ * children tramite `CircleProvider` (così ogni screen può leggerlo con
  * `useCircleId()` senza forwarding manuale dei params).
  */
 export default function CircleStack({ route }: AppScreenProps<'Circle'>) {
@@ -24,7 +39,10 @@ export default function CircleStack({ route }: AppScreenProps<'Circle'>) {
         <Stack.Screen
           name="CircleTabs"
           component={CircleTabs}
-          options={{ headerShown: false }}
+          options={({ route }) => ({
+            headerTitle: getTabsHeaderTitle(route),
+            headerLeft: () => <MenuButton />
+          })}
         />
         <Stack.Screen
           name="DifficultDay"

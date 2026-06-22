@@ -1,8 +1,8 @@
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import type { DrawerContentComponentProps } from '@react-navigation/drawer';
 import type { AppDrawerParamList } from './types';
-import DashboardScreen from '../screens/DashboardScreen';
+import MainStack from './MainStack';
 import AccountScreen from '../screens/AccountScreen';
 import AiHistoryScreen from '../screens/AiHistoryScreen';
 import SupportScreen from '../screens/SupportScreen';
@@ -39,9 +39,23 @@ function DrawerContent(props: DrawerContentComponentProps) {
   );
 }
 
+/**
+ * Drawer root per gli utenti autenticati.
+ *
+ * - `Main` (native stack: Dashboard, NewCircle, Circle, InviteAccept) è
+ *   l'esperienza primaria, headerShown:false perché il MainStack porta
+ *   il proprio header con hamburger.
+ * - Le altre voci sono pagine "globali" raggiungibili dal drawer da
+ *   qualunque punto della app, anche da dentro un cerchio.
+ *
+ * `id="AppDrawer"` permette ai discendenti (MainStack, CircleStack) di
+ * recuperare il drawer via `useNavigation().getParent('AppDrawer')` per
+ * aprirlo dal bottone hamburger nei loro header.
+ */
 export default function AppDrawer() {
   return (
     <Drawer.Navigator
+      id="AppDrawer"
       drawerContent={DrawerContent}
       screenOptions={{
         headerTitleAlign: 'center',
@@ -50,9 +64,9 @@ export default function AppDrawer() {
       }}
     >
       <Drawer.Screen
-        name="Dashboard"
-        component={DashboardScreen}
-        options={{ title: 'Le mie care circle' }}
+        name="Main"
+        component={MainStack}
+        options={{ title: 'Le mie care circle', headerShown: false }}
       />
       <Drawer.Screen
         name="Account"
@@ -77,3 +91,4 @@ export default function AppDrawer() {
     </Drawer.Navigator>
   );
 }
+

@@ -6,17 +6,19 @@ type Props = CircleStackScreen<'DifficultDay'>;
 
 const SUGGESTIONS = [
   'Concediti tre respiri lenti, senza fare altro.',
-  'Bevi un bicchiere d\u2019acqua. Mangia qualcosa, anche poco.',
+  'Bevi un bicchiere d’acqua. Mangia qualcosa, anche poco.',
   'Scrivi una sola frase nel diario, anche dura. Non deve essere bella.',
-  'Manda un messaggio a una persona di fiducia: basta \u201Cho una giornata difficile\u201D.',
+  'Manda un messaggio a una persona di fiducia: basta “ho una giornata difficile”.',
   'Se puoi, esci cinque minuti. Anche solo sulla soglia.',
   'Non sei sola. Non sei solo. Stai facendo molto.'
 ];
 
 export default function DifficultDayScreen({ navigation }: Props) {
-  // Naviga al Support tramite il parent AppStack -> AppDrawer.
+  // Naviga al Support, che ora vive direttamente come voce del drawer
+  // sibling di Main (vedi AppDrawer). I tipi compositi di CircleStackScreen
+  // includono il drawer parente.
   const goToSupport = () => {
-    navigation.navigate('AppDrawer', { screen: 'Support' });
+    navigation.navigate('Support');
   };
 
   return (
@@ -49,11 +51,11 @@ export default function DifficultDayScreen({ navigation }: Props) {
           </Text>
           <Pressable onPress={goToSupport} className="py-1">
             <Text className="text-sm text-accanto-700 underline">
-              Vedi i contatti di supporto \u2192
+              Vedi i contatti di supporto →
             </Text>
           </Pressable>
           <Text className="text-sm text-accanto-500 mt-2">
-            Se c\u2019\u00e8 un\u2019emergenza sanitaria, chiama il 112.
+            Se c’è un’emergenza sanitaria, chiama il 112.
           </Text>
         </View>
       </View>
