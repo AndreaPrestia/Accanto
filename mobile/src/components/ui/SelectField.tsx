@@ -28,7 +28,7 @@ export default function SelectField<T extends string>({
   onChange,
   options,
   emptyLabel,
-  placeholder = 'Seleziona\u2026',
+  placeholder = 'Seleziona…',
   disabled = false
 }: SelectFieldProps<T>) {
   const [open, setOpen] = useState(false);
@@ -133,7 +133,7 @@ function OptionRow({
         }`}
       >
         {label}
-        {selected ? '  \u2713' : ''}
+        {selected ? '  ✓' : ''}
       </Text>
     </Pressable>
   );

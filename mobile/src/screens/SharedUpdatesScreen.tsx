@@ -77,7 +77,7 @@ export default function SharedUpdatesScreen() {
       .get<SharedUpdateTemplate[]>('/shared-update-templates')
       .then((r) => setTemplates(r.data))
       .catch(() => {
-        // Template panel \u00e8 opzionale.
+        // Template panel è opzionale.
       });
   }, []);
 
@@ -162,7 +162,7 @@ export default function SharedUpdatesScreen() {
           >
             <Text className="font-medium text-accanto-900">Modelli pronti</Text>
             <Text className="text-accanto-500">
-              {showTemplates ? '\u2212' : '+'}
+              {showTemplates ? '−' : '+'}
             </Text>
           </Pressable>
           {showTemplates ? (
@@ -213,7 +213,7 @@ export default function SharedUpdatesScreen() {
               className="rounded-lg border border-accanto-100 bg-white p-4"
             >
               <Text className="text-xs text-accanto-500">
-                {AudienceLabel[u.audience]} \u2022{' '}
+                {AudienceLabel[u.audience]} •{' '}
                 {new Date(u.createdAt).toLocaleString('it-IT')}
               </Text>
               <Text className="mt-2 text-accanto-900">{u.content}</Text>
@@ -283,7 +283,7 @@ function NewForm({
   return (
     <View className="rounded-lg border border-accanto-100 bg-white p-4 mb-4 gap-3">
       <SelectField
-        label="A chi \u00e8 rivolto"
+        label="A chi è rivolto"
         value={audience}
         onChange={(v) => v && setAudience(v as SharedUpdateAudience)}
         options={audienceOptions}
@@ -298,7 +298,7 @@ function NewForm({
       />
       <ErrorBanner message={error} />
       <Button onPress={submit} busy={busy} disabled={busy}>
-        {busy ? 'Salvataggio\u2026' : 'Salva aggiornamento'}
+        {busy ? 'Salvataggio…' : 'Salva aggiornamento'}
       </Button>
     </View>
   );

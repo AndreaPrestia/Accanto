@@ -163,7 +163,7 @@ export default function NotificationPreferencesSection() {
       <ErrorBanner message={error} />
       {msg ? <Text className="text-sm text-green-700">{msg}</Text> : null}
       <Button onPress={save} busy={saving} disabled={saving || !prefs}>
-        {saving ? 'Salvataggio\u2026' : 'Salva preferenze'}
+        {saving ? 'Salvataggio…' : 'Salva preferenze'}
       </Button>
     </View>
   );

@@ -111,7 +111,7 @@ export default function DocumentsScreen() {
   const del = (d: DocumentItem) => {
     Alert.alert(
       `Eliminare "${d.originalFileName}"?`,
-      'Il file non potr\u00e0 essere recuperato.',
+      'Il file non potrà essere recuperato.',
       [
         { text: 'Annulla', style: 'cancel' },
         {
@@ -138,7 +138,7 @@ export default function DocumentsScreen() {
         Documenti
       </Text>
       <Text className="text-accanto-500 mb-4">
-        Tieni vicino ci\u00f2 che ti serve quando ti chiedono un documento.
+        Tieni vicino ciò che ti serve quando ti chiedono un documento.
       </Text>
 
       <View className="mb-4">
@@ -181,8 +181,8 @@ export default function DocumentsScreen() {
                 {d.originalFileName}
               </Text>
               <Text className="text-xs text-accanto-500 mt-0.5">
-                {DocumentCategoryLabel[d.category]} \u2022{' '}
-                {formatSize(d.sizeInBytes)} \u2022{' '}
+                {DocumentCategoryLabel[d.category]} •{' '}
+                {formatSize(d.sizeInBytes)} •{' '}
                 {new Date(d.createdAt).toLocaleDateString('it-IT')}
               </Text>
               {d.notes ? (
@@ -210,7 +210,7 @@ export default function DocumentsScreen() {
                     busy={downloadingId === d.id}
                     disabled={downloadingId === d.id}
                   >
-                    {downloadingId === d.id ? 'Apertura\u2026' : 'Apri'}
+                    {downloadingId === d.id ? 'Apertura…' : 'Apri'}
                   </Button>
                 </View>
                 <Pressable
@@ -316,7 +316,7 @@ function UploadForm({
             }`}
             numberOfLines={1}
           >
-            {file ? file.name : 'Tocca per scegliere un file\u2026'}
+            {file ? file.name : 'Tocca per scegliere un file…'}
           </Text>
         </Pressable>
         <Text className="text-xs text-accanto-500 mt-1">Massimo 20 MB.</Text>
@@ -349,7 +349,7 @@ function UploadForm({
       <ErrorBanner message={error} />
 
       <Button onPress={submit} busy={busy} disabled={busy || !file}>
-        {busy ? 'Caricamento\u2026' : 'Carica'}
+        {busy ? 'Caricamento…' : 'Carica'}
       </Button>
     </View>
   );

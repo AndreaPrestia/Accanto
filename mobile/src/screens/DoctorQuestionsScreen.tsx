@@ -96,7 +96,7 @@ export default function DoctorQuestionsScreen() {
       .get<DoctorQuestionTemplate[]>('/doctor-question-templates')
       .then((r) => setTemplates(r.data))
       .catch(() => {
-        // Template panel \u00e8 opzionale.
+        // Template panel è opzionale.
       });
   }, []);
 
@@ -187,7 +187,7 @@ export default function DoctorQuestionsScreen() {
               Suggerimenti per categoria
             </Text>
             <Text className="text-accanto-500">
-              {showTemplates ? '\u2212' : '+'}
+              {showTemplates ? '−' : '+'}
             </Text>
           </Pressable>
           {showTemplates ? (
@@ -262,7 +262,7 @@ function QuestionCard({
     <View className="rounded-lg border border-accanto-100 bg-white p-4">
       <Text className="font-medium text-accanto-900">{q.question}</Text>
       <Text className="text-xs text-accanto-500 mt-1">
-        {QuestionCategoryLabel[q.category]} \u2022{' '}
+        {QuestionCategoryLabel[q.category]} •{' '}
         {QuestionStatusLabel[q.status]}
       </Text>
       {q.answerNotes ? (
@@ -345,7 +345,7 @@ function NewForm({
       />
       <ErrorBanner message={error} />
       <Button onPress={submit} busy={busy} disabled={busy}>
-        {busy ? 'Salvataggio\u2026' : 'Aggiungi domanda'}
+        {busy ? 'Salvataggio…' : 'Aggiungi domanda'}
       </Button>
     </View>
   );

@@ -65,7 +65,7 @@ export default function DeleteAccountSection() {
           } items-center justify-center mt-0.5`}
         >
           {understood ? (
-            <Text className="text-white text-xs leading-none">\u2713</Text>
+            <Text className="text-white text-xs leading-none">✓</Text>
           ) : null}
         </View>
         <Text className="text-sm text-accanto-700 flex-1">

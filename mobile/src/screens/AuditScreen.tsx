@@ -31,13 +31,13 @@ const ACTION_LABEL: Record<string, string> = {
   CircleCreated: 'Ha creato il cerchio',
   CircleUpdated: 'Ha modificato il cerchio',
   CircleArchived: 'Ha archiviato il cerchio',
-  MemberJoined: '\u00c8 entrato nel cerchio',
+  MemberJoined: 'È entrato nel cerchio',
   InviteCreated: 'Ha creato un invito',
   InviteRevoked: 'Ha revocato un invito',
   EntryCreated: 'Ha aggiunto una voce al diario',
   EntryUpdated: 'Ha modificato una voce del diario',
   EntryDeleted: 'Ha eliminato una voce del diario',
-  EntriesBulkUpdated: 'Ha aggiornato pi\u00f9 voci del diario',
+  EntriesBulkUpdated: 'Ha aggiornato più voci del diario',
   DocumentUploaded: 'Ha caricato un documento',
   DocumentDeleted: 'Ha eliminato un documento',
   QuestionCreated: 'Ha aggiunto una domanda per il medico',
@@ -87,7 +87,7 @@ export default function AuditScreen() {
         Registro azioni
       </Text>
       <Text className="text-accanto-500 mb-4">
-        Le azioni svolte dai membri del cerchio, dalla pi\u00f9 recente.
+        Le azioni svolte dai membri del cerchio, dalla più recente.
       </Text>
 
       <ErrorBanner message={error} />
@@ -105,7 +105,7 @@ export default function AuditScreen() {
                 <Text className="font-medium">
                   {e.performedByDisplayName ?? 'Membro rimosso'}
                 </Text>
-                {' \u2014 '}
+                {' — '}
                 <Text>{ACTION_LABEL[e.actionType] ?? e.actionType}</Text>
               </Text>
               {e.summary ? (
@@ -129,7 +129,7 @@ export default function AuditScreen() {
             disabled={loading}
             busy={loading}
           >
-            {loading ? 'Caricamento\u2026' : 'Carica altre'}
+            {loading ? 'Caricamento…' : 'Carica altre'}
           </Button>
         </View>
       ) : null}

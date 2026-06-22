@@ -50,7 +50,7 @@ export default function AccountScreen() {
           </Text>
           <Pressable onPress={() => navigation.navigate('AiHistory')}>
             <Text className="text-sm text-accanto-700 underline">
-              \u2192 {t('ai.history.open') as string}
+              → {t('ai.history.open') as string}
             </Text>
           </Pressable>
         </View>

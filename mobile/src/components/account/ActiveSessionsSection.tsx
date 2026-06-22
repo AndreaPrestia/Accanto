@@ -37,7 +37,7 @@ function shortenUserAgent(
     /iPhone OS [\d_]+/.exec(ua)?.[0]?.replace(/_/g, '.') ||
     /Linux/.exec(ua)?.[0] ||
     '';
-  return [browser, os].filter(Boolean).join(' \u00b7 ') || ua.slice(0, 80);
+  return [browser, os].filter(Boolean).join(' · ') || ua.slice(0, 80);
 }
 
 export default function ActiveSessionsSection() {
@@ -125,10 +125,10 @@ export default function ActiveSessionsSection() {
               <Text className="text-xs text-accanto-500">
                 {t('account.sessionsCreatedAt')}:{' '}
                 {formatDate(s.createdAt, locale)}
-                {' \u00b7 '}
+                {' · '}
                 {t('account.sessionsExpiresAt')}:{' '}
                 {formatDate(s.expiresAt, locale)}
-                {s.ipAddress ? ` \u00b7 ${s.ipAddress}` : ''}
+                {s.ipAddress ? ` · ${s.ipAddress}` : ''}
               </Text>
               {!s.current ? (
                 <Pressable

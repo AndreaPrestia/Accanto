@@ -23,7 +23,7 @@ const PAGE_SIZE = 20;
 
 /**
  * Storico interazioni AI: lista paginata + modale di dettaglio con input/output
- * grezzi. Quando lo screen \u00e8 montato sotto CircleStack legge il circleId dal
+ * grezzi. Quando lo screen è montato sotto CircleStack legge il circleId dal
  * contesto e filtra automaticamente; dal drawer globale mostra tutte le
  * interazioni dell'utente.
  */
@@ -120,8 +120,8 @@ export default function AiHistoryScreen() {
                 </Text>
               </View>
               <Text className="text-xs text-accanto-500 mt-1">
-                {t('ai.history.verdict')}: {it.verdict} \u00b7{' '}
-                {t('ai.history.feedback')}: {it.feedback ?? '\u2014'} \u00b7{' '}
+                {t('ai.history.verdict')}: {it.verdict} ·{' '}
+                {t('ai.history.feedback')}: {it.feedback ?? '—'} ·{' '}
                 {it.model}
               </Text>
             </Pressable>
@@ -136,7 +136,7 @@ export default function AiHistoryScreen() {
             disabled={page <= 1}
             className={page <= 1 ? 'opacity-50' : ''}
           >
-            <Text className="text-accanto-700 text-lg">\u2190</Text>
+            <Text className="text-accanto-700 text-lg">←</Text>
           </Pressable>
           <Text className="text-sm text-accanto-700">
             {page} / {totalPages}
@@ -146,7 +146,7 @@ export default function AiHistoryScreen() {
             disabled={page >= totalPages}
             className={page >= totalPages ? 'opacity-50' : ''}
           >
-            <Text className="text-accanto-700 text-lg">\u2192</Text>
+            <Text className="text-accanto-700 text-lg">→</Text>
           </Pressable>
         </View>
       ) : null}
@@ -166,14 +166,14 @@ export default function AiHistoryScreen() {
                     {selected.function}
                   </Text>
                   <Pressable onPress={() => setSelected(null)} className="p-2">
-                    <Text className="text-accanto-500 text-lg">\u00d7</Text>
+                    <Text className="text-accanto-500 text-lg">×</Text>
                   </Pressable>
                 </View>
                 <ScrollView className="px-4 py-3">
                   <Text className="text-xs text-accanto-500 mb-3">
-                    {fmtDate(selected.createdAt)} \u00b7 {selected.model} \u00b7{' '}
+                    {fmtDate(selected.createdAt)} · {selected.model} ·{' '}
                     {selected.verdict}
-                    {selected.cacheHit ? ' \u00b7 cache' : ''}
+                    {selected.cacheHit ? ' · cache' : ''}
                   </Text>
                   <Text className="text-sm font-medium text-accanto-900 mb-1">
                     {t('ai.history.input') as string}

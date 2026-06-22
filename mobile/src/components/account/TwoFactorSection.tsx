@@ -244,7 +244,7 @@ export default function TwoFactorSection() {
       {status?.enabled ? (
         <View className="gap-3">
           <Text className="text-sm text-accanto-700">
-            {t('account.twoFactorEnabled')} \u00b7{' '}
+            {t('account.twoFactorEnabled')} ·{' '}
             {t('account.twoFactorRecoveryRemaining', {
               count: status.remainingRecoveryCodes
             })}

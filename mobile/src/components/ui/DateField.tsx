@@ -52,7 +52,7 @@ export default function DateField({
   minimumDate,
   maximumDate,
   clearable,
-  placeholder = 'Seleziona\u2026'
+  placeholder = 'Seleziona…'
 }: DateFieldProps) {
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
@@ -72,7 +72,7 @@ export default function DateField({
         const d = new Date(selected);
         d.setSeconds(0, 0);
         // Memorizziamo temporaneamente nello state attraverso onChange,
-        // poi il time picker la rifiner\u00e0.
+        // poi il time picker la rifinerà.
         onChange(d.toISOString());
         setShowTime(true);
       } else {

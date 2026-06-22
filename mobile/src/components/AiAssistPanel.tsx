@@ -144,21 +144,21 @@ export default function AiAssistPanel({
                     {t('ai.feedback.label') as string}
                   </Text>
                   <FeedbackButton
-                    label="\ud83d\udc4d"
+                    label="👍"
                     active={feedback === 'Up'}
                     disabled={feedbackBusy || !!feedback}
                     onPress={() => sendFeedback('Up')}
                     accessibilityLabel={t('ai.feedback.up') as string}
                   />
                   <FeedbackButton
-                    label="\ud83d\udc4e"
+                    label="👎"
                     active={feedback === 'Down'}
                     disabled={feedbackBusy || !!feedback}
                     onPress={() => sendFeedback('Down')}
                     accessibilityLabel={t('ai.feedback.down') as string}
                   />
                   <FeedbackButton
-                    label="\ud83d\udea9"
+                    label="🚩"
                     active={feedback === 'Flag'}
                     disabled={feedbackBusy || !!feedback}
                     onPress={() => sendFeedback('Flag')}
@@ -232,7 +232,7 @@ export function AiAssistModal({
         <View className="bg-white rounded-t-2xl p-4 max-h-[85%]">
           <View className="flex-row items-center justify-end mb-2">
             <Pressable onPress={onClose} className="p-2">
-              <Text className="text-accanto-500 text-lg">\u00d7</Text>
+              <Text className="text-accanto-500 text-lg">×</Text>
             </Pressable>
           </View>
           <AiAssistPanel {...panelProps} />

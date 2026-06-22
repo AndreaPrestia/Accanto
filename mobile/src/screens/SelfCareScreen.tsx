@@ -58,7 +58,7 @@ export default function SelfCareScreen() {
         <View className="gap-2 pl-2">
           {signs.map((s, i) => (
             <Text key={i} className="text-sm text-accanto-900">
-              \u2022 {s}
+              • {s}
             </Text>
           ))}
         </View>
@@ -86,7 +86,7 @@ export default function SelfCareScreen() {
         <View className="gap-2 pl-2">
           {boundaries.map((s, i) => (
             <Text key={i} className="text-sm text-accanto-900">
-              \u2022 {s}
+              • {s}
             </Text>
           ))}
         </View>
@@ -94,7 +94,7 @@ export default function SelfCareScreen() {
 
       <Pressable onPress={() => navigation.navigate('Support')} className="mb-6">
         <Text className="text-sm text-accanto-700 underline">
-          {t('selfCare.supportLink') as string} \u2192
+          {t('selfCare.supportLink') as string} →
         </Text>
       </Pressable>
 
@@ -109,7 +109,7 @@ export default function SelfCareScreen() {
 
 /**
  * Sezione AI: come nel web, `/api/ai/status` richiede l'auth. Nel mobile
- * tutte le rotte sono gi\u00e0 dietro AuthGate, quindi qui basta proteggersi
+ * tutte le rotte sono già dietro AuthGate, quindi qui basta proteggersi
  * dal caso "utente non ancora caricato" per evitare un 401 prima del
  * rehydrate del token.
  */

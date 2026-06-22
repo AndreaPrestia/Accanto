@@ -97,7 +97,7 @@ export default function SecurityAuditSection() {
               {e.ipAddress || e.userAgent ? (
                 <Text className="text-xs text-accanto-500 mt-1">
                   {e.ipAddress}
-                  {e.ipAddress && e.userAgent ? ' \u00b7 ' : ''}
+                  {e.ipAddress && e.userAgent ? ' · ' : ''}
                   {e.userAgent}
                 </Text>
               ) : null}
@@ -115,7 +115,7 @@ export default function SecurityAuditSection() {
           }`}
         >
           <Text className="text-sm text-accanto-700">
-            {t('common.previous', { defaultValue: '\u2190 Precedente' }) as string}
+            {t('common.previous', { defaultValue: '← Precedente' }) as string}
           </Text>
         </Pressable>
         <Pressable
@@ -126,7 +126,7 @@ export default function SecurityAuditSection() {
           }`}
         >
           <Text className="text-sm text-accanto-700">
-            {t('common.next', { defaultValue: 'Successivo \u2192' }) as string}
+            {t('common.next', { defaultValue: 'Successivo →' }) as string}
           </Text>
         </Pressable>
       </View>

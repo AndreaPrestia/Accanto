@@ -170,12 +170,12 @@ export default function WellbeingSection() {
       <View className="flex-row gap-3 flex-wrap">
         <Pressable onPress={() => navigation.navigate('SelfCare')}>
           <Text className="text-sm text-accanto-700 underline">
-            {t('account.wellbeing.selfCareLink') as string} \u2192
+            {t('account.wellbeing.selfCareLink') as string} →
           </Text>
         </Pressable>
         <Pressable onPress={() => navigation.navigate('Support')}>
           <Text className="text-sm text-accanto-700 underline">
-            {t('account.wellbeing.supportLink') as string} \u2192
+            {t('account.wellbeing.supportLink') as string} →
           </Text>
         </Pressable>
       </View>
@@ -194,8 +194,8 @@ export default function WellbeingSection() {
                 {fmtDate(c.createdAt)}
               </Text>
               <Text className="text-xs text-accanto-500">
-                {t('account.wellbeing.mood')} {c.mood}/5 \u00b7{' '}
-                {t('account.wellbeing.energy')} {c.energy}/5 \u00b7{' '}
+                {t('account.wellbeing.mood')} {c.mood}/5 ·{' '}
+                {t('account.wellbeing.energy')} {c.energy}/5 ·{' '}
                 {t('account.wellbeing.stress')} {c.stress}/5
               </Text>
               {c.note ? (
@@ -336,13 +336,13 @@ function Trend({ items }: { items: CaregiverCheckIn[] }) {
       </Svg>
       <View className="flex-row flex-wrap gap-3 mt-2">
         <Text className="text-xs" style={{ color: colors.mood }}>
-          \u25cf {t('account.wellbeing.mood') as string}
+          ● {t('account.wellbeing.mood') as string}
         </Text>
         <Text className="text-xs" style={{ color: colors.energy }}>
-          \u25cf {t('account.wellbeing.energy') as string}
+          ● {t('account.wellbeing.energy') as string}
         </Text>
         <Text className="text-xs" style={{ color: colors.stress }}>
-          \u25cf {t('account.wellbeing.stress') as string}
+          ● {t('account.wellbeing.stress') as string}
         </Text>
       </View>
     </View>

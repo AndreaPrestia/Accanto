@@ -105,7 +105,7 @@ export default function TimelineScreen() {
     <Screen>
       <Text className="text-2xl font-semibold text-accanto-900 mb-1">Diario</Text>
       <Text className="text-accanto-500 mb-4">
-        Tieni traccia di ci\u00f2 che succede, giorno per giorno.
+        Tieni traccia di ciò che succede, giorno per giorno.
       </Text>
 
       {/* Filtri */}
@@ -255,7 +255,7 @@ function EntryCard({
   const [busy, setBusy] = useState(false);
 
   const del = () => {
-    Alert.alert('Eliminare questa voce?', 'L\u2019azione non si pu\u00f2 annullare.', [
+    Alert.alert('Eliminare questa voce?', 'L’azione non si può annullare.', [
       { text: 'Annulla', style: 'cancel' },
       {
         text: 'Elimina',
@@ -296,13 +296,13 @@ function EntryCard({
                   : 'border-accanto-300 bg-white'
               }`}
             >
-              {selected ? <Text className="text-white text-xs">\u2713</Text> : null}
+              {selected ? <Text className="text-white text-xs">✓</Text> : null}
             </View>
           ) : null}
           <View className="flex-1">
             <Text className="font-medium text-accanto-900">{entry.title}</Text>
             <Text className="text-xs text-accanto-500 mt-0.5">
-              {when} \u2022 {TimelineTypeLabel[entry.type]} \u2022{' '}
+              {when} • {TimelineTypeLabel[entry.type]} •{' '}
               {VisibilityLabel[entry.visibility]}
             </Text>
           </View>
@@ -432,7 +432,7 @@ function NewEntryForm({
         </View>
         <View className="flex-1">
           <SelectField
-            label="Visibilit\u00e0"
+            label="Visibilità"
             value={visibility}
             onChange={(v) => v && setVisibility(v as TimelineVisibility)}
             options={visOptions}
@@ -441,7 +441,7 @@ function NewEntryForm({
       </View>
       <ErrorBanner message={error} />
       <Button onPress={submit} busy={busy} disabled={busy}>
-        {busy ? 'Salvataggio\u2026' : 'Salva voce'}
+        {busy ? 'Salvataggio…' : 'Salva voce'}
       </Button>
     </View>
   );
@@ -584,7 +584,7 @@ function BulkEditForm({
         </View>
       </View>
       <SelectField
-        label="Visibilit\u00e0"
+        label="Visibilità"
         value={bulkVisibility}
         onChange={(v) => setBulkVisibility(v as '' | TimelineVisibility)}
         options={visOptions}
@@ -598,7 +598,7 @@ function BulkEditForm({
         busy={bulkBusy}
         disabled={bulkBusy || selectedIds.size === 0}
       >
-        {bulkBusy ? 'Applicazione\u2026' : 'Applica modifiche'}
+        {bulkBusy ? 'Applicazione…' : 'Applica modifiche'}
       </Button>
     </View>
   );

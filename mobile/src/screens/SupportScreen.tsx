@@ -130,7 +130,7 @@ function ResourceCard({
         {resource.url ? (
           <Pressable onPress={() => Linking.openURL(resource.url!)}>
             <Text className="text-sm text-accanto-700 underline">
-              {t('support.website')} \u2197
+              {t('support.website')} ↗
             </Text>
           </Pressable>
         ) : null}

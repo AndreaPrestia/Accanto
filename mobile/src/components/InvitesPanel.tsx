@@ -20,8 +20,8 @@ interface Props {
 /**
  * Pannello di gestione inviti per il owner di un cerchio. Porting 1:1 di
  * `frontend/src/components/InvitesPanel.tsx` adattato al mobile:
- * - select \u2192 toggle segmentato (sono solo 2 ruoli: Caregiver / Viewer)
- * - input numeri \u2192 TextField number-pad
+ * - select → toggle segmentato (sono solo 2 ruoli: Caregiver / Viewer)
+ * - input numeri → TextField number-pad
  * - "Copia link" usa expo-clipboard
  * - "Condividi link" extra rispetto al web: usa il Share nativo
  * - revoca con Alert di conferma
@@ -76,7 +76,7 @@ export default function InvitesPanel({ circleId }: Props) {
   const revoke = (inviteId: string) => {
     Alert.alert(
       'Revocare invito?',
-      'Chi non lo ha ancora usato non potr\u00e0 pi\u00f9 accedere.',
+      'Chi non lo ha ancora usato non potrà più accedere.',
       [
         { text: 'Annulla', style: 'cancel' },
         {
@@ -178,7 +178,7 @@ export default function InvitesPanel({ circleId }: Props) {
 
       <View className="mt-3">
         <Button onPress={create} busy={creating} disabled={creating}>
-          {creating ? 'Creazione\u2026' : 'Crea link di invito'}
+          {creating ? 'Creazione…' : 'Crea link di invito'}
         </Button>
       </View>
 
@@ -188,7 +188,7 @@ export default function InvitesPanel({ circleId }: Props) {
 
       <View className="mt-4 gap-3">
         {invites === null ? (
-          <Text className="text-sm text-accanto-500">Caricamento\u2026</Text>
+          <Text className="text-sm text-accanto-500">Caricamento…</Text>
         ) : invites.length === 0 ? (
           <Text className="text-sm text-accanto-500">Nessun invito attivo.</Text>
         ) : (
@@ -243,9 +243,9 @@ function InviteRow({
       <View className="flex-row items-center justify-between gap-2">
         <Text className="text-sm text-accanto-900 flex-1" numberOfLines={2}>
           <Text className="font-semibold">{RoleLabel[invite.role]}</Text>
-          {' \u2022 scade il '}
+          {' • scade il '}
           {expires}
-          {' \u2022 '}
+          {' • '}
           {invite.usedCount}/{invite.maxUses} usi
         </Text>
         <View

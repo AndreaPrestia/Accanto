@@ -86,7 +86,7 @@ export default function CircleExportPdfButton({ circleId, circleName }: Props) {
       <View className="flex-row items-center gap-3">
         <View className="flex-1">
           <Button onPress={start} busy={busy} disabled={busy}>
-            {busy ? 'Generazione\u2026' : 'Scarica PDF'}
+            {busy ? 'Generazione…' : 'Scarica PDF'}
           </Button>
         </View>
         {from || to ? (
