@@ -50,7 +50,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   return {
     ...config,
     name: `Accanto${label}`,
-    slug: 'accanto',
+    slug: 'accanto-app',
     scheme,
     version: '0.1.0',
     orientation: 'portrait',

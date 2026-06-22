@@ -5,7 +5,6 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "_comment_base": "I tre profili rispecchiano il flusso: development per debug su device fisico con Expo Dev Client, preview per APK/IPA distribuibili internamente (TestFlight interno, link diretto APK), production per le build firmate da pubblicare sugli store.",
     "development": {
       "developmentClient": true,
       "distribution": "internal",
