@@ -4,6 +4,7 @@ using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Validation;
 using Accanto.Application.Email;
+using Accanto.Application.Push;
 using Accanto.Domain.Entities;
 using Accanto.Domain.Enums;
 using FluentValidation;
@@ -17,6 +18,7 @@ public class SharedUpdateService : ISharedUpdateService
     private readonly ICareCircleAuthorization _auth;
     private readonly IAuditLog _audit;
     private readonly ICircleEmailNotifier _email;
+    private readonly ICircleMobilePushNotifier _mobilePush;
     private readonly IValidator<CreateSharedUpdateRequest> _createValidator;
 
     public SharedUpdateService(
@@ -24,12 +26,14 @@ public class SharedUpdateService : ISharedUpdateService
         ICareCircleAuthorization auth,
         IAuditLog audit,
         ICircleEmailNotifier email,
+        ICircleMobilePushNotifier mobilePush,
         IValidator<CreateSharedUpdateRequest> createValidator)
     {
         _db = db;
         _auth = auth;
         _audit = audit;
         _email = email;
+        _mobilePush = mobilePush;
         _createValidator = createValidator;
     }
 
@@ -77,6 +81,18 @@ public class SharedUpdateService : ISharedUpdateService
         _ = _email.NotifyCircleAsync(careCircleId, userId, NotificationTopic.SharedUpdateCreated,
             $"Nuovo aggiornamento da {circleName}",
             EmailTemplates.SharedUpdateCreated(circleName, authorName),
+            CancellationToken.None);
+        _ = _mobilePush.NotifyCircleAsync(
+            careCircleId,
+            userId,
+            NotificationTopic.SharedUpdateCreated,
+            circleName,
+            $"Nuovo aggiornamento da {authorName}",
+            new Dictionary<string, string>
+            {
+                ["circleId"] = careCircleId.ToString(),
+                ["updateId"] = u.Id.ToString()
+            },
             CancellationToken.None);
 
         return Map(u);

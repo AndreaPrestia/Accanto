@@ -13,6 +13,7 @@ public class UserNotificationPreferenceConfiguration : IEntityTypeConfiguration<
         b.Property(x => x.UserId).IsRequired();
         b.Property(x => x.Topic).IsRequired().HasConversion<string>().HasMaxLength(64);
         b.Property(x => x.EmailEnabled).IsRequired();
+        b.Property(x => x.PushEnabled).IsRequired().HasDefaultValue(true);
         b.Property(x => x.UpdatedAt).IsRequired();
         b.HasIndex(x => new { x.UserId, x.Topic }).IsUnique();
     }

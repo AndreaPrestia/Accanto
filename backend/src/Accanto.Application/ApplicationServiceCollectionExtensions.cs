@@ -9,6 +9,7 @@ using Accanto.Application.DoctorQuestions;
 using Accanto.Application.Documents;
 using Accanto.Application.Invites;
 using Accanto.Application.Notifications;
+using Accanto.Application.Push;
 using Accanto.Application.Security;
 using Accanto.Application.SharedUpdates;
 using Accanto.Application.Timeline;
@@ -42,6 +43,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ISecurityAuditQueryService, SecurityAuditQueryService>();
         services.AddScoped<INotificationPreferenceService, NotificationPreferenceService>();
+        services.AddScoped<IDevicePushTokenService, DevicePushTokenService>();
         services.AddScoped<ICheckInService, CheckInService>();
 
         services.AddSingleton<IDoctorQuestionTemplateProvider, StaticDoctorQuestionTemplateProvider>();

@@ -22,7 +22,7 @@ public class InviteServiceTests
             new CreateCareCircleRequestValidator(),
             new UpdateCareCircleRequestValidator());
         IValidator<CreateInviteRequest> createV = new CreateInviteRequestValidator();
-        var invites = new InviteService(db, auth, new NoOpAuditLog(), new NoOpCircleEmailNotifier(), new NoOpOwnerTwoFactorOnboarding(), createV);
+        var invites = new InviteService(db, auth, new NoOpAuditLog(), new NoOpCircleEmailNotifier(), new NoOpCircleMobilePushNotifier(), new NoOpOwnerTwoFactorOnboarding(), createV);
         return (invites, circles, db);
     }
 

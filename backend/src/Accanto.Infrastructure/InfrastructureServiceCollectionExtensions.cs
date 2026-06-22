@@ -48,6 +48,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.Configure<EncryptionOptions>(configuration.GetSection("Encryption"));
         services.Configure<PushOptions>(configuration.GetSection("Push"));
         services.Configure<EmailOptions>(configuration.GetSection("Email"));
+        services.Configure<ExpoPushOptions>(configuration.GetSection("ExpoPush"));
         services.Configure<AiOptions>(configuration.GetSection("Ai"));
         services.Configure<ClamAvOptions>(configuration.GetSection("ClamAV"));
         services.Configure<S3DocumentReplicaOptions>(configuration.GetSection("S3DocumentReplica"));
@@ -103,6 +104,12 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IEmailService, EmailService>();
         services.AddSingleton<ICircleEmailNotifier, CircleEmailNotifier>();
         services.AddScoped<ICareCircleExportService, CareCircleExportService>();
+
+        // Push mobile (Expo): HttpClient tipizzato + notifier singleton
+        // che usa IServiceScopeFactory per aprire scope DB per ciascuna
+        // chiamata fire-and-forget dei service di dominio.
+        services.AddHttpClient<IExpoPushClient, ExpoPushClient>();
+        services.AddSingleton<ICircleMobilePushNotifier, CircleMobilePushNotifier>();
 
         // IAiAssistant: factory in base ad AiOptions.Provider.
         // "ollama" → OllamaAssistant con HttpClient dedicato (timeout settato runtime).

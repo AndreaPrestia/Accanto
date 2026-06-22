@@ -5,6 +5,7 @@ using Accanto.Application.Common.Authorization;
 using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Email;
+using Accanto.Application.Push;
 using Accanto.Domain.Entities;
 using Accanto.Domain.Enums;
 using FluentValidation;
@@ -22,6 +23,7 @@ public class InviteService : IInviteService
     private readonly ICareCircleAuthorization _auth;
     private readonly IAuditLog _audit;
     private readonly ICircleEmailNotifier _email;
+    private readonly ICircleMobilePushNotifier _mobilePush;
     private readonly IOwnerTwoFactorOnboarding _ownerOnboarding;
     private readonly IValidator<CreateInviteRequest> _createValidator;
 
@@ -30,6 +32,7 @@ public class InviteService : IInviteService
         ICareCircleAuthorization auth,
         IAuditLog audit,
         ICircleEmailNotifier email,
+        ICircleMobilePushNotifier mobilePush,
         IOwnerTwoFactorOnboarding ownerOnboarding,
         IValidator<CreateInviteRequest> createValidator)
     {
@@ -37,6 +40,7 @@ public class InviteService : IInviteService
         _auth = auth;
         _audit = audit;
         _email = email;
+        _mobilePush = mobilePush;
         _ownerOnboarding = ownerOnboarding;
         _createValidator = createValidator;
     }
@@ -175,6 +179,16 @@ public class InviteService : IInviteService
             _ = _email.NotifyUserAsync(ownerId, NotificationTopic.InviteAccepted,
                 $"Nuova persona nel cerchio {circleName}",
                 EmailTemplates.InviteAccepted(circleName, newMemberName),
+                CancellationToken.None);
+            _ = _mobilePush.NotifyUserAsync(
+                ownerId,
+                NotificationTopic.InviteAccepted,
+                circleName,
+                $"{newMemberName} è entrato nel cerchio",
+                new Dictionary<string, string>
+                {
+                    ["circleId"] = invite.CareCircleId.ToString()
+                },
                 CancellationToken.None);
         }
 
