@@ -2,8 +2,10 @@ using Accanto.Application.Common.Persistence;
 using Accanto.Application.Push;
 using Accanto.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Accanto.Infrastructure.Push;
 
@@ -20,15 +22,21 @@ public class CircleMobilePushNotifier : ICircleMobilePushNotifier
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IExpoPushClient _expo;
+    private readonly IMemoryCache _throttleCache;
+    private readonly ExpoPushOptions _options;
     private readonly ILogger<CircleMobilePushNotifier> _logger;
 
     public CircleMobilePushNotifier(
         IServiceScopeFactory scopeFactory,
         IExpoPushClient expo,
+        IMemoryCache throttleCache,
+        IOptions<ExpoPushOptions> options,
         ILogger<CircleMobilePushNotifier> logger)
     {
         _scopeFactory = scopeFactory;
         _expo = expo;
+        _throttleCache = throttleCache;
+        _options = options.Value;
         _logger = logger;
     }
 
@@ -137,6 +145,7 @@ public class CircleMobilePushNotifier : ICircleMobilePushNotifier
 
         var optedInUserIds = userIds
             .Where(uid => !prefs.TryGetValue(uid, out var enabled) || enabled)
+            .Where(uid => !IsThrottled(uid, topic))
             .ToList();
         if (optedInUserIds.Count == 0) return;
 
@@ -152,5 +161,32 @@ public class CircleMobilePushNotifier : ICircleMobilePushNotifier
         {
             await tokenService.RemoveInvalidTokensAsync(invalid, ct);
         }
+
+        // Marca i destinatari come "appena notificati" per evitare burst.
+        // Solo se il send HTTP è andato a buon fine (no exception).
+        foreach (var uid in optedInUserIds)
+        {
+            MarkThrottled(uid, topic);
+        }
     }
+
+    private bool IsThrottled(Guid userId, NotificationTopic topic)
+    {
+        var window = _options.MinSecondsBetweenPerUserTopic;
+        if (window <= 0) return false;
+        return _throttleCache.TryGetValue(ThrottleKey(userId, topic), out _);
+    }
+
+    private void MarkThrottled(Guid userId, NotificationTopic topic)
+    {
+        var window = _options.MinSecondsBetweenPerUserTopic;
+        if (window <= 0) return;
+        _throttleCache.Set(
+            ThrottleKey(userId, topic),
+            true,
+            TimeSpan.FromSeconds(window));
+    }
+
+    private static string ThrottleKey(Guid userId, NotificationTopic topic) =>
+        $"push:throttle:{userId}:{(int)topic}";
 }

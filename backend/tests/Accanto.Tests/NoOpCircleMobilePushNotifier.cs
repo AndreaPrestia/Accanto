@@ -36,4 +36,16 @@ public class NoOpCircleMobilePushNotifier : ICircleMobilePushNotifier
         UserNotifications.Add((userId, topic, title, body));
         return Task.CompletedTask;
     }
+
+    public List<(Guid UserId, string Title, string Body)> TestNotifications { get; } = new();
+
+    public Task SendTestAsync(
+        Guid userId,
+        string title,
+        string body,
+        CancellationToken cancellationToken = default)
+    {
+        TestNotifications.Add((userId, title, body));
+        return Task.CompletedTask;
+    }
 }

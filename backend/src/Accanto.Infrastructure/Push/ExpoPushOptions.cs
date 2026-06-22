@@ -24,4 +24,13 @@ public class ExpoPushOptions
     /// solo. Comodo in test e in ambienti dove il push non è configurato.
     /// </summary>
     public bool Disabled { get; set; }
+
+    /// <summary>
+    /// Anti-spam: numero minimo di secondi tra due push consecutive verso
+    /// lo stesso destinatario sullo stesso topic. Esempio: se l'utente A
+    /// crea 10 timeline entries in 30 secondi, gli altri membri del cerchio
+    /// ricevono UNA sola push (le successive sono droppate finché la
+    /// finestra non scade). Default 30 secondi. 0 disattiva il throttle.
+    /// </summary>
+    public int MinSecondsBetweenPerUserTopic { get; set; } = 30;
 }
