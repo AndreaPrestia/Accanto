@@ -11,6 +11,7 @@ const AUDIENCES: SharedUpdateAudience[] = ['CloseFamily','ExtendedFamily','Frien
 
 export default function SharedUpdatesPage() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
   const [items, setItems] = useState<SharedUpdate[] | null>(null);
   const [templates, setTemplates] = useState<SharedUpdateTemplate[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -53,8 +54,11 @@ export default function SharedUpdatesPage() {
         <h1 className="text-2xl font-semibold">Aggiornamenti per gli altri</h1>
         <Link to={`/care-circles/${id}`} className="text-sm text-accanto-500 hover:underline">← Cerchio</Link>
       </div>
-      <p className="text-accanto-500 mb-4">
+      <p className="text-accanto-500 mb-1">
         Componi un messaggio una volta sola, poi copialo e invialo dove preferisci.
+      </p>
+      <p className="text-accanto-500 mb-4">
+        {t('sharedUpdates.introBalance')}
       </p>
 
       <button onClick={() => { setPrefill(''); setShowForm(s => !s); }} className="btn-primary mb-4">
@@ -144,7 +148,7 @@ function NewForm({ careCircleId, prefill, onCreated }: { careCircleId: string; p
 function SharedUpdatesAiSection({ circleId }: { circleId: string }) {
   const { t } = useTranslation();
   const [text, setText] = useState('');
-  const [tone, setTone] = useState<'neutral' | 'warm' | 'concise'>('warm');
+  const [tone, setTone] = useState<'neutral' | 'warm' | 'concise' | 'hopeful' | 'encouraging'>('warm');
   const { systemAvailable, enabledForCircle, loading } = useAiContext(circleId);
 
   if (loading) return null;
@@ -175,6 +179,8 @@ function SharedUpdatesAiSection({ circleId }: { circleId: string }) {
           <option value="neutral">{t('ai.rephrase.toneOptions.neutral')}</option>
           <option value="warm">{t('ai.rephrase.toneOptions.warm')}</option>
           <option value="concise">{t('ai.rephrase.toneOptions.concise')}</option>
+          <option value="hopeful">{t('ai.rephrase.toneOptions.hopeful')}</option>
+          <option value="encouraging">{t('ai.rephrase.toneOptions.encouraging')}</option>
         </select>
       </label>
     </AiAssistPanel>

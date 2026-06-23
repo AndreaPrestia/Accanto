@@ -51,5 +51,9 @@ public class SharedUpdateTemplatesController : ControllerBase
     public SharedUpdateTemplatesController(ISharedUpdateTemplateProvider provider) { _provider = provider; }
 
     [HttpGet]
-    public ActionResult<IReadOnlyList<SharedUpdateTemplateDto>> Get() => Ok(_provider.GetTemplates());
+    public ActionResult<IReadOnlyList<SharedUpdateTemplateDto>> Get()
+    {
+        var acceptLanguage = Request.Headers.AcceptLanguage.ToString();
+        return Ok(_provider.GetTemplates(acceptLanguage));
+    }
 }

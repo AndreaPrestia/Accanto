@@ -44,6 +44,7 @@ if (
 }
 
 export default function SharedUpdatesScreen() {
+  const { t } = useTranslation();
   const circleId = useCircleId();
   const [items, setItems] = useState<SharedUpdate[] | null>(null);
   const [templates, setTemplates] = useState<SharedUpdateTemplate[]>([]);
@@ -119,9 +120,12 @@ export default function SharedUpdatesScreen() {
       <Text className="text-2xl font-semibold text-accanto-900 mb-1">
         Aggiornamenti per gli altri
       </Text>
-      <Text className="text-accanto-500 mb-4">
+      <Text className="text-accanto-500 mb-1">
         Componi un messaggio una volta sola, poi copialo e invialo dove
         preferisci.
+      </Text>
+      <Text className="text-accanto-500 mb-4">
+        {t('sharedUpdates.introBalance')}
       </Text>
 
       <View className="mb-4">
@@ -307,7 +311,9 @@ function NewForm({
 function SharedUpdatesAiSection({ circleId }: { circleId: string }) {
   const { t } = useTranslation();
   const [text, setText] = useState('');
-  const [tone, setTone] = useState<'neutral' | 'warm' | 'concise'>('warm');
+  const [tone, setTone] = useState<
+    'neutral' | 'warm' | 'concise' | 'hopeful' | 'encouraging'
+  >('warm');
   const { systemAvailable, enabledForCircle, loading } = useAiContext(circleId);
 
   const toneOptions = useMemo(
@@ -323,6 +329,14 @@ function SharedUpdatesAiSection({ circleId }: { circleId: string }) {
       {
         value: 'concise',
         label: t('ai.rephrase.toneOptions.concise') as string
+      },
+      {
+        value: 'hopeful',
+        label: t('ai.rephrase.toneOptions.hopeful') as string
+      },
+      {
+        value: 'encouraging',
+        label: t('ai.rephrase.toneOptions.encouraging') as string
       }
     ],
     [t]
@@ -354,7 +368,12 @@ function SharedUpdatesAiSection({ circleId }: { circleId: string }) {
       <SelectField
         label={t('ai.rephrase.toneLabel') as string}
         value={tone}
-        onChange={(v) => v && setTone(v as 'neutral' | 'warm' | 'concise')}
+        onChange={(v) =>
+          v &&
+          setTone(
+            v as 'neutral' | 'warm' | 'concise' | 'hopeful' | 'encouraging'
+          )
+        }
         options={toneOptions}
       />
     </AiAssistPanel>

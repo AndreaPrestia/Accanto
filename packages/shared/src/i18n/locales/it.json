@@ -258,7 +258,9 @@
       "toneOptions": {
         "neutral": "Neutro",
         "warm": "Caldo",
-        "concise": "Sintetico"
+        "concise": "Sintetico",
+        "hopeful": "Speranzoso",
+        "encouraging": "Incoraggiante"
       },
       "cta": "Riformula"
     },
@@ -298,5 +300,8 @@
       "circleSection": "AI del cerchio",
       "circleSectionHint": "Come owner puoi consultare tutte le interazioni AI legate a questo cerchio (escluse le riflessioni personali dei membri)."
     }
+  },
+  "sharedUpdates": {
+    "introBalance": "Va bene raccontare anche un piccolo passo avanti o una giornata più serena: non solo le difficoltà."
   }
 }

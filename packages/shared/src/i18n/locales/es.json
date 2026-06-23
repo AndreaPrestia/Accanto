@@ -258,7 +258,9 @@
       "toneOptions": {
         "neutral": "Neutro",
         "warm": "Cálido",
-        "concise": "Conciso"
+        "concise": "Conciso",
+        "hopeful": "Esperanzado",
+        "encouraging": "Alentador"
       },
       "cta": "Reformular"
     },
@@ -298,5 +300,8 @@
       "circleSection": "IA del círculo",
       "circleSectionHint": "Como propietario puedes revisar todas las interacciones IA de este círculo (excluidas las reflexiones personales de los miembros)."
     }
+  },
+  "sharedUpdates": {
+    "introBalance": "También está bien compartir un pequeño paso adelante o un día más tranquilo, no solo los momentos difíciles."
   }
 }

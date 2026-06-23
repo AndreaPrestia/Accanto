@@ -258,7 +258,9 @@
       "toneOptions": {
         "neutral": "Neutral",
         "warm": "Warm",
-        "concise": "Concise"
+        "concise": "Concise",
+        "hopeful": "Hopeful",
+        "encouraging": "Encouraging"
       },
       "cta": "Rephrase"
     },
@@ -298,5 +300,8 @@
       "circleSection": "Circle AI",
       "circleSectionHint": "As owner you can review all AI interactions linked to this circle (members' personal reflections are excluded)."
     }
+  },
+  "sharedUpdates": {
+    "introBalance": "It's also okay to share a small step forward or a calmer day, not only the hard moments."
   }
 }
