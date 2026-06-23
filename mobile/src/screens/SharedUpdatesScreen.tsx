@@ -27,7 +27,6 @@ import type {
   SharedUpdateAudience,
   SharedUpdateTemplate
 } from '@accanto/shared/types';
-import { AudienceLabel } from '@accanto/shared/types';
 
 const AUDIENCES: SharedUpdateAudience[] = [
   'CloseFamily',
@@ -35,6 +34,13 @@ const AUDIENCES: SharedUpdateAudience[] = [
   'Friends',
   'Generic'
 ];
+
+const AUDIENCE_I18N_KEY: Record<SharedUpdateAudience, string> = {
+  CloseFamily: 'sharedUpdates.audience.closeFamily',
+  ExtendedFamily: 'sharedUpdates.audience.extendedFamily',
+  Friends: 'sharedUpdates.audience.friends',
+  Generic: 'sharedUpdates.audience.generic'
+};
 
 if (
   Platform.OS === 'android' &&
@@ -44,7 +50,7 @@ if (
 }
 
 export default function SharedUpdatesScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const circleId = useCircleId();
   const [items, setItems] = useState<SharedUpdate[] | null>(null);
   const [templates, setTemplates] = useState<SharedUpdateTemplate[]>([]);
@@ -89,17 +95,17 @@ export default function SharedUpdatesScreen() {
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
       Alert.alert(
-        'Impossibile copiare',
-        'Selezionalo e copialo a mano.'
+        t('sharedUpdates.copyErrorTitle'),
+        t('sharedUpdates.copyErrorBody')
       );
     }
   };
 
   const del = (u: SharedUpdate) => {
-    Alert.alert('Eliminare questo aggiornamento?', undefined, [
-      { text: 'Annulla', style: 'cancel' },
+    Alert.alert(t('sharedUpdates.deleteConfirm'), undefined, [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Elimina',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           try {
@@ -118,11 +124,10 @@ export default function SharedUpdatesScreen() {
   return (
     <Screen>
       <Text className="text-2xl font-semibold text-accanto-900 mb-1">
-        Aggiornamenti per gli altri
+        {t('sharedUpdates.title')}
       </Text>
       <Text className="text-accanto-500 mb-1">
-        Componi un messaggio una volta sola, poi copialo e invialo dove
-        preferisci.
+        {t('sharedUpdates.intro')}
       </Text>
       <Text className="text-accanto-500 mb-4">
         {t('sharedUpdates.introBalance')}
@@ -135,7 +140,7 @@ export default function SharedUpdatesScreen() {
             setShowForm((s) => !s);
           }}
         >
-          {showForm ? 'Annulla' : '+ Nuovo aggiornamento'}
+          {showForm ? t('common.cancel') : t('sharedUpdates.newUpdate')}
         </Button>
       </View>
 
@@ -164,30 +169,32 @@ export default function SharedUpdatesScreen() {
             }}
             className="px-4 py-3 flex-row items-center justify-between"
           >
-            <Text className="font-medium text-accanto-900">Modelli pronti</Text>
+            <Text className="font-medium text-accanto-900">
+              {t('sharedUpdates.templatesPanel')}
+            </Text>
             <Text className="text-accanto-500">
               {showTemplates ? '−' : '+'}
             </Text>
           </Pressable>
           {showTemplates ? (
             <View className="px-4 pb-4 gap-3">
-              {templates.map((t) => (
-                <View key={t.title}>
+              {templates.map((tpl) => (
+                <View key={tpl.title}>
                   <Text className="text-sm font-medium text-accanto-900 mb-1">
-                    {t.title}
+                    {tpl.title}
                   </Text>
                   <Text className="text-sm text-accanto-700">
-                    {t.content}
+                    {tpl.content}
                   </Text>
                   <View className="mt-2">
                     <Button
                       variant="ghost"
                       onPress={() => {
-                        setPrefill(t.content);
+                        setPrefill(tpl.content);
                         setShowForm(true);
                       }}
                     >
-                      Usa come base
+                      {t('sharedUpdates.useAsBase')}
                     </Button>
                   </View>
                 </View>
@@ -207,7 +214,7 @@ export default function SharedUpdatesScreen() {
         </View>
       ) : items.length === 0 ? (
         <Text className="text-accanto-500">
-          Ancora nessun aggiornamento.
+          {t('sharedUpdates.empty')}
         </Text>
       ) : (
         <View className="gap-3">
@@ -217,8 +224,8 @@ export default function SharedUpdatesScreen() {
               className="rounded-lg border border-accanto-100 bg-white p-4"
             >
               <Text className="text-xs text-accanto-500">
-                {AudienceLabel[u.audience]} •{' '}
-                {new Date(u.createdAt).toLocaleString('it-IT')}
+                {t(AUDIENCE_I18N_KEY[u.audience])} •{' '}
+                {new Date(u.createdAt).toLocaleString(i18n.language)}
               </Text>
               <Text className="mt-2 text-accanto-900">{u.content}</Text>
               <View className="mt-3 flex-row gap-2">
@@ -227,14 +234,18 @@ export default function SharedUpdatesScreen() {
                     variant="ghost"
                     onPress={() => copy(u.content, u.id)}
                   >
-                    {copiedId === u.id ? 'Copiato!' : 'Copia testo'}
+                    {copiedId === u.id
+                      ? t('sharedUpdates.copied')
+                      : t('sharedUpdates.copyText')}
                   </Button>
                 </View>
                 <Pressable
                   onPress={() => del(u)}
                   className="px-3 py-2 items-center justify-center"
                 >
-                  <Text className="text-sm text-accanto-500">Elimina</Text>
+                  <Text className="text-sm text-accanto-500">
+                    {t('common.delete')}
+                  </Text>
                 </Pressable>
               </View>
             </View>
@@ -254,19 +265,24 @@ function NewForm({
   prefill: string;
   onCreated: () => void;
 }) {
+  const { t } = useTranslation();
   const [audience, setAudience] = useState<SharedUpdateAudience>('CloseFamily');
   const [content, setContent] = useState(prefill);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const audienceOptions = useMemo(
-    () => AUDIENCES.map((a) => ({ value: a, label: AudienceLabel[a] })),
-    []
+    () =>
+      AUDIENCES.map((a) => ({
+        value: a,
+        label: t(AUDIENCE_I18N_KEY[a]) as string
+      })),
+    [t]
   );
 
   const submit = async () => {
     if (!content.trim()) {
-      setError('Scrivi il messaggio.');
+      setError(t('sharedUpdates.writeMessageError'));
       return;
     }
     setBusy(true);
@@ -287,13 +303,13 @@ function NewForm({
   return (
     <View className="rounded-lg border border-accanto-100 bg-white p-4 mb-4 gap-3">
       <SelectField
-        label="A chi è rivolto"
+        label={t('sharedUpdates.audienceLabel') as string}
         value={audience}
         onChange={(v) => v && setAudience(v as SharedUpdateAudience)}
         options={audienceOptions}
       />
       <TextField
-        label="Messaggio"
+        label={t('sharedUpdates.messageLabel') as string}
         value={content}
         onChangeText={setContent}
         multiline
@@ -302,7 +318,7 @@ function NewForm({
       />
       <ErrorBanner message={error} />
       <Button onPress={submit} busy={busy} disabled={busy}>
-        {busy ? 'Salvataggio…' : 'Salva aggiornamento'}
+        {busy ? t('common.saving') : t('sharedUpdates.save')}
       </Button>
     </View>
   );

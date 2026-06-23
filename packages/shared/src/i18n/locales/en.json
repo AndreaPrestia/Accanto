@@ -302,6 +302,29 @@
     }
   },
   "sharedUpdates": {
-    "introBalance": "It's also okay to share a small step forward or a calmer day, not only the hard moments."
+    "title": "Updates for others",
+    "backToCircle": "← Circle",
+    "intro": "Write the message once, then copy it and send it wherever you prefer.",
+    "introBalance": "It's also okay to share a small step forward or a calmer day, not only the hard moments.",
+    "newUpdate": "+ New update",
+    "templatesPanel": "Ready-made templates",
+    "useAsBase": "Use as starting point",
+    "copyText": "Copy text",
+    "copied": "Copied!",
+    "empty": "No updates yet.",
+    "audienceLabel": "Who is it for",
+    "audience": {
+      "closeFamily": "Close family",
+      "extendedFamily": "Extended family",
+      "friends": "Friends",
+      "generic": "Generic message"
+    },
+    "messageLabel": "Message",
+    "save": "Save update",
+    "deleteConfirm": "Delete this update?",
+    "copyError": "Couldn't copy automatically. Please select and copy it manually.",
+    "copyErrorTitle": "Couldn't copy",
+    "copyErrorBody": "Please select and copy it manually.",
+    "writeMessageError": "Please write a message."
   }
 }

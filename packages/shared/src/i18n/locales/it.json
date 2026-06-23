@@ -302,6 +302,29 @@
     }
   },
   "sharedUpdates": {
-    "introBalance": "Va bene raccontare anche un piccolo passo avanti o una giornata più serena: non solo le difficoltà."
+    "title": "Aggiornamenti per gli altri",
+    "backToCircle": "← Cerchio",
+    "intro": "Componi un messaggio una volta sola, poi copialo e invialo dove preferisci.",
+    "introBalance": "Va bene raccontare anche un piccolo passo avanti o una giornata più serena: non solo le difficoltà.",
+    "newUpdate": "+ Nuovo aggiornamento",
+    "templatesPanel": "Modelli pronti",
+    "useAsBase": "Usa come base",
+    "copyText": "Copia testo",
+    "copied": "Copiato!",
+    "empty": "Ancora nessun aggiornamento.",
+    "audienceLabel": "A chi è rivolto",
+    "audience": {
+      "closeFamily": "Famiglia stretta",
+      "extendedFamily": "Famiglia allargata",
+      "friends": "Amici",
+      "generic": "Messaggio generico"
+    },
+    "messageLabel": "Messaggio",
+    "save": "Salva aggiornamento",
+    "deleteConfirm": "Eliminare questo aggiornamento?",
+    "copyError": "Impossibile copiare automaticamente. Selezionalo e copialo a mano.",
+    "copyErrorTitle": "Impossibile copiare",
+    "copyErrorBody": "Selezionalo e copialo a mano.",
+    "writeMessageError": "Scrivi il messaggio."
   }
 }

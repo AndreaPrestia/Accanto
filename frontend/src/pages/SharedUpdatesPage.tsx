@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, extractError } from '../api/client';
-import { AudienceLabel, SharedUpdate, SharedUpdateAudience, SharedUpdateTemplate } from '../types';
+import { SharedUpdate, SharedUpdateAudience, SharedUpdateTemplate } from '../types';
 import { useTranslation } from 'react-i18next';
 import AiAssistPanel from '../components/AiAssistPanel';
 import { rephrase } from '../api/ai';
@@ -9,9 +9,16 @@ import { useAiContext } from '../hooks/useAiContext';
 
 const AUDIENCES: SharedUpdateAudience[] = ['CloseFamily','ExtendedFamily','Friends','Generic'];
 
+const AUDIENCE_I18N_KEY: Record<SharedUpdateAudience, string> = {
+  CloseFamily: 'sharedUpdates.audience.closeFamily',
+  ExtendedFamily: 'sharedUpdates.audience.extendedFamily',
+  Friends: 'sharedUpdates.audience.friends',
+  Generic: 'sharedUpdates.audience.generic'
+};
+
 export default function SharedUpdatesPage() {
   const { id } = useParams<{ id: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [items, setItems] = useState<SharedUpdate[] | null>(null);
   const [templates, setTemplates] = useState<SharedUpdateTemplate[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +40,7 @@ export default function SharedUpdatesPage() {
   }, []);
 
   const del = async (u: SharedUpdate) => {
-    if (!confirm('Eliminare questo aggiornamento?')) return;
+    if (!confirm(t('sharedUpdates.deleteConfirm'))) return;
     await api.delete(`/care-circles/${id}/shared-updates/${u.id}`);
     load();
   };
@@ -44,25 +51,25 @@ export default function SharedUpdatesPage() {
       setCopied(key);
       setTimeout(() => setCopied(null), 2000);
     } catch {
-      alert('Impossibile copiare automaticamente. Selezionalo e copialo a mano.');
+      alert(t('sharedUpdates.copyError'));
     }
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h1 className="text-2xl font-semibold">Aggiornamenti per gli altri</h1>
-        <Link to={`/care-circles/${id}`} className="text-sm text-accanto-500 hover:underline">← Cerchio</Link>
+        <h1 className="text-2xl font-semibold">{t('sharedUpdates.title')}</h1>
+        <Link to={`/care-circles/${id}`} className="text-sm text-accanto-500 hover:underline">{t('sharedUpdates.backToCircle')}</Link>
       </div>
       <p className="text-accanto-500 mb-1">
-        Componi un messaggio una volta sola, poi copialo e invialo dove preferisci.
+        {t('sharedUpdates.intro')}
       </p>
       <p className="text-accanto-500 mb-4">
         {t('sharedUpdates.introBalance')}
       </p>
 
       <button onClick={() => { setPrefill(''); setShowForm(s => !s); }} className="btn-primary mb-4">
-        {showForm ? 'Annulla' : '+ Nuovo aggiornamento'}
+        {showForm ? t('common.cancel') : t('sharedUpdates.newUpdate')}
       </button>
 
       {showForm && <NewForm careCircleId={id!} prefill={prefill} onCreated={() => { setShowForm(false); setPrefill(''); load(); }} />}
@@ -71,17 +78,17 @@ export default function SharedUpdatesPage() {
 
       {templates.length > 0 && (
         <details className="card mb-4">
-          <summary className="cursor-pointer font-medium">Modelli pronti</summary>
+          <summary className="cursor-pointer font-medium">{t('sharedUpdates.templatesPanel')}</summary>
           <div className="mt-3 space-y-3">
-            {templates.map(t => (
-              <div key={t.title}>
-                <p className="text-sm font-medium">{t.title}</p>
-                <p className="text-sm whitespace-pre-wrap mt-1 text-accanto-700">{t.content}</p>
+            {templates.map(tpl => (
+              <div key={tpl.title}>
+                <p className="text-sm font-medium">{tpl.title}</p>
+                <p className="text-sm whitespace-pre-wrap mt-1 text-accanto-700">{tpl.content}</p>
                 <button
                   type="button"
                   className="btn-ghost mt-2"
-                  onClick={() => { setPrefill(t.content); setShowForm(true); }}
-                >Usa come base</button>
+                  onClick={() => { setPrefill(tpl.content); setShowForm(true); }}
+                >{t('sharedUpdates.useAsBase')}</button>
               </div>
             ))}
           </div>
@@ -90,18 +97,18 @@ export default function SharedUpdatesPage() {
 
       {error && <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 mb-3">{error}</div>}
 
-      {items === null ? <p className="text-accanto-500">Caricamento…</p> :
-        items.length === 0 ? <p className="text-accanto-500">Ancora nessun aggiornamento.</p> :
+      {items === null ? <p className="text-accanto-500">{t('common.loading')}</p> :
+        items.length === 0 ? <p className="text-accanto-500">{t('sharedUpdates.empty')}</p> :
         <div className="space-y-3">
           {items.map(u => (
             <div key={u.id} className="card">
-              <p className="text-xs text-accanto-500">{AudienceLabel[u.audience]} • {new Date(u.createdAt).toLocaleString('it-IT')}</p>
+              <p className="text-xs text-accanto-500">{t(AUDIENCE_I18N_KEY[u.audience])} • {new Date(u.createdAt).toLocaleString(i18n.language)}</p>
               <p className="mt-2 whitespace-pre-wrap">{u.content}</p>
               <div className="mt-3 flex gap-2">
                 <button onClick={() => copy(u.content, u.id)} className="btn-ghost">
-                  {copied === u.id ? 'Copiato!' : 'Copia testo'}
+                  {copied === u.id ? t('sharedUpdates.copied') : t('sharedUpdates.copyText')}
                 </button>
-                <button onClick={() => del(u)} className="text-sm text-accanto-500 hover:text-red-700">Elimina</button>
+                <button onClick={() => del(u)} className="text-sm text-accanto-500 hover:text-red-700">{t('common.delete')}</button>
               </div>
             </div>
           ))}
@@ -112,6 +119,7 @@ export default function SharedUpdatesPage() {
 }
 
 function NewForm({ careCircleId, prefill, onCreated }: { careCircleId: string; prefill: string; onCreated: () => void }) {
+  const { t } = useTranslation();
   const [audience, setAudience] = useState<SharedUpdateAudience>('CloseFamily');
   const [content, setContent] = useState(prefill);
   const [busy, setBusy] = useState(false);
@@ -130,17 +138,17 @@ function NewForm({ careCircleId, prefill, onCreated }: { careCircleId: string; p
   return (
     <form onSubmit={submit} className="card mb-4 space-y-3">
       <div>
-        <label className="label">A chi è rivolto</label>
+        <label className="label">{t('sharedUpdates.audienceLabel')}</label>
         <select className="input" value={audience} onChange={(e) => setAudience(e.target.value as SharedUpdateAudience)}>
-          {AUDIENCES.map(a => <option key={a} value={a}>{AudienceLabel[a]}</option>)}
+          {AUDIENCES.map(a => <option key={a} value={a}>{t(AUDIENCE_I18N_KEY[a])}</option>)}
         </select>
       </div>
       <div>
-        <label className="label">Messaggio</label>
+        <label className="label">{t('sharedUpdates.messageLabel')}</label>
         <textarea className="input min-h-[140px]" required value={content} onChange={(e) => setContent(e.target.value)} />
       </div>
       {error && <div className="text-sm text-red-700">{error}</div>}
-      <button className="btn-primary" disabled={busy}>{busy ? 'Salvataggio…' : 'Salva aggiornamento'}</button>
+      <button className="btn-primary" disabled={busy}>{busy ? t('common.saving') : t('sharedUpdates.save')}</button>
     </form>
   );
 }
