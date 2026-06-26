@@ -259,3 +259,13 @@ volumes:
   ollama-data:
   seq-data:
   clamav-data:
+
+# La network di default e' nominata `edge` (sostituisce `accanto_default`)
+# cosi' altri stack docker-compose sul server possono attaccarcisi via
+# `networks: { edge: { external: true, name: edge } }` e farsi raggiungere
+# da Caddy come reverse-proxy condiviso.
+# Vedi deploy/sites.d/README.md per il workflow di un sito satellite.
+networks:
+  default:
+    name: edge
+
