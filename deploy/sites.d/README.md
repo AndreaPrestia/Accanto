@@ -100,10 +100,13 @@ curl -fsSI https://esempio.it/ | head -1      # 308 -> esempio.com
 
 | Errore | Causa probabile / fix |
 |---|---|
-| `no such network: edge` | Lo stack Accanto non è ancora stato avviato con la nuova config network. Esegui `docker compose up -d` nel repo Accanto prima di avviare i siti satellite. |
+| `no such network: edge` | Lo stack Accanto non è ancora stato avviato con la nuova config network. Esegui `docker compose up -d` nel repo Accanto prima di avviare i siti satellite. Se la network esisteva con altro nome, serve `down && up` (non basta `up -d`) per il rename. |
 | Caddy: `dial tcp: lookup <sito>` | Il container del sito non è `up` o non è sulla network `edge`. Verifica `docker network inspect edge` e `docker compose ps`. |
-| Cert ACME fallisce | DNS non ancora propagato (`dig +short <dominio>`) o porta 80 non raggiungibile dall'esterno. Logs: `docker compose logs caddy --tail 200`. |
+| Caddy: `connection refused` verso l'upstream | Hai `reverse_proxy <sito>:80` ma l'app ascolta su un'altra porta. Le immagini nginx-alpine non-root spesso ascoltano su **8080** anche se `EXPOSE 80`. Verifica con `docker exec <sito> ss -tlnp` (o `netstat -tlnp`) e correggi sia `expose:` nel compose del sito sia `reverse_proxy <sito>:<porta>` nel file Caddy. |
+| Cert ACME fallisce | DNS non ancora propagato (`dig +short <dominio>`, prova anche `dig @1.1.1.1`) o porta 80 non raggiungibile dall'esterno. Non ricaricare Caddy ripetutamente prima della propagazione: Let's Encrypt limita a 5 fallimenti/ora per hostname. Logs: `docker compose logs caddy --tail 200`. |
+| Warning `no OCSP server specified` nei log | Atteso: da maggio 2025 Let's Encrypt non include più l'URL OCSP nei cert. Caddy logga `warn` ma non è un errore. |
 | Cambio config Caddy non visibile | Hai modificato solo il file in `sites.d/` ma non hai ricaricato. Il `reload` rilegge anche gli `import`. |
+| Browser mostra il vecchio sito dopo cambio DNS | Cache lato client. `ipconfig /flushdns` (Win) o `sudo dscacheutil -flushcache` (macOS), poi finestra incognito. Se il vecchio sito aveva una PWA con Service Worker, DevTools → Application → Service Workers → Unregister + Clear site data. |
 
 ## Note di sicurezza
 
