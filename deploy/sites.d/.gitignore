@@ -1,0 +1,5 @@
+# Niente file di config concreti dei siti satellite qui dentro:
+# vivono solo sul server in /opt/accanto/sites.d/*.caddy (oppure nel
+# repo privato del singolo sito). Vedi README.md per il workflow.
+*.caddy
+*.caddy.example

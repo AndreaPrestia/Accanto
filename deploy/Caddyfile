@@ -166,3 +166,11 @@
 		reverse_proxy backend:8080
 	}
 }
+# --- Siti aggiuntivi (multi-tenant edge) ---
+# Carica eventuali blocchi-sito esterni montati in /etc/caddy/sites.d/.
+# I file *.caddy in quella cartella vengono inclusi cosi' come sono: ogni
+# file puo' dichiarare uno o piu' siti per domini diversi.
+# Gli snippet definiti sopra (security_headers) restano disponibili anche
+# nei file importati. Glob: `*` non matcha dotfiles, quindi vim/editor
+# swap-files non vengono caricati.
+import /etc/caddy/sites.d/*.caddy

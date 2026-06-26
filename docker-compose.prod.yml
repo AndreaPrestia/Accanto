@@ -102,6 +102,12 @@ services:
       ACCANTO_TLS_EMAIL: ${ACCANTO_TLS_EMAIL:?ACCANTO_TLS_EMAIL richiesto per Let's Encrypt}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Siti aggiuntivi ospitati sullo stesso edge Caddy. Ogni file *.caddy
+      # in /opt/accanto/sites.d viene incluso dal Caddyfile principale via
+      # `import /etc/caddy/sites.d/*.caddy`. Sul server: `mkdir -p
+      # /opt/accanto/sites.d` e ci copi i file dei singoli siti. Se la
+      # cartella e' vuota, l'import e' un no-op. Vedi deploy/sites.d/README.md.
+      - /opt/accanto/sites.d:/etc/caddy/sites.d:ro
       - caddy-data:/data
       - caddy-config:/config
 
