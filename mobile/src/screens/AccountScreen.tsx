@@ -71,6 +71,14 @@ export default function AccountScreen() {
       <View className="gap-3">
         <AccordionSection title={t('account.groups.profile')} defaultOpen>
           <LanguageSection />
+          <View className="gap-1">
+            <Text className="text-base font-semibold text-accanto-900">
+              {t('account.textScale.title')}
+            </Text>
+            <Text className="text-sm text-accanto-500">
+              {t('account.textScale.mobileHint')}
+            </Text>
+          </View>
           <ChangePasswordSection />
         </AccordionSection>
 

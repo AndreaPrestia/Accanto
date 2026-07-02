@@ -83,6 +83,12 @@
     "languageSectionTitle": "Lingua",
     "languageSectionHint": "L'app userà questa lingua sui tuoi dispositivi.",
     "languageSaved": "Lingua aggiornata.",
+    "textScale": {
+      "title": "Dimensione del testo",
+      "toggle": "Testo più grande",
+      "hint": "Aumenta la dimensione del testo per una lettura più comoda.",
+      "mobileHint": "Per cambiare la dimensione del testo usa le impostazioni del tuo dispositivo. Accanto rispetta la tua scelta."
+    },
     "deleteTitle": "Elimina account",
     "deleteDescription": "L'eliminazione rimuove definitivamente il tuo profilo e tutti i cerchi di cui sei l'unico membro, insieme a diario, documenti, domande e aggiornamenti collegati. Se condividi un cerchio con altre persone, devi prima farli uscire o uscire tu stesso.",
     "deleteConfirmLabel": "Conferma con la password",

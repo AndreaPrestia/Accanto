@@ -83,6 +83,12 @@
     "languageSectionTitle": "Idioma",
     "languageSectionHint": "La aplicación usará este idioma en tus dispositivos.",
     "languageSaved": "Idioma actualizado.",
+    "textScale": {
+      "title": "Tamaño del texto",
+      "toggle": "Texto más grande",
+      "hint": "Aumenta el tamaño del texto para una lectura más cómoda.",
+      "mobileHint": "Para cambiar el tamaño del texto usa los ajustes de tu dispositivo. Accanto respeta tu elección."
+    },
     "deleteTitle": "Eliminar cuenta",
     "deleteDescription": "La eliminación borra de forma definitiva tu perfil y todos los círculos en los que eres el único miembro, junto con el diario, los documentos, las preguntas y las novedades vinculadas. Si compartes un círculo con otras personas, primero debes hacer que salgan o salir tú.",
     "deleteConfirmLabel": "Confirma con tu contraseña",

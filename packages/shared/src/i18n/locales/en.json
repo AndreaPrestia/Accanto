@@ -83,6 +83,12 @@
     "languageSectionTitle": "Language",
     "languageSectionHint": "The app will use this language on your devices.",
     "languageSaved": "Language updated.",
+    "textScale": {
+      "title": "Text size",
+      "toggle": "Larger text",
+      "hint": "Increase text size for easier reading.",
+      "mobileHint": "To change text size use your device settings. Accanto respects your choice."
+    },
     "deleteTitle": "Delete account",
     "deleteDescription": "Deletion permanently removes your profile and any circles where you are the only member, along with the related journal, documents, questions and updates. If you share a circle with other people, you must first have them leave or leave the circle yourself.",
     "deleteConfirmLabel": "Confirm with your password",

@@ -11,6 +11,7 @@ import TwoFactorSection from '../components/TwoFactorSection';
 import SecurityAuditSection from '../components/SecurityAuditSection';
 import WellbeingSection from '../components/WellbeingSection';
 import AccordionSection from '../components/AccordionSection';
+import { isLargeText, setLargeText } from '../lib/textScale';
 import type { TwoFactorStatus } from '@accanto/shared/types';
 
 // Anchor id → gruppo accordion da aprire quando l'URL contiene quell'hash.
@@ -46,6 +47,14 @@ export default function AccountPage() {
   // Esportazione dati
   const [exportError, setExportError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+
+  // Accessibility: toggle "Testo più grande". Init dalla preferenza
+  // localStorage; toggle immediato (applica la class sul <html>).
+  const [largeText, setLargeTextState] = useState<boolean>(() => isLargeText());
+  const onToggleLargeText = (next: boolean) => {
+    setLargeTextState(next);
+    setLargeText(next);
+  };
 
   // Hint numerico su "Sicurezza": count di suggerimenti attivi. Per ora: 1 se
   // 2FA disattivata, 0 altrimenti. Errore silenzioso (il hint non è critico).
@@ -176,6 +185,20 @@ export default function AccountPage() {
           <h2 className="text-base font-semibold text-accanto-900">{t('account.languageSectionTitle')}</h2>
           <p className="text-sm text-accanto-500">{t('account.languageSectionHint')}</p>
           <LanguageSwitcher />
+        </section>
+
+        <section className="space-y-2">
+          <h2 className="text-base font-semibold text-accanto-900">{t('account.textScale.title')}</h2>
+          <p className="text-sm text-accanto-500">{t('account.textScale.hint')}</p>
+          <label className="inline-flex items-center gap-2 text-sm text-accanto-700 select-none cursor-pointer">
+            <input
+              type="checkbox"
+              checked={largeText}
+              onChange={(e) => onToggleLargeText(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span>{t('account.textScale.toggle')}</span>
+          </label>
         </section>
 
         <section className="space-y-3">
