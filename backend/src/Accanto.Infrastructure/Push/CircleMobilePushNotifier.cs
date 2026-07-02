@@ -120,7 +120,11 @@ public class CircleMobilePushNotifier : ICircleMobilePushNotifier
                 await tokenService.RemoveInvalidTokensAsync(invalid, cancellationToken);
             }
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Errore invio push di test a utente {User}", userId);
+        }
+        catch (DbUpdateException ex)
         {
             _logger.LogWarning(ex, "Errore invio push di test a utente {User}", userId);
         }
