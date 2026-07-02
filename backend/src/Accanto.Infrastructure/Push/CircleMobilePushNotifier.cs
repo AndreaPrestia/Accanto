@@ -85,7 +85,7 @@ public class CircleMobilePushNotifier : ICircleMobilePushNotifier
 
             await SendToUsersAsync(db, tokenService, new[] { userId }, topic, title, body, data, cancellationToken);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger.LogWarning(ex, "Errore invio push a utente {User} topic {Topic}", userId, topic);
         }
