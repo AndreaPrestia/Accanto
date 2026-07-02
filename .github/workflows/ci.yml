@@ -104,17 +104,22 @@ jobs:
         run: docker compose up -d --build
 
       - name: Attendi che backend e frontend rispondano
+        env:
+          # Serve anche qui: il fallback esegue `docker compose logs` che re-interpola compose.yml.
+          Encryption__MasterKey: ${{ secrets.E2E_ENCRYPTION_KEY || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }}
         run: |
-          for i in $(seq 1 60); do
+          for i in $(seq 1 120); do
             if curl -sf http://localhost:8080/health > /dev/null && curl -sf http://localhost:5173/ > /dev/null; then
-              echo "Stack pronto."
+              echo "Stack pronto dopo $((i*2))s."
               exit 0
             fi
             sleep 2
           done
-          echo "Stack non pronto in tempo." >&2
-          docker compose logs --tail=80 backend
-          docker compose logs --tail=40 frontend
+          echo "Stack non pronto in tempo (240s)." >&2
+          docker compose ps
+          docker compose logs --tail=200 backend
+          docker compose logs --tail=80 frontend
+          docker compose logs --tail=40 db
           exit 1
 
       - name: Install frontend deps
@@ -149,6 +154,9 @@ jobs:
 
       - name: Dump container logs on failure
         if: failure()
+        env:
+          # Serve anche qui per la stessa ragione (docker compose logs re-interpola).
+          Encryption__MasterKey: ${{ secrets.E2E_ENCRYPTION_KEY || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }}
         run: |
           docker compose ps
           docker compose logs --tail=200 backend
