@@ -140,7 +140,8 @@ public class ExpoPushClient : IExpoPushClient
     private static async Task<string> SafeReadBody(HttpResponseMessage response, CancellationToken ct)
     {
         try { return await response.Content.ReadAsStringAsync(ct); }
-        catch { return string.Empty; }
+        catch (HttpRequestException) { return string.Empty; }
+        catch (ObjectDisposedException) { return string.Empty; }
     }
 
     // Codici Expo che indicano "token non più valido" → vanno rimossi dal DB.
