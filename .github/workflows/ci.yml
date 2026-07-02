@@ -109,7 +109,7 @@ jobs:
           Encryption__MasterKey: ${{ secrets.E2E_ENCRYPTION_KEY || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }}
         run: |
           for i in $(seq 1 120); do
-            if curl -sf http://localhost:8080/health > /dev/null && curl -sf http://localhost:5173/ > /dev/null; then
+            if curl -sf http://localhost:8088/health > /dev/null && curl -sf http://localhost:5173/ > /dev/null; then
               echo "Stack pronto dopo $((i*2))s."
               exit 0
             fi
