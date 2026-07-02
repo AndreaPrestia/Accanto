@@ -21,8 +21,13 @@ test('il caregiver salva un check-in di benessere e lo ritrova nello storico', a
   // Success message
   await expect(page.getByText(/check-in salvato/i)).toBeVisible();
 
-  // Expand history and confirm the note we just saved is shown
-  const details = page.locator('details').first();
+  // Expand history and confirm the note we just saved is shown.
+  // (AccountPage ora ha piu' <details> — gli accordion di sezione — quindi
+  // non basta first(): filtriamo per il summary "Storico (N)".)
+  const details = page
+    .locator('details')
+    .filter({ has: page.locator('summary', { hasText: /^Storico/i }) })
+    .first();
   if (!(await details.evaluate((el: HTMLDetailsElement) => el.open))) {
     await details.locator('summary').click();
   }
