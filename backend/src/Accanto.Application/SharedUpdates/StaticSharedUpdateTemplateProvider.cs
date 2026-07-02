@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 
 namespace Accanto.Application.SharedUpdates;
 
@@ -132,9 +133,10 @@ public class StaticSharedUpdateTemplateProvider : ISharedUpdateTemplateProvider
         string? bestLang = null;
         double bestQ = double.NegativeInfinity;
 
-        foreach (var raw in acceptLanguage.Split(',', StringSplitOptions.RemoveEmptyEntries))
+        foreach (var parts in acceptLanguage
+                     .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                     .Select(raw => raw.Split(';')))
         {
-            var parts = raw.Split(';');
             var tag = parts[0].Trim();
             if (string.IsNullOrEmpty(tag) || tag == "*") continue;
 
