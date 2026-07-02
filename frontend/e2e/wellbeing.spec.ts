@@ -5,7 +5,8 @@ test('il caregiver salva un check-in di benessere e lo ritrova nello storico', a
   const user = newUser('wellbeing');
   await registerViaUi(page, user);
 
-  await page.goto('/account');
+  // Deep-link apre l'accordion "Benessere" (default collapsed).
+  await page.goto('/account#section-wellbeing');
 
   // Pick value 4 on each scale (Umore / Energia / Stress).
   // Each scale is a fieldset with a legend; scope the "4" button to that fieldset.

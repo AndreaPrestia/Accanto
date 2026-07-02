@@ -22,7 +22,8 @@ test('crea un cerchio e aggiunge una voce di diario', async ({ page }) => {
   // Cerchio appena creato → la home mostra la checklist di onboarding, non
   // le 5 card. Il primo item della checklist porta al form nuova voce.
   await page.getByRole('link', { name: /scrivi la prima voce/i }).click();
-  await expect(page.getByRole('heading', { name: 'Diario' })).toBeVisible();
+  // { exact: true } evita di collidere con l'H3 "Riassumi il diario" della card AI.
+  await expect(page.getByRole('heading', { name: 'Diario', exact: true })).toBeVisible();
 
   // La checklist naviga alla Timeline con ?new=1: il form è già aperto,
   // non serve cliccare "+ Nuova voce" (farebbe da toggle e lo chiuderebbe).
