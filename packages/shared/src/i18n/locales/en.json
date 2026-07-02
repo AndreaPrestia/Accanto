@@ -16,7 +16,8 @@
     "confirm": "Confirm",
     "loading": "Loading…",
     "saving": "Saving…",
-    "language": "Language"
+    "language": "Language",
+    "back": "Back"
   },
   "auth": {
     "loginTitle": "Welcome back",
@@ -344,7 +345,38 @@
       "input": "Input",
       "output": "Response",
       "circleSection": "Circle AI",
-      "circleSectionHint": "As owner you can review all AI interactions linked to this circle (members' personal reflections are excluded)."
+      "circleSectionHint": "As owner you can review all AI interactions linked to this circle (members' personal reflections are excluded).",
+      "circleFilter": {
+        "label": "Circle",
+        "all": "All circles",
+        "hint": "Filter AI interactions by a specific circle."
+      }
+    }
+  },
+  "circle": {
+    "chips": {
+      "audit": "Activity log",
+      "ai": "Circle AI"
+    },
+    "emptyState": {
+      "title": "Start here",
+      "subtitle": "Three small steps to bring the circle to life.",
+      "item1": {
+        "title": "Add the first entry",
+        "body": "An appointment, a symptom, a decision.",
+        "cta": "Write the first entry"
+      },
+      "item2": {
+        "title": "Upload a document",
+        "body": "A report, a prescription, a form.",
+        "cta": "Go to documents"
+      },
+      "item3": {
+        "title": "Invite a family member",
+        "body": "Add someone who helps to the circle.",
+        "cta": "Invite",
+        "hintOwnerOnly": "Only the owner can invite."
+      }
     }
   },
   "sharedUpdates": {

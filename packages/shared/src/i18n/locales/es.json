@@ -16,7 +16,8 @@
     "confirm": "Confirmar",
     "loading": "Cargando…",
     "saving": "Guardando…",
-    "language": "Idioma"
+    "language": "Idioma",
+    "back": "Atrás"
   },
   "auth": {
     "loginTitle": "Bienvenido de nuevo",
@@ -344,7 +345,38 @@
       "input": "Entrada",
       "output": "Respuesta",
       "circleSection": "IA del círculo",
-      "circleSectionHint": "Como propietario puedes revisar todas las interacciones IA de este círculo (excluidas las reflexiones personales de los miembros)."
+      "circleSectionHint": "Como owner puedes consultar todas las interacciones IA sobre este círculo (excluidas las reflexiones personales de los miembros).",
+      "circleFilter": {
+        "label": "Círculo",
+        "all": "Todos los círculos",
+        "hint": "Filtra las interacciones IA por un círculo específico."
+      }
+    }
+  },
+  "circle": {
+    "chips": {
+      "audit": "Registro de actividad",
+      "ai": "IA del círculo"
+    },
+    "emptyState": {
+      "title": "Empieza por aquí",
+      "subtitle": "Tres pequeños pasos para dar vida al círculo.",
+      "item1": {
+        "title": "Añade la primera entrada",
+        "body": "Una cita, un síntoma, una decisión.",
+        "cta": "Escribir la primera entrada"
+      },
+      "item2": {
+        "title": "Sube un documento",
+        "body": "Un informe, una receta, un formulario.",
+        "cta": "Ir a documentos"
+      },
+      "item3": {
+        "title": "Invita a un familiar",
+        "body": "Añade a alguien que ayuda al círculo.",
+        "cta": "Invitar",
+        "hintOwnerOnly": "Solo el owner puede invitar."
+      }
     }
   },
   "sharedUpdates": {

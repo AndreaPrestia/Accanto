@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -10,6 +10,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import Screen from '../components/ui/Screen';
 import ErrorBanner from '../components/ui/ErrorBanner';
+import SelectField from '../components/ui/SelectField';
 import { useOptionalCircleId } from '../navigation/CircleContext';
 import {
   listAiInteractions,
@@ -17,7 +18,8 @@ import {
   type AiInteractionDetail,
   type AiInteractionSummary
 } from '../api/ai';
-import { extractError } from '../api/client';
+import { api, extractError } from '../api/client';
+import type { CareCircle } from '@accanto/shared/types';
 
 const PAGE_SIZE = 20;
 
@@ -25,11 +27,22 @@ const PAGE_SIZE = 20;
  * Storico interazioni AI: lista paginata + modale di dettaglio con input/output
  * grezzi. Quando lo screen è montato sotto CircleStack legge il circleId dal
  * contesto e filtra automaticamente; dal drawer globale mostra tutte le
- * interazioni dell'utente.
+ * interazioni dell'utente e propone un dropdown per filtrare su un cerchio
+ * specifico (unifica il vecchio link "AI del cerchio").
  */
 export default function AiHistoryScreen() {
-  const circleId = useOptionalCircleId() ?? undefined;
+  const contextCircleId = useOptionalCircleId() ?? undefined;
   const { t, i18n } = useTranslation();
+
+  // Se veniamo montati sotto CircleStack (`AiHistoryCircle`), il context fissa
+  // il filtro; altrimenti l'utente sceglie da dropdown. `selectedCircleId` ha
+  // '' quando si vogliono TUTTE le interazioni.
+  const [selectedCircleId, setSelectedCircleId] = useState<string>(
+    contextCircleId ?? ''
+  );
+  const activeCircleId = contextCircleId ?? selectedCircleId ?? '';
+
+  const [myCircles, setMyCircles] = useState<CareCircle[]>([]);
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<AiInteractionSummary[]>([]);
   const [total, setTotal] = useState(0);
@@ -38,11 +51,39 @@ export default function AiHistoryScreen() {
   const [selected, setSelected] = useState<AiInteractionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
+  // Cerchi dell'utente per popolare il dropdown filtro. Se contextCircleId
+  // è già impostato dal CircleStack non serve caricare la lista (il filtro
+  // è forzato).
+  useEffect(() => {
+    if (contextCircleId) return;
+    let cancelled = false;
+    api
+      .get<CareCircle[]>('/care-circles')
+      .then((r) => {
+        if (!cancelled) setMyCircles(r.data);
+      })
+      .catch(() => {
+        /* silenzioso: dropdown mostra solo "Tutti" */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [contextCircleId]);
+
+  const circleOptions = useMemo(
+    () => myCircles.map((c) => ({ value: c.id, label: c.name })),
+    [myCircles]
+  );
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    listAiInteractions({ circleId, page, pageSize: PAGE_SIZE })
+    listAiInteractions({
+      circleId: activeCircleId || undefined,
+      page,
+      pageSize: PAGE_SIZE
+    })
       .then((r) => {
         if (cancelled) return;
         setItems(r.items);
@@ -57,7 +98,13 @@ export default function AiHistoryScreen() {
     return () => {
       cancelled = true;
     };
-  }, [circleId, page]);
+  }, [activeCircleId, page]);
+
+  // Cambiando cerchio nel dropdown ripartiamo dalla pagina 1.
+  const onSelectCircle = (v: string) => {
+    setSelectedCircleId(v);
+    setPage(1);
+  };
 
   const open = async (id: string) => {
     setDetailLoading(true);
@@ -89,11 +136,30 @@ export default function AiHistoryScreen() {
       <Text className="text-accanto-500 mb-4">
         {t('ai.history.subtitle')}
       </Text>
-      {circleId ? (
+
+      {/* Dropdown filtro cerchio: nascosto se lo screen è montato sotto
+          CircleStack (contextCircleId presente), il filtro è già forzato. */}
+      {!contextCircleId ? (
+        <View className="mb-3">
+          <SelectField
+            label={t('ai.history.circleFilter.label')}
+            value={selectedCircleId}
+            onChange={(v) => onSelectCircle(v as string)}
+            options={circleOptions}
+            emptyLabel={t('ai.history.circleFilter.all')}
+          />
+        </View>
+      ) : null}
+
+      {activeCircleId ? (
         <Text className="text-xs text-accanto-500 mb-3">
           {t('ai.history.circleSectionHint') as string}
         </Text>
-      ) : null}
+      ) : (
+        <Text className="text-xs text-accanto-500 mb-3">
+          {t('ai.history.circleFilter.hint') as string}
+        </Text>
+      )}
 
       <ErrorBanner message={error} />
 

@@ -19,12 +19,13 @@ test('crea un cerchio e aggiunge una voce di diario', async ({ page }) => {
   await expect(page).toHaveURL(/\/care-circles\/[0-9a-f-]+$/);
   await expect(page.getByRole('heading', { name: 'Mamma' })).toBeVisible();
 
-  // Vai al diario
-  await page.getByRole('link', { name: /^Diario$/ }).click();
+  // Cerchio appena creato → la home mostra la checklist di onboarding, non
+  // le 5 card. Il primo item della checklist porta al form nuova voce.
+  await page.getByRole('link', { name: /scrivi la prima voce/i }).click();
   await expect(page.getByRole('heading', { name: 'Diario' })).toBeVisible();
 
-  // Apri il form nuova voce
-  await page.getByRole('button', { name: /\+ nuova voce/i }).click();
+  // La checklist naviga alla Timeline con ?new=1: il form è già aperto,
+  // non serve cliccare "+ Nuova voce" (farebbe da toggle e lo chiuderebbe).
 
   // I campi non hanno htmlFor; li seleziono per attributo.
   // Titolo: primo input testuale all'interno del form della card
