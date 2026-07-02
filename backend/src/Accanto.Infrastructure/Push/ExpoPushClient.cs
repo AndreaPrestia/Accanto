@@ -111,7 +111,7 @@ public class ExpoPushClient : IExpoPushClient
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is JsonException or NotSupportedException or HttpRequestException or TaskCanceledException or OperationCanceledException)
             {
                 _logger.LogWarning(ex, "Expo push: parsing response fallito");
             }
