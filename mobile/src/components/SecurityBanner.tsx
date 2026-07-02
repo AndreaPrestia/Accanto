@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,6 +15,10 @@ import type { AppDrawerParamList } from '../navigation/types';
  *  - non ha dismesso il banner negli ultimi 30 giorni (persistenza AsyncStorage).
  *
  * Il pulsante "Attiva ora" apre lo screen `Account` del drawer.
+ *
+ * Usa `useFocusEffect` invece di `useEffect` così, quando l'utente attiva
+ * 2FA in Account e torna alla Dashboard, il banner rifà la fetch e sparisce
+ * senza aspettare un remount (React Navigation caching mantiene lo screen).
  */
 const DISMISS_KEY = 'accanto.securityBanner.dismissedAt';
 const DISMISS_WINDOW_MS = 30 * 24 * 60 * 60 * 1000; // 30 giorni
@@ -26,30 +30,31 @@ export default function SecurityBanner() {
   const navigation = useNavigation<Nav>();
   const [show, setShow] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const raw = await AsyncStorage.getItem(DISMISS_KEY);
-        if (raw) {
-          const ts = Number(raw);
-          if (Number.isFinite(ts) && Date.now() - ts < DISMISS_WINDOW_MS) {
-            return;
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          const raw = await AsyncStorage.getItem(DISMISS_KEY);
+          if (raw) {
+            const ts = Number(raw);
+            if (Number.isFinite(ts) && Date.now() - ts < DISMISS_WINDOW_MS) {
+              if (!cancelled) setShow(false);
+              return;
+            }
           }
+          const { data } = await api.get<TwoFactorStatus>('/account/2fa');
+          if (!cancelled) setShow(!data.enabled);
+        } catch {
+          // Silenzioso: se AsyncStorage o l'endpoint falliscono, non
+          // aggiungiamo rumore extra sulla Dashboard.
         }
-        const { data } = await api.get<TwoFactorStatus>('/account/2fa');
-        if (!cancelled && !data.enabled) {
-          setShow(true);
-        }
-      } catch {
-        // Silenzioso: se AsyncStorage o l'endpoint falliscono, non aggiungiamo
-        // rumore extra sulla Dashboard.
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [])
+  );
 
   if (!show) return null;
 

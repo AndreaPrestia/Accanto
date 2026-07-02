@@ -23,9 +23,14 @@ public sealed class RequireTwoFactorForOwnersMiddleware
 {
     // Path che restano accessibili anche con 2FA-required scaduto. Match per
     // prefisso, case-insensitive. Tenere il minimo indispensabile.
+    //
+    // NB: sia il path esatto (`/api/account/2fa` per la GET dello status)
+    // sia il subtree (`/api/account/2fa/setup`, `/enable`, `/disable`, ecc.)
+    // devono essere in bypass; altrimenti l'Owner scaduto non pu\u00f2 nemmeno
+    // leggere lo stato per uscire dal blocco (deadlock UI).
     private static readonly string[] BypassPrefixes =
     {
-        "/api/account/2fa/",      // setup, enable, disable, status, recovery codes
+        "/api/account/2fa",       // stato (GET) + tutti i sub-path (setup, enable, ...)
         "/api/account/me",        // serve per leggere lo stato e fare logout dal frontend
         "/api/auth/logout",
         "/api/auth/refresh",
@@ -146,8 +151,8 @@ public sealed class RequireTwoFactorForOwnersMiddleware
         var pd = new ProblemDetails
         {
             Status = StatusCodes.Status403Forbidden,
-            Title = "Autenticazione a due fattori obbligatoria.",
-            Detail = $"In quanto Owner di almeno un care circle devi configurare 2FA. " +
+            Title = "Verifica in due passaggi obbligatoria.",
+            Detail = $"In quanto Owner di almeno un care circle devi attivare la verifica in due passaggi. " +
                      $"Grace scaduta il {deadline:o}. Visita /account/security/2fa per attivarla.",
             Type = "https://accanto.care/errors/two-factor-required"
         };

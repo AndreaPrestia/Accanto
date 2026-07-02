@@ -33,19 +33,35 @@ export default function SecurityBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (isRecentlyDismissed()) return;
     let cancelled = false;
-    api
-      .get<TwoFactorStatus>('/account/2fa')
-      .then((r) => {
-        if (!cancelled && !r.data.enabled) setShow(true);
-      })
-      .catch(() => {
+
+    const refresh = async () => {
+      if (isRecentlyDismissed()) {
+        if (!cancelled) setShow(false);
+        return;
+      }
+      try {
+        const r = await api.get<TwoFactorStatus>('/account/2fa');
+        if (!cancelled) setShow(!r.data.enabled);
+      } catch {
         // Silenzioso: se la chiamata fallisce (offline, 401, rate limit) non
         // vogliamo mostrare rumore extra sulla Dashboard.
-      });
+      }
+    };
+
+    refresh();
+
+    // Se l'utente attiva/disattiva 2FA in un'altra tab, o torna sulla tab
+    // Dashboard dopo aver cambiato lo stato altrove, riprendiamo lo stato
+    // aggiornato senza aspettare un remount.
+    const onFocus = () => refresh();
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+
     return () => {
       cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
     };
   }, []);
 
