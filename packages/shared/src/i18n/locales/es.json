@@ -80,7 +80,7 @@
     "exportHint": "Descarga un archivo ZIP con tu perfil, las entradas del diario, los documentos cargados, las preguntas, las actualizaciones, el registro y las preferencias.",
     "exportCta": "Descargar archivo",
     "exportPreparing": "Preparando…",
-    "sessionsTitle": "Sesiones activas",
+    "sessionsTitle": "Dispositivos conectados",
     "sessionsHint": "Dispositivos y navegadores conectados a tu cuenta. Revoca los que no reconozcas.",
     "sessionsEmpty": "No hay otras sesiones activas.",
     "sessionsCurrent": "Esta sesión",
@@ -90,10 +90,10 @@
     "sessionsRevoking": "Revocando…",
     "sessionsLoadError": "No se pudieron cargar las sesiones.",
     "sessionsUnknownDevice": "Dispositivo desconocido",
-    "twoFactorTitle": "Autenticación de dos factores",
+    "twoFactorTitle": "Verificación en dos pasos",
     "twoFactorHint": "Añade una protección extra a tu cuenta con una app autenticadora (p. ej. Google Authenticator, Aegis, 1Password).",
     "twoFactorDisabled": "Actualmente desactivada.",
-    "twoFactorEnabled": "Autenticación de dos factores activa.",
+    "twoFactorEnabled": "Verificación en dos pasos activa.",
     "twoFactorRecoveryRemaining_one": "Queda {{count}} código de recuperación",
     "twoFactorRecoveryRemaining_other": "Quedan {{count}} códigos de recuperación",
     "twoFactorEnableCta": "Activar 2FA",
@@ -155,6 +155,40 @@
       "supportLink": "¿Necesitas hablar con alguien? Encuentra apoyo",
       "selfCareLink": "Cuidándote"
     }
+  },
+  "welcome": {
+    "title": "Te damos la bienvenida",
+    "subtitle": "Tres pasos rápidos para conocer Accanto. Puedes saltar cuando quieras.",
+    "skipCta": "Saltar",
+    "nextCta": "Siguiente",
+    "backCta": "Atrás",
+    "step": "Paso {{current}} de {{total}}",
+    "step1": {
+      "title": "Un círculo para quien cuidas",
+      "body": "Cada persona a la que atiendes tiene su propio círculo: información, documentos y quien ayuda, en un solo lugar."
+    },
+    "step2": {
+      "title": "Diario compartido",
+      "body": "Una entrada a la vez. Síntomas, citas, decisiones: en orden y fáciles de encontrar cuando importa."
+    },
+    "step3": {
+      "title": "Invita a quien quieras",
+      "body": "Añade al círculo a familiares o amistades. Tú decides qué ve cada persona. También puedes empezar en solitario."
+    },
+    "ctaCreateFirstCircle": "Crear el primer círculo",
+    "namePrefill": "Círculo familiar"
+  },
+  "security": {
+    "banner": {
+      "title": "Protege tu cuenta",
+      "body": "Activa la verificación en dos pasos: aunque alguien acierte tu contraseña, no entrará.",
+      "cta": "Activar ahora",
+      "dismiss": "Ahora no"
+    }
+  },
+  "dashboard": {
+    "quickAddEntry": "+ Entrada",
+    "quickAddEntryAria": "Añadir una entrada al diario de {{name}}"
   },
   "selfCare": {
     "title": "Cuidándote",

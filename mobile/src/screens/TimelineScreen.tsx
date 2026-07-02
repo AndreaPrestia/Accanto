@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -6,7 +6,8 @@ import {
   Text,
   View
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Screen from '../components/ui/Screen';
 import Button from '../components/ui/Button';
@@ -25,6 +26,7 @@ import type {
   TimelineVisibility
 } from '@accanto/shared/types';
 import { TimelineTypeLabel, VisibilityLabel } from '@accanto/shared/types';
+import type { CircleTabParamList } from '../navigation/types';
 
 const TYPES: TimelineEntryType[] = [
   'MedicalUpdate',
@@ -40,6 +42,8 @@ const VIS: TimelineVisibility[] = ['Circle', 'Private'];
 
 export default function TimelineScreen() {
   const circleId = useCircleId();
+  const navigation = useNavigation();
+  const route = useRoute<RouteProp<CircleTabParamList, 'Timeline'>>();
 
   const [entries, setEntries] = useState<TimelineEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +57,17 @@ export default function TimelineScreen() {
   // Bulk select
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  // Deep-nav "quick action" dalla Dashboard: se il param openNew è true,
+  // apri subito il form "Nuova voce" e resetta il param per evitare che si
+  // riapra ad ogni tab switch/refocus.
+  useEffect(() => {
+    if (route.params?.openNew) {
+      setShowForm(true);
+      navigation.setParams({ openNew: undefined } as never);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.openNew]);
 
   const load = useCallback(async () => {
     setError(null);

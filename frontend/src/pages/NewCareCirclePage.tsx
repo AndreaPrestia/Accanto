@@ -1,11 +1,15 @@
 import { FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api, extractError } from '../api/client';
 import { CareCircle } from '../types';
 
 export default function NewCareCirclePage() {
   const nav = useNavigate();
-  const [name, setName] = useState('');
+  const [params] = useSearchParams();
+  // Pre-fill "name" arriva dal Welcome (o da futuri deep link). Sanifichiamo
+  // brutalmente lunghezza per non caricare pattern strani nell'input.
+  const initialName = (params.get('name') ?? '').slice(0, 80);
+  const [name, setName] = useState(initialName);
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

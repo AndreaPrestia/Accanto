@@ -10,8 +10,11 @@ import type { AppScreenProps } from '../navigation/types';
 
 type Props = AppScreenProps<'NewCircle'>;
 
-export default function NewCircleScreen({ navigation }: Props) {
-  const [name, setName] = useState('');
+export default function NewCircleScreen({ navigation, route }: Props) {
+  // Pre-fill "name" arriva dal Welcome finale (o da futuri deep link).
+  // Sanifichiamo brutalmente la lunghezza per non caricare pattern strani.
+  const initialName = (route.params?.name ?? '').slice(0, 80);
+  const [name, setName] = useState(initialName);
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

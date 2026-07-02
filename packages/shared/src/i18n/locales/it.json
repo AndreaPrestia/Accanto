@@ -80,7 +80,7 @@
     "exportHint": "Scarica un archivio ZIP con il tuo profilo, le voci di diario, i documenti caricati, le domande, gli aggiornamenti, l'audit e le preferenze.",
     "exportCta": "Scarica archivio",
     "exportPreparing": "Preparazione…",
-    "sessionsTitle": "Sessioni attive",
+    "sessionsTitle": "Dispositivi collegati",
     "sessionsHint": "Dispositivi e browser collegati al tuo account. Revoca quelli che non riconosci.",
     "sessionsEmpty": "Nessuna altra sessione attiva.",
     "sessionsCurrent": "Questa sessione",
@@ -90,10 +90,10 @@
     "sessionsRevoking": "Revoca…",
     "sessionsLoadError": "Impossibile caricare le sessioni.",
     "sessionsUnknownDevice": "Dispositivo sconosciuto",
-    "twoFactorTitle": "Autenticazione a due fattori",
+    "twoFactorTitle": "Verifica in due passaggi",
     "twoFactorHint": "Aggiungi una protezione extra al tuo account con un'app autenticatore (es. Google Authenticator, Aegis, 1Password).",
     "twoFactorDisabled": "Attualmente non attiva.",
-    "twoFactorEnabled": "Autenticazione a due fattori attiva.",
+    "twoFactorEnabled": "Verifica in due passaggi attiva.",
     "twoFactorRecoveryRemaining_one": "{{count}} codice di recupero rimasto",
     "twoFactorRecoveryRemaining_other": "{{count}} codici di recupero rimasti",
     "twoFactorEnableCta": "Attiva 2FA",
@@ -155,6 +155,40 @@
       "supportLink": "Hai bisogno di parlare con qualcuno? Trova supporto",
       "selfCareLink": "Cura di te"
     }
+  },
+  "welcome": {
+    "title": "Ti diamo il benvenuto",
+    "subtitle": "In tre passi capiremo come funziona Accanto. Puoi saltare quando vuoi.",
+    "skipCta": "Salta",
+    "nextCta": "Avanti",
+    "backCta": "Indietro",
+    "step": "Passo {{current}} di {{total}}",
+    "step1": {
+      "title": "Un cerchio per chi assisti",
+      "body": "Ogni persona di cui ti prendi cura ha il suo cerchio: informazioni, documenti e chi la aiuta, in un posto solo."
+    },
+    "step2": {
+      "title": "Diario condiviso",
+      "body": "Annota una cosa alla volta. Sintomi, appuntamenti, decisioni: tutto in ordine, ritrovabile quando serve."
+    },
+    "step3": {
+      "title": "Invita chi vuoi, quando vuoi",
+      "body": "Aggiungi al cerchio familiari o amici. Decidi tu cosa può vedere ognuno. Puoi cominciare anche da solo."
+    },
+    "ctaCreateFirstCircle": "Crea il primo cerchio",
+    "namePrefill": "Cerchio per la mia famiglia"
+  },
+  "security": {
+    "banner": {
+      "title": "Metti in sicurezza il tuo account",
+      "body": "Attiva la verifica in due passaggi: se qualcuno indovina la tua password, non entra comunque.",
+      "cta": "Attiva ora",
+      "dismiss": "Non ora"
+    }
+  },
+  "dashboard": {
+    "quickAddEntry": "+ Voce",
+    "quickAddEntryAria": "Aggiungi una voce al diario di {{name}}"
   },
   "selfCare": {
     "title": "Cura di te",

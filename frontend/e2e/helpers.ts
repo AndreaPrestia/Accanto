@@ -24,6 +24,17 @@ export function newUser(prefix = 'e2e'): TestUser {
 }
 
 export async function registerViaUi(page: Page, user: TestUser) {
+  // Marca il welcome come visto PRIMA di caricare la pagina, così dopo la
+  // registrazione atterriamo direttamente sulla dashboard (che è quello che
+  // i test si aspettano). Se qualche test in futuro vuole coprire il flow
+  // di welcome, chiami direttamente /welcome dopo register.
+  await page.addInitScript(() => {
+    try {
+      window.localStorage.setItem('accanto.hasSeenWelcome', '1');
+    } catch {
+      /* localStorage bloccato: pazienza, il test vedrà il welcome */
+    }
+  });
   await page.goto('/register');
   // The register form lacks htmlFor/id associations; select by input position/attributes.
   const inputs = page.locator('input.input');

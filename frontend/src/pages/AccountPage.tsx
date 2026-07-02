@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
@@ -15,6 +15,7 @@ export default function AccountPage() {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Cambio password
   const [currentPwd, setCurrentPwd] = useState('');
@@ -33,6 +34,21 @@ export default function AccountPage() {
   // Esportazione dati
   const [exportError, setExportError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+
+  // Deep link jump da SecurityBanner (Dashboard) → `/account#section-twofactor`.
+  // Scrolla la section dopo il primo render, con un piccolo delay per lasciare
+  // che il DOM sia stabile (Router monta prima, hash disponibile subito).
+  useEffect(() => {
+    if (!location.hash) return;
+    const id = location.hash.slice(1);
+    const el = document.getElementById(id);
+    if (!el) return;
+    // requestAnimationFrame per aspettare che i figli (form) abbiano preso
+    // le loro dimensioni finali; altrimenti lo scroll è off.
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [location.hash]);
 
   if (!user) return null;
 
@@ -189,7 +205,9 @@ export default function AccountPage() {
 
       <ActiveSessionsSection />
 
-      <TwoFactorSection />
+      <div id="section-twofactor" className="scroll-mt-16">
+        <TwoFactorSection />
+      </div>
 
       <SecurityAuditSection />
 

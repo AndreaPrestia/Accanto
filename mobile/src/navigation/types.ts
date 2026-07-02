@@ -17,7 +17,10 @@ export type AuthStackParamList = {
 // ---- CircleTabs (tab bar interno a una care circle) -----------------------
 export type CircleTabParamList = {
   CircleOverview: undefined;
-  Timeline: undefined;
+  // openNew: se true, TimelineScreen apre il form "Nuova voce" al mount
+  // (quick action dalla Dashboard). Il param viene resettato dallo screen
+  // stesso dopo la lettura per evitare riaperture al re-focus.
+  Timeline: { openNew?: boolean } | undefined;
   Documents: undefined;
   DoctorQuestions: undefined;
   SharedUpdates: undefined;
@@ -35,8 +38,18 @@ export type CircleStackParamList = {
 // flussi push come Circle / NewCircle / accettazione invito) ---------------
 export type MainStackParamList = {
   Dashboard: undefined;
-  NewCircle: undefined;
-  Circle: { circleId: string };
+  // Onboarding a 3 slide dopo la registrazione. Skippable.
+  Welcome: undefined;
+  // `name`: pre-fill del campo (arriva dal Welcome finale o da altri deep link).
+  NewCircle: { name?: string } | undefined;
+  // Circle apre CircleStack. `screen`/`params` opzionali permettono deep-nav
+  // dalla Dashboard (es. "+ Voce" → Timeline con openNew=true) senza dover
+  // passare per una landing intermedia.
+  Circle: {
+    circleId: string;
+    screen?: keyof CircleStackParamList;
+    params?: NavigatorScreenParams<CircleTabParamList>;
+  };
   InviteAccept: { token: string };
 };
 

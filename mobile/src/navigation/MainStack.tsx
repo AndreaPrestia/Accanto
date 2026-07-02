@@ -4,6 +4,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import NewCircleScreen from '../screens/NewCircleScreen';
 import CircleStack from './CircleStack';
 import InviteAcceptScreen from '../screens/InviteAcceptScreen';
+import WelcomeScreen from '../screens/WelcomeScreen';
 import MenuButton from './MenuButton';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -26,6 +27,11 @@ export default function MainStack() {
           title: 'Le mie care circle',
           headerLeft: () => <MenuButton />
         }}
+      />
+      <Stack.Screen
+        name="Welcome"
+        component={WelcomeScreen}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="NewCircle"

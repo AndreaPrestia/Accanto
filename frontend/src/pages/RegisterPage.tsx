@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import { extractError } from '../api/client';
+import { hasSeenWelcome } from './WelcomePage';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -23,7 +24,10 @@ export default function RegisterPage() {
     setBusy(true);
     try {
       await register({ email, displayName, password });
-      nav(returnTo, { replace: true });
+      // Se non c'è un `returnTo` esplicito (es. da un deep link invite) e
+      // l'utente non ha già visto il welcome, mandiamo prima al Welcome.
+      const shouldWelcome = returnTo === '/' && !hasSeenWelcome();
+      nav(shouldWelcome ? '/welcome' : returnTo, { replace: true });
     } catch (err) {
       setError(extractError(err));
     } finally {

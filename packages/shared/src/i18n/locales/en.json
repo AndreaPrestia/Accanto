@@ -80,7 +80,7 @@
     "exportHint": "Download a ZIP archive with your profile, journal entries, uploaded documents, questions, updates, audit log and preferences.",
     "exportCta": "Download archive",
     "exportPreparing": "Preparing…",
-    "sessionsTitle": "Active sessions",
+    "sessionsTitle": "Connected devices",
     "sessionsHint": "Devices and browsers signed in to your account. Revoke any you don't recognise.",
     "sessionsEmpty": "No other active sessions.",
     "sessionsCurrent": "This session",
@@ -90,10 +90,10 @@
     "sessionsRevoking": "Revoking…",
     "sessionsLoadError": "Couldn't load sessions.",
     "sessionsUnknownDevice": "Unknown device",
-    "twoFactorTitle": "Two-factor authentication",
+    "twoFactorTitle": "Two-step verification",
     "twoFactorHint": "Add an extra layer of protection with an authenticator app (e.g. Google Authenticator, Aegis, 1Password).",
     "twoFactorDisabled": "Currently disabled.",
-    "twoFactorEnabled": "Two-factor authentication is enabled.",
+    "twoFactorEnabled": "Two-step verification is enabled.",
     "twoFactorRecoveryRemaining_one": "{{count}} recovery code left",
     "twoFactorRecoveryRemaining_other": "{{count}} recovery codes left",
     "twoFactorEnableCta": "Enable 2FA",
@@ -155,6 +155,40 @@
       "supportLink": "Need to talk to someone? Find support",
       "selfCareLink": "Caring for yourself"
     }
+  },
+  "welcome": {
+    "title": "Welcome",
+    "subtitle": "Three quick steps to show how Accanto works. Skip anytime.",
+    "skipCta": "Skip",
+    "nextCta": "Next",
+    "backCta": "Back",
+    "step": "Step {{current}} of {{total}}",
+    "step1": {
+      "title": "A circle for who you care for",
+      "body": "Each person you look after has their own circle: information, documents, and the people helping\u2014all in one place."
+    },
+    "step2": {
+      "title": "Shared journal",
+      "body": "One entry at a time. Symptoms, appointments, decisions\u2014in order, easy to find when it matters."
+    },
+    "step3": {
+      "title": "Invite whoever you want",
+      "body": "Add family or friends to the circle. You decide what each person can see. You can also start on your own."
+    },
+    "ctaCreateFirstCircle": "Create your first circle",
+    "namePrefill": "Family circle"
+  },
+  "security": {
+    "banner": {
+      "title": "Secure your account",
+      "body": "Turn on two-step verification: even if someone guesses your password, they still can't sign in.",
+      "cta": "Turn on now",
+      "dismiss": "Not now"
+    }
+  },
+  "dashboard": {
+    "quickAddEntry": "+ Entry",
+    "quickAddEntryAria": "Add a journal entry to {{name}}"
   },
   "selfCare": {
     "title": "Caring for yourself",

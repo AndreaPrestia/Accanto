@@ -23,7 +23,7 @@ test('un caregiver può attivare la 2FA e poi accedere usando il codice TOTP', a
   await registerViaUi(setupPage, user);
 
   await setupPage.goto('/account');
-  await expect(setupPage.getByRole('heading', { name: /autenticazione a due fattori/i })).toBeVisible();
+  await expect(setupPage.getByRole('heading', { name: /verifica in due passaggi/i })).toBeVisible();
 
   // Start setup
   await setupPage.getByRole('button', { name: /attiva 2fa/i }).click();
@@ -42,7 +42,7 @@ test('un caregiver può attivare la 2FA e poi accedere usando il codice TOTP', a
 
   // Recovery codes block appears + status flips to "enabled".
   await expect(setupPage.getByText(/salva i codici di recupero/i)).toBeVisible();
-  await expect(setupPage.getByText(/autenticazione a due fattori attiva/i)).toBeVisible();
+  await expect(setupPage.getByText(/verifica in due passaggi attiva/i)).toBeVisible();
 
   await setupCtx.close();
 
