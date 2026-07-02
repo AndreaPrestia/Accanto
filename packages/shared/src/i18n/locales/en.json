@@ -59,6 +59,18 @@
   },
   "account": {
     "title": "Your account",
+    "groups": {
+      "profile": "Profile",
+      "security": "Security",
+      "data": "Data",
+      "wellbeing": "Wellbeing"
+    },
+    "hints": {
+      "security": {
+        "enable2fa_one": "{{count}} suggestion",
+        "enable2fa_other": "{{count}} suggestions"
+      }
+    },
     "changePassword": "Change password",
     "currentPassword": "Current password",
     "newPassword": "New password",

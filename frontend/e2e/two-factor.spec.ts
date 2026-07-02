@@ -22,7 +22,7 @@ test('un caregiver può attivare la 2FA e poi accedere usando il codice TOTP', a
   const user = newUser('twofa');
   await registerViaUi(setupPage, user);
 
-  await setupPage.goto('/account');
+  await setupPage.goto('/account#section-twofactor');
   await expect(setupPage.getByRole('heading', { name: /verifica in due passaggi/i })).toBeVisible();
 
   // Start setup

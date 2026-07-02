@@ -60,7 +60,9 @@ export type MainStackParamList = {
 // e in CircleStack via getParent('AppDrawer').openDrawer()).
 export type AppDrawerParamList = {
   Main: NavigatorScreenParams<MainStackParamList> | undefined;
-  Account: undefined;
+  // `section`: apre subito il gruppo accordion indicato (es. dal
+  // SecurityBanner della Dashboard → 'security').
+  Account: { section?: 'security' | 'data' | 'wellbeing' } | undefined;
   AiHistory: undefined;
   Support: undefined;
   SelfCare: undefined;

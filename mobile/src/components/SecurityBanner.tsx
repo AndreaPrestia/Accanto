@@ -77,7 +77,7 @@ export default function SecurityBanner() {
       </Text>
       <View className="mt-3 flex-row items-center gap-2">
         <Pressable
-          onPress={() => navigation.navigate('Account')}
+          onPress={() => navigation.navigate('Account', { section: 'security' })}
           accessibilityRole="button"
           className="rounded-md bg-amber-700 px-3 py-2 active:opacity-80"
         >
