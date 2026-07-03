@@ -150,8 +150,11 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      # Monorepo: il contesto è la repo root in modo che il Dockerfile possa
+      # copiare anche packages/shared/ (workspace `@accanto/shared`) richiesto
+      # da frontend/package.json. Vedi frontend/Dockerfile per i dettagli.
+      context: .
+      dockerfile: frontend/Dockerfile
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
     restart: unless-stopped

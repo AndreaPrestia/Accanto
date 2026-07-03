@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import DashboardPage from './pages/DashboardPage';
+import WelcomePage from './pages/WelcomePage';
 import NewCareCirclePage from './pages/NewCareCirclePage';
 import CareCirclePage from './pages/CareCirclePage';
 import TimelinePage from './pages/TimelinePage';
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/welcome" element={<RequireAuth><WelcomePage /></RequireAuth>} />
         <Route path="/" element={<RequireAuth><DashboardPage /></RequireAuth>} />
         <Route path="/care-circles/new" element={<RequireAuth><NewCareCirclePage /></RequireAuth>} />
         <Route path="/care-circles/:id" element={<RequireAuth><CareCirclePage /></RequireAuth>} />

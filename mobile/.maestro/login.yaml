@@ -1,0 +1,26 @@
+# Smoke flow: apre l'app fresca → si aspetta di vedere il login.
+# Eseguibile da `mobile/` con:
+#   maestro test .maestro/login.yaml
+# Richiede l'app installata sul device (Expo Dev Client o build EAS dev/preview).
+appId: ${MAESTRO_APP_ID}
+env:
+  EMAIL: ${MAESTRO_EMAIL}
+  PASSWORD: ${MAESTRO_PASSWORD}
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "login-email"
+- tapOn:
+    id: "login-email"
+- inputText: ${EMAIL}
+- tapOn:
+    id: "login-password"
+- inputText: ${PASSWORD}
+- tapOn:
+    id: "login-submit"
+# Attende che RootNavigator switchi su AppStack e mostri la dashboard.
+# Il testo "Il tuo spazio" è hardcoded in DashboardScreen.tsx.
+- extendedWaitUntil:
+    visible: "Il tuo spazio"
+    timeout: 10000

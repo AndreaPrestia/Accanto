@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { api, extractError } from '../api/client';
 import { TimelineEntry, TimelineEntryType, TimelineTypeLabel, TimelineVisibility, VisibilityLabel } from '../types';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ const VIS: TimelineVisibility[] = ['Circle','Private'];
 
 export default function TimelinePage() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [entries, setEntries] = useState<TimelineEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<TimelineEntryType | ''>('');
@@ -26,6 +27,20 @@ export default function TimelinePage() {
   const [bulkAddTags, setBulkAddTags] = useState('');
   const [bulkRemoveTags, setBulkRemoveTags] = useState('');
   const [bulkVisibility, setBulkVisibility] = useState<'' | TimelineVisibility>('');
+
+  // Deep link "quick action" dalla dashboard: `?new=1` apre subito il form
+  // "Nuova voce" senza costringere l'utente a un ulteriore click. Puliamo
+  // il param dopo la prima esecuzione per evitare di riaprire il form ad
+  // ogni back/refresh.
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setShowForm(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete('new');
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const load = async () => {
     if (!id) return;

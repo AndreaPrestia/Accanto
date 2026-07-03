@@ -56,6 +56,8 @@ export const ROUTES: Record<string, Record<Locale, string>> = {
   features: { it: 'funzioni', en: 'features', es: 'funcionalidades' },
   forWhom: { it: 'per-chi', en: 'for-whom', es: 'para-quien' },
   privacy: { it: 'privacy', en: 'privacy', es: 'privacidad' },
+  terms: { it: 'termini', en: 'terms', es: 'terminos' },
+  support: { it: 'supporto', en: 'support', es: 'soporte' },
   faq: { it: 'faq', en: 'faq', es: 'preguntas' },
   pricing: { it: 'prezzi', en: 'pricing', es: 'precios' },
   contact: { it: 'contatti', en: 'contact', es: 'contacto' }

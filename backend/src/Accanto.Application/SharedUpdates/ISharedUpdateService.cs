@@ -10,5 +10,10 @@ public interface ISharedUpdateService
 
 public interface ISharedUpdateTemplateProvider
 {
-    IReadOnlyList<SharedUpdateTemplateDto> GetTemplates();
+    /// <summary>
+    /// Restituisce i modelli pronti per la lingua richiesta. <paramref name="acceptLanguage"/> è
+    /// l'header HTTP Accept-Language grezzo (può essere null/vuoto). Fallback a italiano se la
+    /// lingua non è supportata.
+    /// </summary>
+    IReadOnlyList<SharedUpdateTemplateDto> GetTemplates(string? acceptLanguage);
 }

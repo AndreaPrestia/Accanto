@@ -3,6 +3,7 @@ using Accanto.Application.Account;
 using Accanto.Application.Auth;
 using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.Notifications;
+using Accanto.Application.Push;
 using Accanto.Application.Security;
 using Accanto.Application.Wellbeing;
 using Accanto.Domain.Enums;
@@ -25,6 +26,8 @@ public class AccountController : ControllerBase
     private readonly ISecurityAuditLog _audit;
     private readonly ISecurityAuditQueryService _auditQuery;
     private readonly ICheckInService _checkIns;
+    private readonly IDevicePushTokenService _devicePushTokens;
+    private readonly ICircleMobilePushNotifier _mobilePush;
     private readonly ICurrentUser _currentUser;
 
     public AccountController(
@@ -36,6 +39,8 @@ public class AccountController : ControllerBase
         ISecurityAuditLog audit,
         ISecurityAuditQueryService auditQuery,
         ICheckInService checkIns,
+        IDevicePushTokenService devicePushTokens,
+        ICircleMobilePushNotifier mobilePush,
         ICurrentUser currentUser)
     {
         _svc = svc;
@@ -46,9 +51,10 @@ public class AccountController : ControllerBase
         _audit = audit;
         _auditQuery = auditQuery;
         _checkIns = checkIns;
+        _devicePushTokens = devicePushTokens;
+        _mobilePush = mobilePush;
         _currentUser = currentUser;
     }
-
     [HttpPost("change-password")]
     [EnableRateLimiting("auth-sensitive")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken ct)
@@ -172,6 +178,57 @@ public class AccountController : ControllerBase
     {
         await _checkIns.DeleteAsync(_currentUser.RequireUserId(), id, ct);
         return NoContent();
+    }
+
+    // ---------- Mobile push devices (Expo) ----------
+
+    [HttpGet("push-devices")]
+    public async Task<ActionResult<IReadOnlyList<DevicePushTokenDto>>> ListPushDevices(CancellationToken ct)
+        => Ok(await _devicePushTokens.ListAsync(_currentUser.RequireUserId(), ct));
+
+    [HttpPost("push-devices")]
+    public async Task<ActionResult<DevicePushTokenDto>> RegisterPushDevice([FromBody] RegisterDevicePushTokenRequest request, CancellationToken ct)
+    {
+        var dto = await _devicePushTokens.RegisterAsync(_currentUser.RequireUserId(), request, ct);
+        return Ok(dto);
+    }
+
+    [HttpDelete("push-devices/{id:guid}")]
+    public async Task<IActionResult> DeletePushDeviceById(Guid id, CancellationToken ct)
+    {
+        await _devicePushTokens.RemoveByIdAsync(_currentUser.RequireUserId(), id, ct);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Cancellazione "by token" usata dal client mobile in fase di
+    /// logout: il device conosce il proprio token Expo ma non il GUID
+    /// del record DB.
+    /// </summary>
+    [HttpDelete("push-devices")]
+    public async Task<IActionResult> DeletePushDeviceByToken([FromBody] DeletePushDeviceRequest request, CancellationToken ct)
+    {
+        if (request is null || string.IsNullOrWhiteSpace(request.Token)) return BadRequest();
+        await _devicePushTokens.RemoveByTokenAsync(_currentUser.RequireUserId(), request.Token, ct);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Invia una notifica push di prova a tutti i device dell'utente
+    /// corrente. Bypassa le preferenze (testare la connessione non deve
+    /// essere silenziato dai topic flags). Utile per validare end-to-end
+    /// la pipeline (token registrato, Expo push service, APNs/FCM).
+    /// </summary>
+    [HttpPost("push-devices/test")]
+    [EnableRateLimiting("auth-sensitive")]
+    public async Task<IActionResult> SendTestPush(CancellationToken ct)
+    {
+        await _mobilePush.SendTestAsync(
+            _currentUser.RequireUserId(),
+            "Accanto",
+            "Notifica di prova: tutto funziona \ud83c\udf89",
+            ct);
+        return Accepted();
     }
 
     private ClientInfo BuildClientInfo()

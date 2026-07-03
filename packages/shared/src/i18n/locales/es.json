@@ -16,7 +16,8 @@
     "confirm": "Confirmar",
     "loading": "Cargando…",
     "saving": "Guardando…",
-    "language": "Idioma"
+    "language": "Idioma",
+    "back": "Atrás"
   },
   "auth": {
     "loginTitle": "Bienvenido de nuevo",
@@ -59,6 +60,18 @@
   },
   "account": {
     "title": "Tu cuenta",
+    "groups": {
+      "profile": "Perfil",
+      "security": "Seguridad",
+      "data": "Datos",
+      "wellbeing": "Bienestar"
+    },
+    "hints": {
+      "security": {
+        "enable2fa_one": "{{count}} sugerencia",
+        "enable2fa_other": "{{count}} sugerencias"
+      }
+    },
     "changePassword": "Cambiar contraseña",
     "currentPassword": "Contraseña actual",
     "newPassword": "Nueva contraseña",
@@ -70,6 +83,12 @@
     "languageSectionTitle": "Idioma",
     "languageSectionHint": "La aplicación usará este idioma en tus dispositivos.",
     "languageSaved": "Idioma actualizado.",
+    "textScale": {
+      "title": "Tamaño del texto",
+      "toggle": "Texto más grande",
+      "hint": "Aumenta el tamaño del texto para una lectura más cómoda.",
+      "mobileHint": "Para cambiar el tamaño del texto usa los ajustes de tu dispositivo. Accanto respeta tu elección."
+    },
     "deleteTitle": "Eliminar cuenta",
     "deleteDescription": "La eliminación borra de forma definitiva tu perfil y todos los círculos en los que eres el único miembro, junto con el diario, los documentos, las preguntas y las novedades vinculadas. Si compartes un círculo con otras personas, primero debes hacer que salgan o salir tú.",
     "deleteConfirmLabel": "Confirma con tu contraseña",
@@ -80,7 +99,7 @@
     "exportHint": "Descarga un archivo ZIP con tu perfil, las entradas del diario, los documentos cargados, las preguntas, las actualizaciones, el registro y las preferencias.",
     "exportCta": "Descargar archivo",
     "exportPreparing": "Preparando…",
-    "sessionsTitle": "Sesiones activas",
+    "sessionsTitle": "Dispositivos conectados",
     "sessionsHint": "Dispositivos y navegadores conectados a tu cuenta. Revoca los que no reconozcas.",
     "sessionsEmpty": "No hay otras sesiones activas.",
     "sessionsCurrent": "Esta sesión",
@@ -90,10 +109,10 @@
     "sessionsRevoking": "Revocando…",
     "sessionsLoadError": "No se pudieron cargar las sesiones.",
     "sessionsUnknownDevice": "Dispositivo desconocido",
-    "twoFactorTitle": "Autenticación de dos factores",
+    "twoFactorTitle": "Verificación en dos pasos",
     "twoFactorHint": "Añade una protección extra a tu cuenta con una app autenticadora (p. ej. Google Authenticator, Aegis, 1Password).",
     "twoFactorDisabled": "Actualmente desactivada.",
-    "twoFactorEnabled": "Autenticación de dos factores activa.",
+    "twoFactorEnabled": "Verificación en dos pasos activa.",
     "twoFactorRecoveryRemaining_one": "Queda {{count}} código de recuperación",
     "twoFactorRecoveryRemaining_other": "Quedan {{count}} códigos de recuperación",
     "twoFactorEnableCta": "Activar 2FA",
@@ -155,6 +174,40 @@
       "supportLink": "¿Necesitas hablar con alguien? Encuentra apoyo",
       "selfCareLink": "Cuidándote"
     }
+  },
+  "welcome": {
+    "title": "Te damos la bienvenida",
+    "subtitle": "Tres pasos rápidos para conocer Accanto. Puedes saltar cuando quieras.",
+    "skipCta": "Saltar",
+    "nextCta": "Siguiente",
+    "backCta": "Atrás",
+    "step": "Paso {{current}} de {{total}}",
+    "step1": {
+      "title": "Un círculo para quien cuidas",
+      "body": "Cada persona a la que atiendes tiene su propio círculo: información, documentos y quien ayuda, en un solo lugar."
+    },
+    "step2": {
+      "title": "Diario compartido",
+      "body": "Una entrada a la vez. Síntomas, citas, decisiones: en orden y fáciles de encontrar cuando importa."
+    },
+    "step3": {
+      "title": "Invita a quien quieras",
+      "body": "Añade al círculo a familiares o amistades. Tú decides qué ve cada persona. También puedes empezar en solitario."
+    },
+    "ctaCreateFirstCircle": "Crear el primer círculo",
+    "namePrefill": "Círculo familiar"
+  },
+  "security": {
+    "banner": {
+      "title": "Protege tu cuenta",
+      "body": "Activa la verificación en dos pasos: aunque alguien acierte tu contraseña, no entrará.",
+      "cta": "Activar ahora",
+      "dismiss": "Ahora no"
+    }
+  },
+  "dashboard": {
+    "quickAddEntry": "+ Entrada",
+    "quickAddEntryAria": "Añadir una entrada al diario de {{name}}"
   },
   "selfCare": {
     "title": "Cuidándote",
@@ -258,7 +311,9 @@
       "toneOptions": {
         "neutral": "Neutro",
         "warm": "Cálido",
-        "concise": "Conciso"
+        "concise": "Conciso",
+        "hopeful": "Esperanzado",
+        "encouraging": "Alentador"
       },
       "cta": "Reformular"
     },
@@ -296,7 +351,64 @@
       "input": "Entrada",
       "output": "Respuesta",
       "circleSection": "IA del círculo",
-      "circleSectionHint": "Como propietario puedes revisar todas las interacciones IA de este círculo (excluidas las reflexiones personales de los miembros)."
+      "circleSectionHint": "Como owner puedes consultar todas las interacciones IA sobre este círculo (excluidas las reflexiones personales de los miembros).",
+      "circleFilter": {
+        "label": "Círculo",
+        "all": "Todos los círculos",
+        "hint": "Filtra las interacciones IA por un círculo específico."
+      }
     }
+  },
+  "circle": {
+    "chips": {
+      "audit": "Registro de actividad",
+      "ai": "IA del círculo"
+    },
+    "emptyState": {
+      "title": "Empieza por aquí",
+      "subtitle": "Tres pequeños pasos para dar vida al círculo.",
+      "item1": {
+        "title": "Añade la primera entrada",
+        "body": "Una cita, un síntoma, una decisión.",
+        "cta": "Escribir la primera entrada"
+      },
+      "item2": {
+        "title": "Sube un documento",
+        "body": "Un informe, una receta, un formulario.",
+        "cta": "Ir a documentos"
+      },
+      "item3": {
+        "title": "Invita a un familiar",
+        "body": "Añade a alguien que ayuda al círculo.",
+        "cta": "Invitar",
+        "hintOwnerOnly": "Solo el owner puede invitar."
+      }
+    }
+  },
+  "sharedUpdates": {
+    "title": "Actualizaciones para los demás",
+    "backToCircle": "← Círculo",
+    "intro": "Escribe el mensaje una sola vez, luego cópialo y envíalo por donde prefieras.",
+    "introBalance": "También está bien compartir un pequeño paso adelante o un día más tranquilo, no solo los momentos difíciles.",
+    "newUpdate": "+ Nueva actualización",
+    "templatesPanel": "Plantillas listas",
+    "useAsBase": "Usar como base",
+    "copyText": "Copiar texto",
+    "copied": "¡Copiado!",
+    "empty": "Aún no hay actualizaciones.",
+    "audienceLabel": "A quién va dirigido",
+    "audience": {
+      "closeFamily": "Familia cercana",
+      "extendedFamily": "Familia extensa",
+      "friends": "Amigos",
+      "generic": "Mensaje genérico"
+    },
+    "messageLabel": "Mensaje",
+    "save": "Guardar actualización",
+    "deleteConfirm": "¿Eliminar esta actualización?",
+    "copyError": "No se pudo copiar automáticamente. Seleccionalo y cópialo a mano.",
+    "copyErrorTitle": "No se pudo copiar",
+    "copyErrorBody": "Selecciónalo y cópialo a mano.",
+    "writeMessageError": "Escribe un mensaje."
   }
 }

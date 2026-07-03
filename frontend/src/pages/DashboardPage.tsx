@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
 import { CareCircle, RoleLabel } from '../types';
+import SecurityBanner from '../components/SecurityBanner';
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [circles, setCircles] = useState<CareCircle[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,6 +23,8 @@ export default function DashboardPage() {
         Un cerchio di cura raccoglie le informazioni sulla persona che stai assistendo, in un solo posto.
       </p>
 
+      <SecurityBanner />
+
       {error && <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 mb-4">{error}</div>}
 
       {circles === null && <p className="text-accanto-500">Caricamento…</p>}
@@ -35,14 +40,27 @@ export default function DashboardPage() {
         <>
           <div className="space-y-3 mb-4">
             {circles.map((c) => (
-              <Link to={`/care-circles/${c.id}`} key={c.id} className="card block hover:bg-accanto-50">
+              <div key={c.id} className="card">
                 <div className="flex items-baseline justify-between">
-                  <h2 className="text-lg font-medium">{c.name}</h2>
-                  <span className="text-xs text-accanto-500">{RoleLabel[c.myRole]}</span>
+                  <Link to={`/care-circles/${c.id}`} className="text-lg font-medium text-accanto-900 hover:underline">
+                    {c.name}
+                  </Link>
+                  <span className="text-xs text-accanto-500 ml-2">{RoleLabel[c.myRole]}</span>
                 </div>
                 {c.description && <p className="text-sm text-accanto-500 mt-1">{c.description}</p>}
                 {c.status === 'Archived' && <p className="text-xs text-accanto-500 mt-2">Archiviato</p>}
-              </Link>
+                {c.status !== 'Archived' && (
+                  <div className="mt-3 flex justify-end">
+                    <Link
+                      to={`/care-circles/${c.id}/timeline?new=1`}
+                      className="text-sm text-accanto-700 hover:underline"
+                      aria-label={t('dashboard.quickAddEntryAria', { name: c.name })}
+                    >
+                      {t('dashboard.quickAddEntry')}
+                    </Link>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
           <Link to="/care-circles/new" className="btn-ghost">+ Nuovo cerchio</Link>

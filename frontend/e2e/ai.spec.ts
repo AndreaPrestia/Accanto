@@ -48,9 +48,9 @@ test.describe('AI completa (richiede profilo ai e modello scaricato)', () => {
     await page.getByRole('button', { name: /crea cerchio/i }).click();
     await expect(page).toHaveURL(/\/care-circles\/[0-9a-f-]+$/);
 
-    // Aggiungi una voce di diario così c'è qualcosa da riassumere
-    await page.getByRole('link', { name: /^Diario$/ }).click();
-    await page.getByRole('button', { name: /\+ nuova voce/i }).click();
+    // Aggiungi una voce di diario così c'è qualcosa da riassumere.
+    // Cerchio nuovo → checklist di onboarding → primo item apre subito il form.
+    await page.getByRole('link', { name: /scrivi la prima voce/i }).click();
     const form = page.locator('form.card');
     await form.locator('input:not([type="datetime-local"]):not([type="date"])').first().fill('Visita controllo');
     await form.locator('textarea').fill('Pressione ok. Riconsegnare ricetta tra 2 settimane.');

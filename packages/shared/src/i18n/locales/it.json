@@ -16,7 +16,8 @@
     "confirm": "Conferma",
     "loading": "Caricamento…",
     "saving": "Salvataggio…",
-    "language": "Lingua"
+    "language": "Lingua",
+    "back": "Indietro"
   },
   "auth": {
     "loginTitle": "Bentornato",
@@ -59,6 +60,18 @@
   },
   "account": {
     "title": "Il tuo account",
+    "groups": {
+      "profile": "Profilo",
+      "security": "Sicurezza",
+      "data": "Dati",
+      "wellbeing": "Benessere"
+    },
+    "hints": {
+      "security": {
+        "enable2fa_one": "{{count}} suggerimento",
+        "enable2fa_other": "{{count}} suggerimenti"
+      }
+    },
     "changePassword": "Cambia password",
     "currentPassword": "Password attuale",
     "newPassword": "Nuova password",
@@ -70,6 +83,12 @@
     "languageSectionTitle": "Lingua",
     "languageSectionHint": "L'app userà questa lingua sui tuoi dispositivi.",
     "languageSaved": "Lingua aggiornata.",
+    "textScale": {
+      "title": "Dimensione del testo",
+      "toggle": "Testo più grande",
+      "hint": "Aumenta la dimensione del testo per una lettura più comoda.",
+      "mobileHint": "Per cambiare la dimensione del testo usa le impostazioni del tuo dispositivo. Accanto rispetta la tua scelta."
+    },
     "deleteTitle": "Elimina account",
     "deleteDescription": "L'eliminazione rimuove definitivamente il tuo profilo e tutti i cerchi di cui sei l'unico membro, insieme a diario, documenti, domande e aggiornamenti collegati. Se condividi un cerchio con altre persone, devi prima farli uscire o uscire tu stesso.",
     "deleteConfirmLabel": "Conferma con la password",
@@ -80,7 +99,7 @@
     "exportHint": "Scarica un archivio ZIP con il tuo profilo, le voci di diario, i documenti caricati, le domande, gli aggiornamenti, l'audit e le preferenze.",
     "exportCta": "Scarica archivio",
     "exportPreparing": "Preparazione…",
-    "sessionsTitle": "Sessioni attive",
+    "sessionsTitle": "Dispositivi collegati",
     "sessionsHint": "Dispositivi e browser collegati al tuo account. Revoca quelli che non riconosci.",
     "sessionsEmpty": "Nessuna altra sessione attiva.",
     "sessionsCurrent": "Questa sessione",
@@ -90,10 +109,10 @@
     "sessionsRevoking": "Revoca…",
     "sessionsLoadError": "Impossibile caricare le sessioni.",
     "sessionsUnknownDevice": "Dispositivo sconosciuto",
-    "twoFactorTitle": "Autenticazione a due fattori",
+    "twoFactorTitle": "Verifica in due passaggi",
     "twoFactorHint": "Aggiungi una protezione extra al tuo account con un'app autenticatore (es. Google Authenticator, Aegis, 1Password).",
     "twoFactorDisabled": "Attualmente non attiva.",
-    "twoFactorEnabled": "Autenticazione a due fattori attiva.",
+    "twoFactorEnabled": "Verifica in due passaggi attiva.",
     "twoFactorRecoveryRemaining_one": "{{count}} codice di recupero rimasto",
     "twoFactorRecoveryRemaining_other": "{{count}} codici di recupero rimasti",
     "twoFactorEnableCta": "Attiva 2FA",
@@ -155,6 +174,40 @@
       "supportLink": "Hai bisogno di parlare con qualcuno? Trova supporto",
       "selfCareLink": "Cura di te"
     }
+  },
+  "welcome": {
+    "title": "Ti diamo il benvenuto",
+    "subtitle": "In tre passi capiremo come funziona Accanto. Puoi saltare quando vuoi.",
+    "skipCta": "Salta",
+    "nextCta": "Avanti",
+    "backCta": "Indietro",
+    "step": "Passo {{current}} di {{total}}",
+    "step1": {
+      "title": "Un cerchio per chi assisti",
+      "body": "Ogni persona di cui ti prendi cura ha il suo cerchio: informazioni, documenti e chi la aiuta, in un posto solo."
+    },
+    "step2": {
+      "title": "Diario condiviso",
+      "body": "Annota una cosa alla volta. Sintomi, appuntamenti, decisioni: tutto in ordine, ritrovabile quando serve."
+    },
+    "step3": {
+      "title": "Invita chi vuoi, quando vuoi",
+      "body": "Aggiungi al cerchio familiari o amici. Decidi tu cosa può vedere ognuno. Puoi cominciare anche da solo."
+    },
+    "ctaCreateFirstCircle": "Crea il primo cerchio",
+    "namePrefill": "Cerchio per la mia famiglia"
+  },
+  "security": {
+    "banner": {
+      "title": "Metti in sicurezza il tuo account",
+      "body": "Attiva la verifica in due passaggi: se qualcuno indovina la tua password, non entra comunque.",
+      "cta": "Attiva ora",
+      "dismiss": "Non ora"
+    }
+  },
+  "dashboard": {
+    "quickAddEntry": "+ Voce",
+    "quickAddEntryAria": "Aggiungi una voce al diario di {{name}}"
   },
   "selfCare": {
     "title": "Cura di te",
@@ -258,7 +311,9 @@
       "toneOptions": {
         "neutral": "Neutro",
         "warm": "Caldo",
-        "concise": "Sintetico"
+        "concise": "Sintetico",
+        "hopeful": "Speranzoso",
+        "encouraging": "Incoraggiante"
       },
       "cta": "Riformula"
     },
@@ -296,7 +351,64 @@
       "input": "Input",
       "output": "Risposta",
       "circleSection": "AI del cerchio",
-      "circleSectionHint": "Come owner puoi consultare tutte le interazioni AI legate a questo cerchio (escluse le riflessioni personali dei membri)."
+      "circleSectionHint": "Come owner puoi consultare tutte le interazioni AI legate a questo cerchio (escluse le riflessioni personali dei membri).",
+      "circleFilter": {
+        "label": "Cerchio",
+        "all": "Tutti i cerchi",
+        "hint": "Filtra le interazioni AI su un cerchio specifico."
+      }
     }
+  },
+  "circle": {
+    "chips": {
+      "audit": "Registro azioni",
+      "ai": "AI del cerchio"
+    },
+    "emptyState": {
+      "title": "Iniziamo da qui",
+      "subtitle": "Tre piccoli passi per far vivere il cerchio.",
+      "item1": {
+        "title": "Aggiungi la prima voce",
+        "body": "Un appuntamento, un sintomo, una decisione.",
+        "cta": "Scrivi la prima voce"
+      },
+      "item2": {
+        "title": "Carica un documento",
+        "body": "Un referto, una prescrizione, un modulo.",
+        "cta": "Vai ai documenti"
+      },
+      "item3": {
+        "title": "Invita un familiare",
+        "body": "Aggiungi al cerchio chi ti aiuta.",
+        "cta": "Invita",
+        "hintOwnerOnly": "Solo l'owner può invitare."
+      }
+    }
+  },
+  "sharedUpdates": {
+    "title": "Aggiornamenti per gli altri",
+    "backToCircle": "← Cerchio",
+    "intro": "Componi un messaggio una volta sola, poi copialo e invialo dove preferisci.",
+    "introBalance": "Va bene raccontare anche un piccolo passo avanti o una giornata più serena: non solo le difficoltà.",
+    "newUpdate": "+ Nuovo aggiornamento",
+    "templatesPanel": "Modelli pronti",
+    "useAsBase": "Usa come base",
+    "copyText": "Copia testo",
+    "copied": "Copiato!",
+    "empty": "Ancora nessun aggiornamento.",
+    "audienceLabel": "A chi è rivolto",
+    "audience": {
+      "closeFamily": "Famiglia stretta",
+      "extendedFamily": "Famiglia allargata",
+      "friends": "Amici",
+      "generic": "Messaggio generico"
+    },
+    "messageLabel": "Messaggio",
+    "save": "Salva aggiornamento",
+    "deleteConfirm": "Eliminare questo aggiornamento?",
+    "copyError": "Impossibile copiare automaticamente. Selezionalo e copialo a mano.",
+    "copyErrorTitle": "Impossibile copiare",
+    "copyErrorBody": "Selezionalo e copialo a mano.",
+    "writeMessageError": "Scrivi il messaggio."
   }
 }

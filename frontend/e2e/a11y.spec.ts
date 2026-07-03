@@ -57,7 +57,9 @@ test.describe('Audit accessibilità WCAG 2.1 AA', () => {
   test('/account autenticato non ha violazioni serious/critical', async ({ page }) => {
     const user = newUser('a11y');
     await registerViaUi(page, user);
-    await page.goto('/account');
+    // Apre la sezione Benessere (accordion default collapsed) via deep-link
+    // così l'audit copre anche i contenuti dentro l'accordion, non solo l'header.
+    await page.goto('/account#section-wellbeing');
     await expect(page.getByRole('heading', { name: /come stai oggi/i })).toBeVisible();
     await runAudit(page, '/account');
   });

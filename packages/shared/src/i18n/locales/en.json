@@ -16,7 +16,8 @@
     "confirm": "Confirm",
     "loading": "Loading…",
     "saving": "Saving…",
-    "language": "Language"
+    "language": "Language",
+    "back": "Back"
   },
   "auth": {
     "loginTitle": "Welcome back",
@@ -59,6 +60,18 @@
   },
   "account": {
     "title": "Your account",
+    "groups": {
+      "profile": "Profile",
+      "security": "Security",
+      "data": "Data",
+      "wellbeing": "Wellbeing"
+    },
+    "hints": {
+      "security": {
+        "enable2fa_one": "{{count}} suggestion",
+        "enable2fa_other": "{{count}} suggestions"
+      }
+    },
     "changePassword": "Change password",
     "currentPassword": "Current password",
     "newPassword": "New password",
@@ -70,6 +83,12 @@
     "languageSectionTitle": "Language",
     "languageSectionHint": "The app will use this language on your devices.",
     "languageSaved": "Language updated.",
+    "textScale": {
+      "title": "Text size",
+      "toggle": "Larger text",
+      "hint": "Increase text size for easier reading.",
+      "mobileHint": "To change text size use your device settings. Accanto respects your choice."
+    },
     "deleteTitle": "Delete account",
     "deleteDescription": "Deletion permanently removes your profile and any circles where you are the only member, along with the related journal, documents, questions and updates. If you share a circle with other people, you must first have them leave or leave the circle yourself.",
     "deleteConfirmLabel": "Confirm with your password",
@@ -80,7 +99,7 @@
     "exportHint": "Download a ZIP archive with your profile, journal entries, uploaded documents, questions, updates, audit log and preferences.",
     "exportCta": "Download archive",
     "exportPreparing": "Preparing…",
-    "sessionsTitle": "Active sessions",
+    "sessionsTitle": "Connected devices",
     "sessionsHint": "Devices and browsers signed in to your account. Revoke any you don't recognise.",
     "sessionsEmpty": "No other active sessions.",
     "sessionsCurrent": "This session",
@@ -90,10 +109,10 @@
     "sessionsRevoking": "Revoking…",
     "sessionsLoadError": "Couldn't load sessions.",
     "sessionsUnknownDevice": "Unknown device",
-    "twoFactorTitle": "Two-factor authentication",
+    "twoFactorTitle": "Two-step verification",
     "twoFactorHint": "Add an extra layer of protection with an authenticator app (e.g. Google Authenticator, Aegis, 1Password).",
     "twoFactorDisabled": "Currently disabled.",
-    "twoFactorEnabled": "Two-factor authentication is enabled.",
+    "twoFactorEnabled": "Two-step verification is enabled.",
     "twoFactorRecoveryRemaining_one": "{{count}} recovery code left",
     "twoFactorRecoveryRemaining_other": "{{count}} recovery codes left",
     "twoFactorEnableCta": "Enable 2FA",
@@ -155,6 +174,40 @@
       "supportLink": "Need to talk to someone? Find support",
       "selfCareLink": "Caring for yourself"
     }
+  },
+  "welcome": {
+    "title": "Welcome",
+    "subtitle": "Three quick steps to show how Accanto works. Skip anytime.",
+    "skipCta": "Skip",
+    "nextCta": "Next",
+    "backCta": "Back",
+    "step": "Step {{current}} of {{total}}",
+    "step1": {
+      "title": "A circle for who you care for",
+      "body": "Each person you look after has their own circle: information, documents, and the people helping\u2014all in one place."
+    },
+    "step2": {
+      "title": "Shared journal",
+      "body": "One entry at a time. Symptoms, appointments, decisions\u2014in order, easy to find when it matters."
+    },
+    "step3": {
+      "title": "Invite whoever you want",
+      "body": "Add family or friends to the circle. You decide what each person can see. You can also start on your own."
+    },
+    "ctaCreateFirstCircle": "Create your first circle",
+    "namePrefill": "Family circle"
+  },
+  "security": {
+    "banner": {
+      "title": "Secure your account",
+      "body": "Turn on two-step verification: even if someone guesses your password, they still can't sign in.",
+      "cta": "Turn on now",
+      "dismiss": "Not now"
+    }
+  },
+  "dashboard": {
+    "quickAddEntry": "+ Entry",
+    "quickAddEntryAria": "Add a journal entry to {{name}}"
   },
   "selfCare": {
     "title": "Caring for yourself",
@@ -258,7 +311,9 @@
       "toneOptions": {
         "neutral": "Neutral",
         "warm": "Warm",
-        "concise": "Concise"
+        "concise": "Concise",
+        "hopeful": "Hopeful",
+        "encouraging": "Encouraging"
       },
       "cta": "Rephrase"
     },
@@ -296,7 +351,64 @@
       "input": "Input",
       "output": "Response",
       "circleSection": "Circle AI",
-      "circleSectionHint": "As owner you can review all AI interactions linked to this circle (members' personal reflections are excluded)."
+      "circleSectionHint": "As owner you can review all AI interactions linked to this circle (members' personal reflections are excluded).",
+      "circleFilter": {
+        "label": "Circle",
+        "all": "All circles",
+        "hint": "Filter AI interactions by a specific circle."
+      }
     }
+  },
+  "circle": {
+    "chips": {
+      "audit": "Activity log",
+      "ai": "Circle AI"
+    },
+    "emptyState": {
+      "title": "Start here",
+      "subtitle": "Three small steps to bring the circle to life.",
+      "item1": {
+        "title": "Add the first entry",
+        "body": "An appointment, a symptom, a decision.",
+        "cta": "Write the first entry"
+      },
+      "item2": {
+        "title": "Upload a document",
+        "body": "A report, a prescription, a form.",
+        "cta": "Go to documents"
+      },
+      "item3": {
+        "title": "Invite a family member",
+        "body": "Add someone who helps to the circle.",
+        "cta": "Invite",
+        "hintOwnerOnly": "Only the owner can invite."
+      }
+    }
+  },
+  "sharedUpdates": {
+    "title": "Updates for others",
+    "backToCircle": "← Circle",
+    "intro": "Write the message once, then copy it and send it wherever you prefer.",
+    "introBalance": "It's also okay to share a small step forward or a calmer day, not only the hard moments.",
+    "newUpdate": "+ New update",
+    "templatesPanel": "Ready-made templates",
+    "useAsBase": "Use as starting point",
+    "copyText": "Copy text",
+    "copied": "Copied!",
+    "empty": "No updates yet.",
+    "audienceLabel": "Who is it for",
+    "audience": {
+      "closeFamily": "Close family",
+      "extendedFamily": "Extended family",
+      "friends": "Friends",
+      "generic": "Generic message"
+    },
+    "messageLabel": "Message",
+    "save": "Save update",
+    "deleteConfirm": "Delete this update?",
+    "copyError": "Couldn't copy automatically. Please select and copy it manually.",
+    "copyErrorTitle": "Couldn't copy",
+    "copyErrorBody": "Please select and copy it manually.",
+    "writeMessageError": "Please write a message."
   }
 }

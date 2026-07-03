@@ -18,6 +18,7 @@ public class TimelineService : ITimelineService
     private readonly ICareCircleAuthorization _auth;
     private readonly IPushService _push;
     private readonly ICircleEmailNotifier _email;
+    private readonly ICircleMobilePushNotifier _mobilePush;
     private readonly IAuditLog _audit;
     private readonly IValidator<CreateTimelineEntryRequest> _createValidator;
     private readonly IValidator<UpdateTimelineEntryRequest> _updateValidator;
@@ -28,6 +29,7 @@ public class TimelineService : ITimelineService
         ICareCircleAuthorization auth,
         IPushService push,
         ICircleEmailNotifier email,
+        ICircleMobilePushNotifier mobilePush,
         IAuditLog audit,
         IValidator<CreateTimelineEntryRequest> createValidator,
         IValidator<UpdateTimelineEntryRequest> updateValidator,
@@ -37,6 +39,7 @@ public class TimelineService : ITimelineService
         _auth = auth;
         _push = push;
         _email = email;
+        _mobilePush = mobilePush;
         _audit = audit;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
@@ -132,6 +135,18 @@ public class TimelineService : ITimelineService
             _ = _email.NotifyCircleAsync(careCircleId, userId, NotificationTopic.TimelineEntryCreated,
                 $"Nuova voce nel diario di {circleName}",
                 EmailTemplates.TimelineEntryCreated(circleName, authorName, entry.Title),
+                CancellationToken.None);
+            _ = _mobilePush.NotifyCircleAsync(
+                careCircleId,
+                userId,
+                NotificationTopic.TimelineEntryCreated,
+                circleName,
+                $"{authorName}: {entry.Title}",
+                new Dictionary<string, string>
+                {
+                    ["circleId"] = careCircleId.ToString(),
+                    ["entryId"] = entry.Id.ToString()
+                },
                 CancellationToken.None);
         }
 

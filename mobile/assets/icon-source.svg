@@ -1,0 +1,49 @@
+<!--
+  Accanto · icona master 1024×1024.
+
+  Design: due "presenze" che si toccano dolcemente (caregiver + persona
+  assistita), inscritte in un cerchio morbido che evoca il "cerchio di cura".
+  Palette coerente con il sito: sfondo accanto-600 (#475569), figure
+  accanto-50/100 (#f8fafc/#f1f5f9) con un accento warm su una delle teste per
+  spezzare il monocolore in store listing.
+
+  PER GENERARE I PNG: vedi mobile/README.md sezione "Icona e splash". Il modo
+  più veloce è caricare questo SVG su https://icon.kitchen (export iOS + Android).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Sfondo a tinta unita: Apple impone niente trasparenza, niente angoli
+       arrotondati nel master 1024 (li applica iOS). -->
+  <rect width="1024" height="1024" fill="#475569"/>
+
+  <!-- Cerchio decorativo soft (il "cerchio di cura"). Quasi invisibile a piccole
+       size: lo manteniamo per leggibilità a 1024×1024 / store listing. -->
+  <circle cx="512" cy="540" r="380" fill="none" stroke="#64748b" stroke-width="6" opacity="0.55"/>
+
+  <!-- Figura A (caregiver) — più grande, ombra calda. -->
+  <g>
+    <!-- testa -->
+    <circle cx="420" cy="380" r="92" fill="#f8fafc"/>
+    <!-- busto / spalle -->
+    <path
+      d="M260 720c0-90 72-150 160-150s160 60 160 150v40H260z"
+      fill="#f8fafc"/>
+  </g>
+
+  <!-- Figura B (persona assistita) — leggermente più piccola, addossata. Accento
+       caldo (sand) sulla testa per distinguerla senza essere stridente. -->
+  <g>
+    <circle cx="640" cy="430" r="76" fill="#e7c8a0"/>
+    <path
+      d="M500 740c0-78 62-130 140-130s140 52 140 130v30H500z"
+      fill="#e7c8a0"/>
+  </g>
+
+  <!-- Linea di "contatto" — un arco discreto sotto le due figure che richiama
+       l'idea di accompagnamento. -->
+  <path
+    d="M270 800 Q 512 870 770 800"
+    stroke="#f1f5f9"
+    stroke-width="14"
+    stroke-linecap="round"
+    fill="none"/>
+</svg>

@@ -5,7 +5,8 @@ test('il caregiver salva un check-in di benessere e lo ritrova nello storico', a
   const user = newUser('wellbeing');
   await registerViaUi(page, user);
 
-  await page.goto('/account');
+  // Deep-link apre l'accordion "Benessere" (default collapsed).
+  await page.goto('/account#section-wellbeing');
 
   // Pick value 4 on each scale (Umore / Energia / Stress).
   // Each scale is a fieldset with a legend; scope the "4" button to that fieldset.
@@ -20,8 +21,13 @@ test('il caregiver salva un check-in di benessere e lo ritrova nello storico', a
   // Success message
   await expect(page.getByText(/check-in salvato/i)).toBeVisible();
 
-  // Expand history and confirm the note we just saved is shown
-  const details = page.locator('details').first();
+  // Expand history and confirm the note we just saved is shown.
+  // AccountPage e' fatta di piu' <details> (accordion di sezione), quindi
+  // scegliamo esplicitamente il details.card interno del WellbeingSection
+  // (l'unico che ha class "card" e summary che inizia con "Storico").
+  const details = page.locator('details.card').filter({
+    has: page.locator('summary', { hasText: /^Storico/i })
+  });
   if (!(await details.evaluate((el: HTMLDetailsElement) => el.open))) {
     await details.locator('summary').click();
   }

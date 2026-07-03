@@ -1,0 +1,16 @@
+{
+  "name": "accanto-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*",
+    "frontend",
+    "mobile"
+  ],
+  "scripts": {
+    "build:frontend": "npm --workspace frontend run build",
+    "dev:frontend": "npm --workspace frontend run dev",
+    "build:shared": "npm --workspace @accanto/shared run build",
+    "typecheck:shared": "npm --workspace @accanto/shared run typecheck"
+  }
+}

@@ -22,15 +22,26 @@ public class NotificationPreferenceService : INotificationPreferenceService
         var saved = await _db.UserNotificationPreferences
             .Where(p => p.UserId == userId)
             .ToListAsync(cancellationToken);
-        var byTopic = saved.ToDictionary(p => p.Topic, p => p.EmailEnabled);
+        var byTopic = saved.ToDictionary(p => p.Topic);
         return AllTopics
-            .Select(t => new NotificationPreferenceDto(t, byTopic.TryGetValue(t, out var v) ? v : true))
+            .Select(t =>
+            {
+                if (byTopic.TryGetValue(t, out var pref))
+                {
+                    return new NotificationPreferenceDto(t, pref.EmailEnabled, pref.PushEnabled);
+                }
+                // Default-enabled per topic e canale: chi non ha mai toccato
+                // le impostazioni riceve sia email sia push.
+                return new NotificationPreferenceDto(t, true, true);
+            })
             .ToList();
     }
 
     public async Task<IReadOnlyList<NotificationPreferenceDto>> UpdateAsync(Guid userId, UpdateNotificationPreferencesRequest request, CancellationToken cancellationToken = default)
     {
-        var incoming = request.Preferences.GroupBy(p => p.Topic).ToDictionary(g => g.Key, g => g.Last().EmailEnabled);
+        // Last-write-wins se il client manda lo stesso topic due volte
+        // nella stessa request (difensivo).
+        var incoming = request.Preferences.GroupBy(p => p.Topic).ToDictionary(g => g.Key, g => g.Last());
         var saved = await _db.UserNotificationPreferences
             .Where(p => p.UserId == userId)
             .ToListAsync(cancellationToken);
@@ -39,14 +50,23 @@ public class NotificationPreferenceService : INotificationPreferenceService
         var now = DateTimeOffset.UtcNow;
         foreach (var topic in AllTopics)
         {
-            if (!incoming.TryGetValue(topic, out var enabled)) continue;
+            if (!incoming.TryGetValue(topic, out var dto)) continue;
             if (byTopic.TryGetValue(topic, out var existing))
             {
-                if (existing.EmailEnabled != enabled)
+                var changed = false;
+                if (existing.EmailEnabled != dto.EmailEnabled)
                 {
-                    existing.EmailEnabled = enabled;
-                    existing.UpdatedAt = now;
+                    existing.EmailEnabled = dto.EmailEnabled;
+                    changed = true;
                 }
+                // PushEnabled è opzionale nelle richieste per backward
+                // compat col client web: applichiamo solo se presente.
+                if (dto.PushEnabled is { } pushWanted && existing.PushEnabled != pushWanted)
+                {
+                    existing.PushEnabled = pushWanted;
+                    changed = true;
+                }
+                if (changed) existing.UpdatedAt = now;
             }
             else
             {
@@ -55,7 +75,8 @@ public class NotificationPreferenceService : INotificationPreferenceService
                     Id = Guid.NewGuid(),
                     UserId = userId,
                     Topic = topic,
-                    EmailEnabled = enabled,
+                    EmailEnabled = dto.EmailEnabled,
+                    PushEnabled = dto.PushEnabled ?? true,
                     UpdatedAt = now
                 });
             }

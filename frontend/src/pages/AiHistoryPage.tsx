@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import {
   listAiInteractions,
   getAiInteraction,
   AiInteractionSummary,
   AiInteractionDetail,
 } from '../api/ai';
-import { extractError } from '../api/client';
+import { api, extractError } from '../api/client';
+import { CareCircle } from '../types';
 
 export default function AiHistoryPage() {
   const { t, i18n } = useTranslation();
+  const nav = useNavigate();
   const { circleId } = useParams<{ circleId?: string }>();
   const [params, setParams] = useSearchParams();
   const page = Math.max(1, parseInt(params.get('page') ?? '1', 10) || 1);
@@ -22,6 +24,16 @@ export default function AiHistoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AiInteractionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  // Lista dei cerchi dell'utente, per popolare il dropdown filtro. Errore
+  // silenzioso: se non arriva il dropdown mostra solo "Tutti i cerchi".
+  const [myCircles, setMyCircles] = useState<CareCircle[]>([]);
+
+  useEffect(() => {
+    api
+      .get<CareCircle[]>('/care-circles')
+      .then((r) => setMyCircles(r.data))
+      .catch(() => setMyCircles([]));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +65,13 @@ export default function AiHistoryPage() {
     }
   };
 
+  // Cambio filtro cerchio: navighiamo alla rotta corrispondente (mantiene
+  // bookmarking + back button del browser). "" = tutti i cerchi.
+  const onCircleChange = (nextId: string) => {
+    if (nextId) nav(`/care-circles/${nextId}/ai/history`);
+    else nav('/ai/history');
+  };
+
   const fmtDate = (s: string) => new Date(s).toLocaleString(i18n.language);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -61,11 +80,36 @@ export default function AiHistoryPage() {
       <h1 className="page-title">{t('ai.history.title')}</h1>
       <p className="text-sm text-accanto-500 mt-1">{t('ai.history.subtitle')}</p>
 
-      {circleId && (
+      <div className="mt-3 flex items-center gap-2 flex-wrap text-sm">
+        <label htmlFor="ai-circle-filter" className="text-accanto-700">
+          {t('ai.history.circleFilter.label')}:
+        </label>
+        <select
+          id="ai-circle-filter"
+          value={circleId ?? ''}
+          onChange={(e) => onCircleChange(e.target.value)}
+          className="border border-accanto-200 rounded px-2 py-1 bg-white"
+        >
+          <option value="">{t('ai.history.circleFilter.all')}</option>
+          {myCircles.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        {circleId ? (
+          <Link to={`/care-circles/${circleId}`} className="text-accanto-700 underline">
+            ← {t('common.back')}
+          </Link>
+        ) : null}
+      </div>
+      {circleId ? (
         <p className="text-xs text-accanto-500 mt-2">
-          <Link to={`/care-circles/${circleId}`} className="text-accanto-700 underline">← {t('common.back')}</Link>
-          {' · '}
-          <span>{t('ai.history.circleSectionHint')}</span>
+          {t('ai.history.circleSectionHint')}
+        </p>
+      ) : (
+        <p className="text-xs text-accanto-500 mt-2">
+          {t('ai.history.circleFilter.hint')}
         </p>
       )}
 

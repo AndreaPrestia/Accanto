@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'en' as const;
+const lastUpdated = 'June 22, 2026';
+---
+<BaseLayout
+  title="Terms of service · Accanto"
+  description="Terms governing the use of the Accanto app: service scope, account, user content, liability, withdrawal."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Terms</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Terms of service</h1>
+    <p class="text-sm text-accanto-500 mb-6">Last updated: {lastUpdated}</p>
+
+    <aside class="rounded-lg border border-accanto-200 bg-accanto-50 p-4 mb-8 text-sm">
+      The authoritative version of these terms is published in Italian at
+      <a href="/it/termini" class="underline font-semibold">/it/termini</a>. The English summary
+      below mirrors its key points; in case of conflict the Italian text prevails.
+    </aside>
+
+    <h2>Service provider</h2>
+    <p>
+      <strong>PRESTIA.DEV S.A.S. DI PRESTIA ANDREA</strong> — Viale Bruno Rizzieri 199C, 00173 Rome
+      (RM), Italy. VAT IT17486541000. REA RM-1721153.<br />
+      Contact: <a href="mailto:support@accanto.care">support@accanto.care</a>.
+    </p>
+
+    <h2>Scope</h2>
+    <p>Accanto is a digital tool to organize information, notes, documents and tasks related to
+    caring for a family member. It is shared within "care circles" with the members you invite. It
+    is not a medical device and does not provide diagnosis or clinical advice.</p>
+
+    <h2>Account</h2>
+    <ul>
+      <li>You must provide a valid email and password to use the service.</li>
+      <li>You are responsible for keeping your credentials safe; we recommend enabling TOTP 2FA.</li>
+      <li>You must be at least 16 years old (younger users need a parent/guardian's consent).</li>
+    </ul>
+
+    <h2>User content</h2>
+    <p>Everything you enter in Accanto remains yours. You grant us a limited license to store,
+    process and display it strictly to operate the service. You are responsible for the content
+    you provide and, in particular, for being entitled to process third-party data (e.g. the
+    person you assist) under applicable law.</p>
+
+    <h2>Acceptable use</h2>
+    <p>You agree not to attempt to compromise the service's security, scrape it in bulk, impersonate
+    other users, or use it for unlawful activities.</p>
+
+    <h2>Pricing</h2>
+    <p>Accanto is currently free during the launch phase. Any future paid tier will be communicated
+    in advance and governed by dedicated commercial terms.</p>
+
+    <h2>Termination</h2>
+    <p>You can delete your account at any time from the Account section of the app. Your data is
+    erased from active systems within 30 days and from cyclic backups within an additional 60
+    days, as described in the <a href={routeUrl('privacy', lang)}>Privacy notice</a>.</p>
+
+    <h2>Disclaimer</h2>
+    <p>The service is provided "as-is" and "as-available". To the extent permitted by law we
+    disclaim warranties of uninterrupted or error-free operation. Mandatory consumer rights remain
+    unaffected.</p>
+
+    <h2>Medical disclaimer</h2>
+    <p>Accanto is <strong>not a medical device</strong> within the meaning of Regulation (EU)
+    2017/745 and does not replace professional medical advice. In case of emergency call 112 (EU)
+    or your local emergency number.</p>
+
+    <h2>Governing law</h2>
+    <p>These terms are governed by Italian law. Any dispute that cannot be resolved amicably is
+    subject to the exclusive jurisdiction of the courts of Rome, Italy, subject to mandatory
+    consumer protection rules.</p>
+
+    <p class="text-sm text-accanto-500 mt-10">
+      Questions? Email <a href="mailto:support@accanto.care">support@accanto.care</a> or visit the
+      <a href={routeUrl('contact', lang)}>contact</a> page.
+    </p>
+  </article>
+</BaseLayout>

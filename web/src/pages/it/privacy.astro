@@ -3,62 +3,278 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { routeUrl } from '../../i18n';
 
 const lang = 'it' as const;
+const lastUpdated = '22 giugno 2026';
 ---
 <BaseLayout
   title="Privacy · Accanto"
-  description="Come Accanto tratta i tuoi dati: minimo indispensabile, niente profilazione, esportazione completa, possibilità di self-hosting."
+  description="Informativa sul trattamento dei dati personali di Accanto, ai sensi del Regolamento UE 2016/679 (GDPR)."
 >
   <article class="container-page container-prose">
     <p class="eyebrow mb-3">Privacy</p>
-    <h1 class="text-3xl sm:text-4xl font-semibold mb-6">I tuoi dati, le tue regole</h1>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Informativa privacy</h1>
+    <p class="text-sm text-accanto-500 mb-8">
+      Ultimo aggiornamento: {lastUpdated} · Ai sensi degli articoli 13 e 14 del Regolamento (UE) 2016/679 ("GDPR").
+    </p>
 
-    <nav aria-label="Indice della pagina" class="mb-8">
+    <nav aria-label="Indice della pagina" class="mb-10">
       <p class="eyebrow mb-2">In questa pagina</p>
       <ul class="text-sm text-accanto-600 space-y-1">
-        <li>• <a href="#cosa-raccogliamo" class="underline">Cosa raccogliamo</a></li>
-        <li>• <a href="#cosa-non-facciamo" class="underline">Cosa non facciamo</a></li>
-        <li>• <a href="#self-hosting" class="underline">Self-hosting</a></li>
+        <li>• <a href="#sintesi" class="underline">In breve</a></li>
+        <li>• <a href="#titolare" class="underline">Titolare del trattamento</a></li>
+        <li>• <a href="#dati" class="underline">Dati che trattiamo</a></li>
+        <li>• <a href="#finalita" class="underline">Finalità e basi giuridiche</a></li>
+        <li>• <a href="#conservazione" class="underline">Periodo di conservazione</a></li>
+        <li>• <a href="#destinatari" class="underline">Destinatari e responsabili esterni</a></li>
+        <li>• <a href="#trasferimenti" class="underline">Trasferimenti extra-UE</a></li>
         <li>• <a href="#diritti" class="underline">I tuoi diritti</a></li>
         <li>• <a href="#sicurezza" class="underline">Sicurezza</a></li>
+        <li>• <a href="#cookie" class="underline">Cookie e tracker</a></li>
+        <li>• <a href="#minori" class="underline">Minori</a></li>
+        <li>• <a href="#ai" class="underline">Funzionalità AI</a></li>
+        <li>• <a href="#self-hosting" class="underline">Self-hosting</a></li>
         <li>• <a href="#avviso-medico" class="underline">Avviso medico</a></li>
+        <li>• <a href="#modifiche" class="underline">Aggiornamenti dell'informativa</a></li>
       </ul>
     </nav>
 
-    <p>Accanto raccoglie informazioni sensibili che riguardano la salute di chi assisti.
-    Per questo motivo abbiamo scelto fin dall'inizio un approccio "privacy by design".</p>
+    <section id="sintesi">
+      <h2>In breve</h2>
+      <p>Accanto è pensata per chi assiste un familiare. Per offrirti il servizio trattiamo
+      alcuni dati che ti riguardano. In sintesi:</p>
+      <ul>
+        <li>Trattiamo solo i dati necessari a far funzionare l'app (account, contenuti che inserisci tu, log essenziali).</li>
+        <li>Non vendiamo i tuoi dati, non li usiamo per profilazione pubblicitaria, non ospitiamo tracker commerciali.</li>
+        <li>I tuoi contenuti sanitari sono trattati con misure di sicurezza dedicate (cifratura "at rest", accessi limitati, audit log).</li>
+        <li>Puoi esportare e cancellare i tuoi dati in qualsiasi momento dalla tua area personale.</li>
+        <li>Le notifiche push e le funzioni AI sono opt-in: puoi disattivarle senza compromettere l'uso dell'app.</li>
+      </ul>
+    </section>
 
-    <h2 id="cosa-raccogliamo">Cosa raccogliamo</h2>
-    <ul>
-      <li>Le informazioni che inserisci tu (note, sintomi, documenti, contatti).</li>
-      <li>I dati strettamente necessari al funzionamento dell'account (email, password con hash, log essenziali).</li>
-    </ul>
+    <section id="titolare">
+      <h2>Titolare del trattamento</h2>
+      <p>
+        <strong>PRESTIA.DEV S.A.S. DI PRESTIA ANDREA</strong><br />
+        Viale Bruno Rizzieri 199C, 00173 Roma (RM), Italia<br />
+        P.IVA / Codice Fiscale: <strong>IT17486541000</strong><br />
+        REA Roma: <strong>RM-1721153</strong><br />
+        Contatto privacy: <a href="mailto:support@accanto.care">support@accanto.care</a>
+      </p>
+      <p>Non è stato nominato un Responsabile della Protezione dei Dati (DPO) in quanto
+      il trattamento non rientra nei casi di obbligo ai sensi dell'art. 37 GDPR. Per qualunque
+      richiesta legata ai tuoi dati personali scrivi all'indirizzo indicato sopra.</p>
+    </section>
 
-    <h2 id="cosa-non-facciamo">Cosa non facciamo</h2>
-    <ul>
-      <li>Non vendiamo i tuoi dati.</li>
-      <li>Non facciamo profilazione pubblicitaria.</li>
-      <li>Non integriamo tracker di terze parti per scopi commerciali.</li>
-    </ul>
+    <section id="dati">
+      <h2>Dati che trattiamo</h2>
+      <ol>
+        <li>
+          <strong>Dati di account.</strong> Indirizzo email, password (memorizzata solo come hash
+          crittografico), nome visualizzato, lingua preferita, eventuale fattore di autenticazione
+          a due fattori (TOTP).
+        </li>
+        <li>
+          <strong>Contenuti che inserisci tu.</strong> Note, sintomi, diario timeline, domande per
+          il medico, documenti caricati, contatti e membri dei "cerchi di cura". Possono includere
+          <strong>dati relativi alla salute</strong> di chi assisti (categoria particolare ex art. 9 GDPR).
+        </li>
+        <li>
+          <strong>Dati tecnici.</strong> Indirizzo IP, user-agent, timestamp degli accessi, ID di sessione,
+          log di audit (chi ha aperto/modificato cosa nei cerchi di cura, per ragioni di sicurezza e
+          trasparenza tra i membri del cerchio).
+        </li>
+        <li>
+          <strong>Identificativi dispositivo (solo app mobile e push attive).</strong> Token push Expo
+          (ExponentPushToken), piattaforma (iOS/Android), nome del dispositivo. Vengono inviati
+          solo dopo che hai dato il consenso esplicito al sistema operativo.
+        </li>
+        <li>
+          <strong>Email transazionali</strong> (es. reset password, conferma invito). Indirizzo del
+          destinatario e contenuto strettamente funzionale.
+        </li>
+      </ol>
+      <p><strong>Non raccogliamo</strong>: dati di geolocalizzazione precisa, contatti rubrica, foto della galleria
+      (a meno che tu non scelga esplicitamente di caricarne una), identificativi pubblicitari, tracker
+      di terze parti.</p>
+    </section>
 
-    <h2 id="self-hosting">Self-hosting</h2>
-    <p>Accanto può essere installato sul tuo server. In quel caso i dati restano fisicamente
-    nel tuo ambiente. La modalità AI è opzionale e può essere collegata a un modello locale
-    (per esempio tramite Ollama).</p>
+    <section id="finalita">
+      <h2>Finalità e basi giuridiche</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Finalità</th>
+            <th>Categorie di dati</th>
+            <th>Base giuridica</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Erogazione del servizio (creazione account, accesso, sincronizzazione)</td>
+            <td>Account, contenuti, dati tecnici</td>
+            <td>Esecuzione del contratto — art. 6(1)(b) GDPR</td>
+          </tr>
+          <tr>
+            <td>Trattamento di dati sanitari inseriti volontariamente dall'utente</td>
+            <td>Contenuti sanitari (timeline, sintomi, documenti)</td>
+            <td>Consenso esplicito — artt. 6(1)(a) e 9(2)(a) GDPR</td>
+          </tr>
+          <tr>
+            <td>Sicurezza, prevenzione abusi, audit di accesso</td>
+            <td>Dati tecnici, audit log</td>
+            <td>Legittimo interesse — art. 6(1)(f) GDPR</td>
+          </tr>
+          <tr>
+            <td>Adempimenti fiscali e contabili (futuri abbonamenti)</td>
+            <td>Dati di fatturazione</td>
+            <td>Obbligo di legge — art. 6(1)(c) GDPR</td>
+          </tr>
+          <tr>
+            <td>Notifiche push (opt-in)</td>
+            <td>Token push, identificativi dispositivo</td>
+            <td>Consenso — art. 6(1)(a) GDPR</td>
+          </tr>
+          <tr>
+            <td>Risposta a richieste di supporto via email</td>
+            <td>Email + contenuto del ticket</td>
+            <td>Legittimo interesse / esecuzione di contratto</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
 
-    <h2 id="diritti">I tuoi diritti</h2>
-    <p>Puoi esportare i tuoi dati o richiederne la cancellazione in qualunque momento dalla tua area personale.
-    Per richieste specifiche puoi contattarci dalla pagina <a href={routeUrl('contact', lang)}>Contatti</a>.</p>
+    <section id="conservazione">
+      <h2>Periodo di conservazione</h2>
+      <ul>
+        <li><strong>Dati di account e contenuti:</strong> per tutta la durata del rapporto. Dopo la cancellazione dell'account, eliminati entro 30 giorni dai sistemi attivi e dai backup ciclici entro ulteriori 60 giorni.</li>
+        <li><strong>Audit log e log di sicurezza:</strong> 12 mesi.</li>
+        <li><strong>Token push:</strong> finché il dispositivo resta registrato; rimossi automaticamente al logout o quando il provider segnala il token come scaduto.</li>
+        <li><strong>Backup cifrati:</strong> rotazione su finestra di 90 giorni.</li>
+        <li><strong>Dati fiscali</strong> (quando applicabili): 10 anni come previsto dalla normativa italiana.</li>
+      </ul>
+    </section>
 
-    <h2 id="sicurezza">Sicurezza</h2>
-    <p>Le password sono salvate solo come hash. Le sessioni sono firmate e revocabili.
-    Le connessioni avvengono tramite HTTPS. Lavoriamo per mantenere superfici di attacco
-    ridotte e ben sorvegliate.</p>
+    <section id="destinatari">
+      <h2>Destinatari e responsabili esterni</h2>
+      <p>Per erogare il servizio ci avvaliamo dei seguenti soggetti, nominati responsabili del trattamento
+      ai sensi dell'art. 28 GDPR (o autonomi titolari, quando agiscono in tale veste):</p>
+      <table>
+        <thead>
+          <tr><th>Fornitore</th><th>Funzione</th><th>Ubicazione</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>IONOS Cloud (IONOS SE)</td><td>Hosting backend e database</td><td>Germania (UE)</td></tr>
+          <tr><td>Expo (650 Industries, Inc.)</td><td>Recapito notifiche push</td><td>Stati Uniti</td></tr>
+          <tr><td>Apple Push Notification service</td><td>Consegna push su iOS</td><td>Stati Uniti</td></tr>
+          <tr><td>Google Firebase Cloud Messaging</td><td>Consegna push su Android</td><td>Stati Uniti</td></tr>
+          <tr><td>Apple App Store / Google Play Store</td><td>Distribuzione dell'app</td><td>Stati Uniti / Irlanda (UE)</td></tr>
+        </tbody>
+      </table>
+      <p>Non utilizziamo strumenti di analytics di terze parti, non incorporiamo widget social o
+      pubblicitari, non condividiamo i tuoi dati a fini commerciali con nessuno.</p>
+    </section>
 
-    <h2 id="avviso-medico">Avviso medico</h2>
-    <p>Accanto non è un dispositivo medico. Le informazioni contenute nell'applicazione
-    non sostituiscono un consulto sanitario qualificato.</p>
+    <section id="trasferimenti">
+      <h2>Trasferimenti extra-UE</h2>
+      <p>I servizi di Expo, Apple e Google possono comportare un trasferimento di dati personali
+      verso gli Stati Uniti. Tali trasferimenti avvengono sulla base del
+      <strong>EU–U.S. Data Privacy Framework</strong> (decisione di adeguatezza della Commissione Europea
+      del 10 luglio 2023) oppure, in alternativa, sulla base di <strong>Clausole Contrattuali Standard</strong>
+      (Decisione 2021/914/UE) integrate da misure tecniche e organizzative supplementari.</p>
+      <p>Limitiamo i dati trasferiti al minimo indispensabile per la finalità della notifica
+      (token opaco + payload essenziale: tipo evento, ID cerchio di cura, identificativo entry).</p>
+    </section>
 
-    <p class="text-sm text-accanto-500 mt-10">Questa pagina è una sintesi orientativa, non sostituisce un'informativa privacy completa
-    che potrà essere richiesta tramite la pagina contatti.</p>
+    <section id="diritti">
+      <h2>I tuoi diritti</h2>
+      <p>In qualsiasi momento, ai sensi degli artt. 15-22 GDPR, hai diritto a:</p>
+      <ul>
+        <li><strong>Accesso</strong> ai tuoi dati personali e a una copia degli stessi.</li>
+        <li><strong>Rettifica</strong> di dati inesatti o incompleti.</li>
+        <li><strong>Cancellazione</strong> ("diritto all'oblio") dei tuoi dati.</li>
+        <li><strong>Limitazione</strong> del trattamento.</li>
+        <li><strong>Portabilità</strong>: ricevere i tuoi dati in formato strutturato e leggibile da macchina.</li>
+        <li><strong>Opposizione</strong> al trattamento basato su legittimo interesse.</li>
+        <li><strong>Revoca del consenso</strong> in qualunque momento, senza pregiudicare la liceità del trattamento precedente.</li>
+      </ul>
+      <p>Puoi esercitare la maggior parte di questi diritti direttamente dall'area Account dell'app
+      (esportazione dati, cancellazione account, revoca sessioni). Per richieste specifiche o se hai
+      bisogno di assistenza scrivi a <a href="mailto:support@accanto.care">support@accanto.care</a>.
+      Risponderemo entro 30 giorni come previsto dall'art. 12 GDPR.</p>
+      <p>Se ritieni che il trattamento violi la normativa puoi proporre reclamo al
+      <strong>Garante per la Protezione dei Dati Personali</strong>
+      (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>)
+      o a un'altra autorità di controllo competente.</p>
+    </section>
+
+    <section id="sicurezza">
+      <h2>Sicurezza</h2>
+      <ul>
+        <li>Le password sono salvate solo come hash con algoritmi resistenti a forza bruta.</li>
+        <li>Le sessioni sono firmate (JWT) e revocabili; supporto a TOTP per la 2FA.</li>
+        <li>Documenti caricati: cifratura "at rest" con chiave gestita dal titolare; accesso ristretto al cerchio di cura.</li>
+        <li>Backup giornalieri cifrati, conservati off-site con retention a 90 giorni.</li>
+        <li>Audit log immutabile delle azioni sensibili interne ai cerchi di cura.</li>
+        <li>Connessioni esclusivamente in HTTPS (TLS 1.2+).</li>
+        <li>Revisione periodica delle dipendenze (SBOM CycloneDX) e dei controlli di sicurezza.</li>
+      </ul>
+    </section>
+
+    <section id="cookie">
+      <h2>Cookie e tracker</h2>
+      <p>Il sito <strong>accanto.care</strong> utilizza esclusivamente cookie tecnici necessari al
+      funzionamento (mantenimento della preferenza di lingua, gestione della sessione di login).
+      <strong>Non utilizziamo cookie di profilazione</strong>, nessun cookie di terze parti, nessuno
+      strumento di analytics.</p>
+      <p>L'app mobile non utilizza cookie; conserva il token di autenticazione in storage sicuro
+      (Keychain su iOS, EncryptedSharedPreferences su Android tramite Expo SecureStore).</p>
+    </section>
+
+    <section id="minori">
+      <h2>Minori</h2>
+      <p>Accanto è destinata a un pubblico adulto (16+ ai sensi dell'art. 8 GDPR come applicato in Italia).
+      Non offriamo intenzionalmente il servizio a minori di 16 anni. Se sei genitore o tutore e ritieni
+      che un minore ci abbia fornito dati personali senza consenso, contattaci e procederemo alla
+      cancellazione.</p>
+    </section>
+
+    <section id="ai">
+      <h2>Funzionalità AI</h2>
+      <p>Accanto offre opzionalmente funzionalità di assistenza basate su modelli linguistici
+      (es. suggerimento di domande per il medico, sintesi). In produzione queste funzionalità
+      utilizzano <strong>esclusivamente modelli locali self-hosted</strong> (es. Ollama) eseguiti sulla
+      stessa infrastruttura di Accanto. <strong>Nessun prompt e nessun contenuto utente viene
+      trasmesso a fornitori AI cloud di terze parti</strong> (OpenAI, Anthropic, Google, ecc.).</p>
+      <p>Se in futuro introdurremo modelli cloud opzionali, sarà fornita un'informativa specifica
+      e ti sarà chiesto un consenso separato prima dell'attivazione.</p>
+    </section>
+
+    <section id="self-hosting">
+      <h2>Self-hosting</h2>
+      <p>Accanto è disponibile anche come applicazione installabile sul tuo server.
+      In quel caso il titolare del trattamento sei tu (o l'ente che gestisce l'installazione):
+      i dati restano fisicamente nel tuo ambiente e questa informativa non si applica nei tuoi
+      confronti come "titolare", ma può essere usata come modello per la tua organizzazione.</p>
+    </section>
+
+    <section id="avviso-medico">
+      <h2>Avviso medico</h2>
+      <p>Accanto <strong>non è un dispositivo medico</strong> ai sensi del Regolamento (UE) 2017/745
+      e <strong>non sostituisce</strong> il parere di un professionista sanitario qualificato.
+      Le informazioni e i suggerimenti offerti dall'app hanno finalità organizzative e di supporto
+      al caregiver. In caso di emergenza contatta il numero unico per le emergenze (112 in Italia).</p>
+    </section>
+
+    <section id="modifiche">
+      <h2>Aggiornamenti dell'informativa</h2>
+      <p>Possiamo aggiornare questa informativa per riflettere modifiche legali, organizzative o
+      tecniche. La data dell'ultimo aggiornamento è in cima alla pagina. Le modifiche sostanziali
+      ti saranno comunicate via email e/o tramite un avviso in app al successivo accesso.</p>
+    </section>
+
+    <p class="text-sm text-accanto-500 mt-12">
+      Per qualunque domanda sul trattamento dei tuoi dati personali puoi scrivere a
+      <a href="mailto:support@accanto.care">support@accanto.care</a> o tramite la pagina
+      <a href={routeUrl('contact', lang)}>Contatti</a>.
+    </p>
   </article>
 </BaseLayout>

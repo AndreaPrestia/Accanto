@@ -3,6 +3,8 @@
     "features": "Features",
     "forWhom": "Who it's for",
     "privacy": "Privacy",
+    "terms": "Terms",
+    "support": "Support",
     "faq": "FAQ",
     "pricing": "Pricing",
     "contact": "Contact",
@@ -26,5 +28,12 @@
     "it": "Italiano",
     "en": "English",
     "es": "Español"
+  },
+  "mobile": {
+    "title": "Mobile app coming soon",
+    "subtitle": "Accanto is coming to iPhone and Android. In the meantime you can use the web app from any device.",
+    "comingSoon": "Coming soon to",
+    "ios": "App Store",
+    "android": "Google Play"
   }
 }

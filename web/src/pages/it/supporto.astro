@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'it' as const;
+const lastUpdated = '22 giugno 2026';
+---
+<BaseLayout
+  title="Supporto · Accanto"
+  description="Hai bisogno di aiuto con Accanto? Scrivici a support@accanto.care. Risposte alle domande più frequenti su account, sicurezza, cerchi di cura e dati."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Supporto</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Come possiamo aiutarti</h1>
+    <p class="text-sm text-accanto-500 mb-8">Ultimo aggiornamento: {lastUpdated}</p>
+
+    <section class="rounded-lg border border-accanto-200 bg-accanto-50 p-5 mb-10">
+      <h2 class="text-lg font-semibold mb-2">Scrivici una email</h2>
+      <p class="mb-2">Per qualunque problema, dubbio o richiesta:</p>
+      <p class="text-lg">
+        <a href="mailto:support@accanto.care" class="font-semibold underline">support@accanto.care</a>
+      </p>
+      <p class="text-sm text-accanto-600 mt-3">
+        Rispondiamo di norma entro 2 giorni lavorativi. Per richieste relative al trattamento dei
+        dati personali (accesso, rettifica, cancellazione, portabilità) il tempo massimo di
+        risposta è di 30 giorni, come previsto dal GDPR.
+      </p>
+    </section>
+
+    <section>
+      <h2>Cosa includere nella richiesta</h2>
+      <ul>
+        <li>Indirizzo email dell'account con cui hai effettuato l'accesso.</li>
+        <li>Dispositivo e versione del sistema operativo (es. iPhone 15 / iOS 26, Pixel 8 / Android 15).</li>
+        <li>Versione dell'app (in Account → Informazioni o nella schermata di login).</li>
+        <li>Una descrizione del problema con i passaggi per riprodurlo, se possibile.</li>
+        <li>Eventuali screenshot (evita di includere dati personali di terzi se non necessari).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Domande frequenti</h2>
+
+      <h3>Ho dimenticato la password, cosa posso fare?</h3>
+      <p>Dalla schermata di login tocca "Password dimenticata?" e segui le istruzioni che riceverai
+      via email. Il link di reset è valido per un tempo limitato.</p>
+
+      <h3>Come funzionano i "cerchi di cura"?</h3>
+      <p>Un cerchio di cura è uno spazio condiviso dedicato a una persona da assistere. Tu sei
+      l'amministratore del cerchio e puoi invitare altre persone (familiari, caregiver) come
+      membri, attribuendo a ciascuno un ruolo. Tutti i membri vedono gli stessi contenuti, in modo
+      coordinato.</p>
+
+      <h3>Posso esportare tutti i miei dati?</h3>
+      <p>Sì. Dall'area Account dell'app puoi richiedere un'esportazione completa dei tuoi
+      contenuti (timeline, documenti, domande, cerchi). L'esportazione è in formato strutturato e
+      leggibile da macchina, come previsto dal diritto alla portabilità (art. 20 GDPR).</p>
+
+      <h3>Come cancello l'account?</h3>
+      <p>Dall'area Account dell'app è disponibile la voce "Elimina account". L'operazione comporta
+      la cancellazione dei tuoi dati dai sistemi attivi entro 30 giorni e dai backup ciclici entro
+      ulteriori 60 giorni. Per i dettagli vedi la nostra <a href={routeUrl('privacy', lang)}>Informativa privacy</a>.</p>
+
+      <h3>Non ricevo le notifiche push, perché?</h3>
+      <p>Controlla in ordine: 1) di aver concesso il permesso alle notifiche dalle impostazioni
+      del telefono per Accanto; 2) di non aver attivato la modalità "Non disturbare" o "Focus";
+      3) di avere connessione di rete attiva. Se il problema persiste prova a uscire e rientrare
+      nell'account: l'app rinegozia il token push al nuovo login.</p>
+
+      <h3>I miei dati sono al sicuro?</h3>
+      <p>Adottiamo cifratura "at rest" per i documenti, hashing crittografico delle password,
+      audit log delle azioni sensibili e backup cifrati. Le connessioni avvengono esclusivamente
+      in HTTPS. Per dettagli tecnici e per i diritti che hai sui tuoi dati consulta la
+      <a href={routeUrl('privacy', lang)}>Informativa privacy</a>.</p>
+
+      <h3>Accanto è un dispositivo medico?</h3>
+      <p>No. Accanto è uno strumento di supporto organizzativo al caregiver. Non fornisce
+      diagnosi né raccomandazioni cliniche e non sostituisce il parere di un professionista
+      sanitario. In caso di emergenza chiama il 112.</p>
+
+      <h3>Posso usare Accanto sul mio server?</h3>
+      <p>Sì. Accanto è disponibile come applicazione self-hosted. Trovi il codice e le istruzioni
+      di installazione sul nostro repository pubblico, linkato dal sito.</p>
+
+      <h3>Come segnalo un problema di sicurezza?</h3>
+      <p>Scrivi a <a href="mailto:support@accanto.care">support@accanto.care</a> con oggetto
+      "Segnalazione sicurezza". Ci impegniamo a rispondere e a coordinare la risoluzione secondo
+      una policy di "responsible disclosure". Vedi anche il file
+      <a href="/.well-known/security.txt"><code>/.well-known/security.txt</code></a>.</p>
+    </section>
+
+    <section>
+      <h2>Documenti utili</h2>
+      <ul>
+        <li><a href={routeUrl('privacy', lang)}>Informativa privacy</a></li>
+        <li><a href={routeUrl('terms', lang)}>Termini di servizio</a></li>
+        <li><a href={routeUrl('faq', lang)}>FAQ generali</a></li>
+        <li><a href={routeUrl('contact', lang)}>Pagina contatti</a></li>
+      </ul>
+    </section>
+  </article>
+</BaseLayout>

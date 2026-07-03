@@ -1,0 +1,20 @@
+# Smoke flow: apre l'app via universal/app link su /support
+# (pagina pubblica, non richiede login).
+#
+# Eseguibile dal device dopo aver fatto build con variant `development`
+# (scheme accanto.dev://) o `production` (accanto://).
+#
+#   maestro test .maestro/deeplink-support.yaml
+appId: ${MAESTRO_APP_ID}
+env:
+  SCHEME: ${MAESTRO_SCHEME}   # es. "accanto.dev" o "accanto"
+---
+- launchApp:
+    clearState: true
+- openLink: "${SCHEME}://support"
+# La SupportScreen renderizza l'header tradotto (support.title).
+# Italiano: "Trovi supporto" — testiamo solo il fragment più stabile.
+- extendedWaitUntil:
+    visible:
+      text: ".*(Trovi supporto|Find support|Encuentra apoyo).*"
+    timeout: 8000

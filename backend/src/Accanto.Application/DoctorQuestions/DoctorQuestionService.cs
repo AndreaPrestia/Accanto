@@ -4,6 +4,7 @@ using Accanto.Application.Common.Exceptions;
 using Accanto.Application.Common.Persistence;
 using Accanto.Application.Common.Validation;
 using Accanto.Application.Email;
+using Accanto.Application.Push;
 using Accanto.Domain.Entities;
 using Accanto.Domain.Enums;
 using FluentValidation;
@@ -17,6 +18,7 @@ public class DoctorQuestionService : IDoctorQuestionService
     private readonly ICareCircleAuthorization _auth;
     private readonly IAuditLog _audit;
     private readonly ICircleEmailNotifier _email;
+    private readonly ICircleMobilePushNotifier _mobilePush;
     private readonly IValidator<CreateDoctorQuestionRequest> _createValidator;
     private readonly IValidator<UpdateDoctorQuestionRequest> _updateValidator;
 
@@ -25,6 +27,7 @@ public class DoctorQuestionService : IDoctorQuestionService
         ICareCircleAuthorization auth,
         IAuditLog audit,
         ICircleEmailNotifier email,
+        ICircleMobilePushNotifier mobilePush,
         IValidator<CreateDoctorQuestionRequest> createValidator,
         IValidator<UpdateDoctorQuestionRequest> updateValidator)
     {
@@ -32,6 +35,7 @@ public class DoctorQuestionService : IDoctorQuestionService
         _auth = auth;
         _audit = audit;
         _email = email;
+        _mobilePush = mobilePush;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
     }
@@ -96,6 +100,18 @@ public class DoctorQuestionService : IDoctorQuestionService
             _ = _email.NotifyCircleAsync(careCircleId, userId, NotificationTopic.DoctorQuestionAnswered,
                 $"Domanda al medico aggiornata in {circleName}",
                 EmailTemplates.DoctorQuestionAnswered(circleName, q.Question),
+                CancellationToken.None);
+            _ = _mobilePush.NotifyCircleAsync(
+                careCircleId,
+                userId,
+                NotificationTopic.DoctorQuestionAnswered,
+                circleName,
+                "Una domanda al medico è stata aggiornata",
+                new Dictionary<string, string>
+                {
+                    ["circleId"] = careCircleId.ToString(),
+                    ["questionId"] = q.Id.ToString()
+                },
                 CancellationToken.None);
         }
 

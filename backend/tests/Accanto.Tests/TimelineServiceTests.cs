@@ -30,7 +30,7 @@ public class TimelineServiceTests
         var auth = new CareCircleAuthorization(db);
         IValidator<CreateTimelineEntryRequest> cv = new CreateTimelineEntryRequestValidator();
         IValidator<UpdateTimelineEntryRequest> uv = new UpdateTimelineEntryRequestValidator();
-        var svc = new TimelineService(db, auth, new NoOpPushService(), new NoOpCircleEmailNotifier(), new NoOpAuditLog(), cv, uv, new BulkUpdateTimelineEntriesRequestValidator());
+        var svc = new TimelineService(db, auth, new NoOpPushService(), new NoOpCircleEmailNotifier(), new NoOpCircleMobilePushNotifier(), new NoOpAuditLog(), cv, uv, new BulkUpdateTimelineEntriesRequestValidator());
         return (svc, db, circleId, alice, bob);
     }
 

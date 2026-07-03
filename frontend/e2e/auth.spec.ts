@@ -10,7 +10,8 @@ test('registrazione, navigazione e logout funzionano', async ({ page }) => {
   await expect(page).toHaveURL(/\/$|\/circles|\/care-circles/);
   await expect(page.getByRole('link', { name: user.displayName }).or(page.getByRole('link', { name: 'Account' }))).toBeVisible();
 
-  // Go to /account and verify the wellbeing section header is rendered
-  await page.goto('/account');
+  // Go to /account e verifica che la sezione Benessere si apra via deep-link.
+  // (AccountPage è in accordion: Benessere è chiuso di default, l'anchor lo apre.)
+  await page.goto('/account#section-wellbeing');
   await expect(page.getByRole('heading', { name: /come stai oggi/i })).toBeVisible();
 });

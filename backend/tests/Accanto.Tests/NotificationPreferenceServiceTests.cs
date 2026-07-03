@@ -63,4 +63,57 @@ public class NotificationPreferenceServiceTests
         fetched.Single(p => p.Topic == NotificationTopic.TimelineEntryCreated).EmailEnabled.Should().BeFalse();
         fetched.Single(p => p.Topic == NotificationTopic.SharedUpdateCreated).EmailEnabled.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task Get_returns_PushEnabled_default_true_when_no_rows()
+    {
+        var db = TestDb.Create();
+        var svc = new NotificationPreferenceService(db);
+        var userId = Guid.NewGuid();
+
+        var prefs = await svc.GetAsync(userId);
+
+        prefs.Should().OnlyContain(p => p.PushEnabled == true);
+    }
+
+    [Fact]
+    public async Task Update_with_null_PushEnabled_preserves_existing_value()
+    {
+        var db = TestDb.Create();
+        var svc = new NotificationPreferenceService(db);
+        var userId = Guid.NewGuid();
+
+        await svc.UpdateAsync(userId, new UpdateNotificationPreferencesRequest(new[]
+        {
+            new NotificationPreferenceDto(NotificationTopic.TimelineEntryCreated, EmailEnabled: true, PushEnabled: false)
+        }));
+
+        await svc.UpdateAsync(userId, new UpdateNotificationPreferencesRequest(new[]
+        {
+            new NotificationPreferenceDto(NotificationTopic.TimelineEntryCreated, EmailEnabled: false, PushEnabled: null)
+        }));
+
+        var fetched = await svc.GetAsync(userId);
+        var p = fetched.Single(x => x.Topic == NotificationTopic.TimelineEntryCreated);
+        p.EmailEnabled.Should().BeFalse();
+        p.PushEnabled.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Update_with_PushEnabled_only_changes_push_flag()
+    {
+        var db = TestDb.Create();
+        var svc = new NotificationPreferenceService(db);
+        var userId = Guid.NewGuid();
+
+        await svc.UpdateAsync(userId, new UpdateNotificationPreferencesRequest(new[]
+        {
+            new NotificationPreferenceDto(NotificationTopic.SharedUpdateCreated, EmailEnabled: true, PushEnabled: false)
+        }));
+
+        var fetched = await svc.GetAsync(userId);
+        var p = fetched.Single(x => x.Topic == NotificationTopic.SharedUpdateCreated);
+        p.EmailEnabled.Should().BeTrue();
+        p.PushEnabled.Should().BeFalse();
+    }
 }

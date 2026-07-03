@@ -10,6 +10,14 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* Accessibility: "Testo più grande" (toggle in Account → Profilo).
+   La class è applicata su <html> a boot da src/lib/textScale.ts leggendo
+   localStorage 'accanto.largeText'. Alza il font-size base da 16px a 18px
+   (+12.5%): tutta la UI Tailwind (che usa rem) scala proporzionalmente. */
+html.accanto-large {
+  font-size: 18px;
+}
+
 @layer components {
   .btn {
     @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50;
