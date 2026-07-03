@@ -1,0 +1,6 @@
+# Screenshot generati localmente, non committati (troppo pesanti per il repo).
+# Vedi README.md nella stessa cartella per specifiche e workflow.
+*.png
+*.jpg
+*.jpeg
+!README.md

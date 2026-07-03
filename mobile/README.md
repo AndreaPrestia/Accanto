@@ -127,36 +127,27 @@ I sorgenti SVG sono in `mobile/assets/`:
 - `notification-icon-source.svg` → 96×96 monocromatico bianco per le push Android.
 
 I PNG effettivi caricati dall'app (`icon.png`, `adaptive-icon.png`,
-`notification-icon.png`, `splash.png`, `favicon.png`) sono attualmente placeholder
-generati da Expo. Per rigenerarli dalle sorgenti SVG, due modi:
+`notification-icon.png`, `splash.png`, `favicon.png`) sono generati dagli SVG
+sorgenti via script Node + `sharp`.
 
-**A. Via [icon.kitchen](https://icon.kitchen) (raccomandato, nessuna dipendenza)**
-
-1. Carica `icon-source.svg`, scarica i pacchetti iOS + Android.
-2. Sostituisci:
-   - `assets/icon.png` con `ios/AppIcon~ios-marketing.png` (1024×1024).
-   - `assets/adaptive-icon.png` con il foreground `mipmap-xxxhdpi/ic_launcher_foreground.png`
-     (oppure ri-esporta da `adaptive-icon-source.svg` a 1024×1024 con bordi trasparenti).
-   - `assets/notification-icon.png` con un export di `notification-icon-source.svg`
-     a 96×96 bianco/trasparente.
-3. `splash.png` e `favicon.png`: vedi sotto.
-
-**B. Via `sharp` da CLI** (richiede Node + `npm i -g sharp-cli`):
+**Rigenerazione (raccomandato)**
 
 ```pwsh
-cd mobile/assets
-sharp -i icon-source.svg -o icon.png resize 1024 1024
-sharp -i adaptive-icon-source.svg -o adaptive-icon.png resize 1024 1024
-sharp -i notification-icon-source.svg -o notification-icon.png resize 96 96
+cd mobile
+node scripts/gen-icons.mjs
 ```
 
-**Splash screen** (`splash.png`, 1284×2778 consigliato): immagine semplice con
-logo Accanto centrato su sfondo `#f8fafc` (definito in `app.config.ts`
-`splash.backgroundColor`). Può essere generato dallo stesso `icon-source.svg`
-posizionato su canvas 1284×2778, oppure da icon.kitchen → Splash Screen.
+Lo script produce tutti gli asset alle dimensioni corrette (icon 1024², adaptive
+1024² trasparente, notification 96² bianco, splash 1284×2778 con logo centrato
+su `#f8fafc`, favicon 48²). `sharp` è già in `devDependencies`.
 
-**Favicon web** (`favicon.png`, 48×48): export di `icon-source.svg` a quella
-dimensione, sostituisce il placeholder Expo per il bundle web.
+**Alternative senza script**
+
+- Online: carica `icon-source.svg` su [icon.kitchen](https://icon.kitchen) e
+  scarica i pacchetti iOS + Android — utile se vuoi variazioni di stile senza
+  toccare la sorgente.
+- CLI diretta: `npx sharp-cli -i icon-source.svg -o icon.png resize 1024 1024`
+  (una singola dimensione alla volta).
 
 > Verificare ogni rebuild che `npx expo prebuild --clean` non rigeneri gli asset
 > sovrascrivendo quelli custom: il progetto è **managed**, quindi i PNG in

@@ -1,0 +1,1 @@
+cuidador,familia,cuidado,mayores,demencia,diario,medico,bienestar,coordinacion,apoyo

@@ -1,0 +1,19 @@
+Accanto è la stanza tranquilla dove chi assiste un familiare raccoglie ciò che serve senza inondare chat: note quotidiane, documenti clinici, domande per il medico, promemoria per sé.
+
+COSA PUOI FARE
+• Cerchi di cura — un cerchio per persona assistita: inviti solo chi vuoi (familiari, badante, medico di fiducia) e decidi cosa condividere con ciascuno.
+• Timeline condivisa — annota sintomi, episodi, cambi terapia in ordine cronologico. Tutto ritrovabile la prossima volta che serve.
+• Documenti a portata di mano — ricette, referti, moduli sempre disponibili, anche di notte o in pronto soccorso.
+• Domande per il medico — raccogli dubbi tra una visita e l'altra, arriva preparato.
+• Aggiornamenti per la famiglia — un riepilogo su richiesta, quando serve, senza chat infinite.
+• Cura di sé — piccoli spazi per riconoscere il proprio carico. Anche chi assiste ha bisogno di essere assistito.
+
+PRIVACY
+Nessuna pubblicità. Nessuna profilazione. Nessuna analisi comportamentale. I tuoi dati restano tuoi: puoi esportare tutto in qualsiasi momento e chiudere l'account con un click. L'intelligenza artificiale è opzionale, spenta di default, e usa un modello self-hosted (nessun invio a servizi cloud AI).
+
+SICUREZZA
+Verifica in due passaggi, dispositivi collegati sotto controllo, registro azioni per ogni cerchio, sblocco con Face ID.
+
+Titolare del trattamento: PRESTIA.DEV S.A.S. — Roma (Italia). Hosting in Germania (UE). Vedi https://accanto.care/it/privacy per il dettaglio completo.
+
+Accanto non è un dispositivo medico e non sostituisce il parere di un professionista sanitario.

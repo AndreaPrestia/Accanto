@@ -1,0 +1,8 @@
+Primera versión pública de Accanto.
+
+• Crea tu primer círculo de cuidado e invita a quien quieras
+• Cronología compartida, documentos, preguntas para el médico
+• Autocuidado: recordatorios para reconocer tu propia carga
+• Desbloqueo con Face ID
+• Notificaciones push para las actualizaciones importantes
+• Interfaz en italiano, inglés, español

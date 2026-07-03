@@ -1,0 +1,7 @@
+Prima versione pubblica di Accanto.
+
+• Crea il tuo primo cerchio di cura e invita chi vuoi
+• Timeline condivisa, documenti, domande per il medico
+• Cura di sé: promemoria per riconoscere il proprio carico
+• Notifiche push per gli aggiornamenti importanti
+• Interfaccia in italiano, inglese, spagnolo

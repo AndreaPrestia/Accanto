@@ -1,0 +1,7 @@
+First public release of Accanto.
+
+• Create your first care circle and invite the people you want
+• Shared timeline, documents, questions for the doctor
+• Self care: reminders to acknowledge your own load
+• Push notifications for important updates
+• Interface in Italian, English, Spanish

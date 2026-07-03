@@ -1,0 +1,25 @@
+Accanto è la stanza tranquilla dove chi assiste un familiare raccoglie ciò che serve senza inondare chat: note quotidiane, documenti clinici, domande per il medico, promemoria per sé.
+
+<b>Perché nasce</b>
+Chi si prende cura di un genitore anziano, di un partner con una malattia cronica o di un familiare fragile lo sa: il coordinamento tra fratelli, badante, medici e specialisti finisce in decine di chat, foto sfocate di ricette, promemoria appuntati su fogli sparsi. Accanto è pensato per liberare quella testa. Un cerchio per persona, tutto in un posto solo, ritrovabile anche di notte o in pronto soccorso.
+
+<b>Cosa puoi fare</b>
+• Cerchi di cura — un cerchio per persona assistita: inviti solo chi vuoi (familiari, badante, medico di fiducia) e decidi cosa condividere con ciascuno.
+• Timeline condivisa — annota sintomi, episodi, cambi terapia in ordine cronologico. Tutto ritrovabile la prossima volta che serve.
+• Documenti a portata di mano — ricette, referti, moduli sempre disponibili.
+• Domande per il medico — raccogli dubbi tra una visita e l'altra, arriva preparato.
+• Aggiornamenti per la famiglia — un riepilogo su richiesta, senza chat infinite.
+• Cura di sé — piccoli spazi per riconoscere il proprio carico. Anche chi assiste ha bisogno di essere assistito.
+
+<b>Privacy by design</b>
+Nessuna pubblicità. Nessuna profilazione. Nessuna analisi comportamentale. I tuoi dati restano tuoi: esportazione completa in ogni momento, chiusura account con un click. L'intelligenza artificiale è opzionale, spenta di default, e usa un modello self-hosted (nessun invio a servizi cloud AI).
+
+<b>Sicurezza</b>
+Verifica in due passaggi, controllo dei dispositivi collegati, registro azioni per ogni cerchio, sblocco con impronta o riconoscimento facciale (dove supportato dal dispositivo).
+
+<b>A chi è pensato</b>
+Familiari caregiver, spesso figlie e figli tra i 45 e i 70 anni, che coordinano la cura di un genitore anziano, di un partner con una malattia cronica, di un familiare con demenza o disabilità. Nessuna competenza tecnica richiesta.
+
+Titolare del trattamento: PRESTIA.DEV S.A.S. — Roma (Italia). Hosting in Germania (UE). Informativa completa: https://accanto.care/it/privacy
+
+Accanto non è un dispositivo medico e non sostituisce il parere di un professionista sanitario.

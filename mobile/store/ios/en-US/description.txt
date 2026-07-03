@@ -1,0 +1,19 @@
+Accanto is a quiet room where family caregivers keep what matters, without flooding chats: daily notes, clinical documents, questions for the doctor, reminders for themselves.
+
+WHAT YOU CAN DO
+• Care circles — one circle per person you care for: invite only the people you want (family, hired carer, trusted doctor) and decide what to share with each.
+• Shared timeline — log symptoms, episodes, therapy changes in chronological order. Everything findable next time it matters.
+• Documents at hand — prescriptions, reports, forms always available, even at night or in the ER.
+• Questions for the doctor — collect concerns between visits, arrive prepared.
+• Family updates — a summary on demand, when needed, without endless chats.
+• Self care — small spaces to acknowledge your own load. Those who care also need to be cared for.
+
+PRIVACY
+No ads. No tracking. No behavioural analytics. Your data stays yours: full export any time, one-click account deletion. AI is optional, off by default, and runs on a self-hosted model (no data sent to cloud AI providers).
+
+SECURITY
+Two-step verification, connected devices control, per-circle audit log, Face ID unlock.
+
+Data controller: PRESTIA.DEV S.A.S. — Rome (Italy). Hosting in Germany (EU). See https://accanto.care/en/privacy for full details.
+
+Accanto is not a medical device and does not replace professional medical advice.

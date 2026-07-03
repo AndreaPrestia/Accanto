@@ -23,6 +23,12 @@ android/
 *.ipa
 *.app
 
+# Store metadata (whitelisted despite the ios/ and android/ patterns above)
+!store/ios/
+!store/ios/**
+!store/android/
+!store/android/**
+
 # Env
 .env
 .env.local
