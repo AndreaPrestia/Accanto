@@ -118,7 +118,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ],
     extra: {
       eas: {
-        projectId: process.env.EAS_PROJECT_ID ?? ''
+        // Fallback all'ID del progetto expo.dev: serve a runtime alle push
+        // (getExpoPushTokenAsync) e deve essere embedded in ogni build.
+        projectId:
+          process.env.EAS_PROJECT_ID ??
+          '54f532b4-9b94-4dae-80d6-4b169f15d775'
       },
       apiBaseUrl:
         process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://api.accanto.care',

@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appIDs": ["REPLACE_WITH_APPLE_TEAM_ID.app.accanto.mobile"],
+        "appIDs": ["JP7XBZJ6FN.app.accanto.mobile"],
         "components": [
           { "/": "/invite/*", "comment": "Inviti care circle" },
           { "/": "/reset-password*", "comment": "Reset password" },
@@ -16,6 +16,6 @@
     ]
   },
   "webcredentials": {
-    "apps": ["REPLACE_WITH_APPLE_TEAM_ID.app.accanto.mobile"]
+    "apps": ["JP7XBZJ6FN.app.accanto.mobile"]
   }
 }
