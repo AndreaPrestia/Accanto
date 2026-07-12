@@ -71,3 +71,8 @@ sbom/
 *.cdx.json
 *.cdx.json.sha256
 
+# Config Expo/EAS spuri generati nella ROOT del monorepo (la config vera
+# vive in mobile/). Lanciare expo/eas SOLO da mobile/, mai dalla root.
+/eas.json
+/app.json
+

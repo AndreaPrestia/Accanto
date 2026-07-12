@@ -70,6 +70,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       // Niente activitycontinuation: non usiamo Handoff.
       associatedDomains: ['applinks:accanto.care'],
       infoPlist: {
+        // Solo crittografia standard/esente (HTTPS/TLS + keychain OS via
+        // expo-secure-store): rientra nell'esenzione export USA, così App
+        // Store non chiede la export compliance a ogni submit.
+        ITSAppUsesNonExemptEncryption: false,
         NSFaceIDUsageDescription:
           'Usa Face ID per sbloccare Accanto rapidamente senza inserire la password.',
         // Stringa richiesta da App Store review nel caso DocumentPicker
