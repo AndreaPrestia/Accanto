@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3f5169"/>
+      <stop offset="100%" stop-color="#2f3d52"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#bg)"/>
+  <!-- persona dietro (verde salvia) -->
+  <circle cx="262" cy="172" r="40" fill="#93c5b5"/>
+  <path d="M197 326C197 250 230 212 262 212C294 212 327 250 327 326Z" fill="#93c5b5"/>
+  <!-- persona davanti (avorio) -->
+  <circle cx="155" cy="186" r="48" fill="#f1f5f9"/>
+  <path d="M75 326C75 252 111 222 155 222C199 222 235 252 235 326Z" fill="#f1f5f9"/>
+</svg>
