@@ -49,7 +49,7 @@ jobs:
             context: .
             dockerfile: ./backend/Dockerfile
           - name: frontend
-            context: ./frontend
+            context: .
             dockerfile: ./frontend/Dockerfile
           - name: web
             context: ./web
