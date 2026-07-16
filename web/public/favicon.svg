@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <rect width="64" height="64" rx="14" fill="#334155"/>
-  <path d="M22 42c0-6 4-10 10-10s10 4 10 10" stroke="#f1f5f9" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="32" cy="24" r="6" fill="#f1f5f9"/>
+  <!-- persona dietro (verde salvia) -->
+  <circle cx="42" cy="23" r="6.5" fill="#93c5b5"/>
+  <path d="M31 49C31 39 36 31 42 31C48 31 53 39 53 49Z" fill="#93c5b5"/>
+  <!-- persona davanti (avorio) -->
+  <circle cx="25" cy="25" r="8" fill="#f1f5f9"/>
+  <path d="M12 49C12 39 18 34 25 34C32 34 38 39 38 49Z" fill="#f1f5f9"/>
 </svg>
