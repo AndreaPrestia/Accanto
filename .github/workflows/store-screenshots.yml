@@ -40,13 +40,9 @@ jobs:
       - name: Install dependencies (workspace root)
         run: npm ci
         # npm ci dalla root installa TUTTI gli workspace (mobile incluso) e
-        # linka @accanto/shared come workspace dependency.
-
-      # Mobile importa @accanto/shared (workspace): serve la sua build (dist/)
-      # prima che Metro/EAS bundlelli l'app, altrimenti la build iOS fallisce
-      # non trovando i tipi/moduli shared compilati.
-      - name: Build shared workspace
-        run: npm run build:shared
+        # linka @accanto/shared come workspace dependency. N.B.: shared e'
+        # consumato come SORGENTE TS (main: ./src/index.ts, niente build step
+        # — Metro lo transpila), quindi non serve alcuna build del workspace.
 
       - name: Install Maestro
         run: curl -Ls https://get.maestro.mobile.dev | bash
