@@ -1,0 +1,74 @@
+{
+  "background": "#0f172a",
+  "foreground": "#f8fafc",
+  "subtle": "#94a3b8",
+  "fontFamily": "Inter, Segoe UI, Arial",
+  "locales": {
+    "it-IT": {
+      "01-dashboard": {
+        "title": "Tutto il tuo cerchio di cura, in un unico spazio",
+        "subtitle": "Accoglienza sicura dal primo accesso"
+      },
+      "02-timeline": {
+        "title": "Ogni momento della cura, sempre con te",
+        "subtitle": "Sintomi, terapie e note in un diario condiviso"
+      },
+      "03-documents": {
+        "title": "Documenti sempre a portata di mano",
+        "subtitle": "Ricette e referti organizzati e al sicuro"
+      },
+      "04-doctor-questions": {
+        "title": "Le domande giuste, pronte per il medico",
+        "subtitle": "Non dimenticare nulla alla prossima visita"
+      },
+      "05-self-care": {
+        "title": "Prenditi cura anche di te",
+        "subtitle": "Piccoli gesti quotidiani per chi assiste"
+      }
+    },
+    "en-US": {
+      "01-dashboard": {
+        "title": "Your whole care circle, in one place",
+        "subtitle": "A safe, welcoming start from day one"
+      },
+      "02-timeline": {
+        "title": "Every moment of care, always with you",
+        "subtitle": "Symptoms, meds and notes in a shared diary"
+      },
+      "03-documents": {
+        "title": "Documents always within reach",
+        "subtitle": "Prescriptions and reports, organized and safe"
+      },
+      "04-doctor-questions": {
+        "title": "The right questions, ready for the doctor",
+        "subtitle": "Never forget anything at the next visit"
+      },
+      "05-self-care": {
+        "title": "Take care of yourself too",
+        "subtitle": "Small daily gestures for caregivers"
+      }
+    },
+    "es-ES": {
+      "01-dashboard": {
+        "title": "Todo tu círculo de cuidado, en un solo espacio",
+        "subtitle": "Una bienvenida segura desde el primer acceso"
+      },
+      "02-timeline": {
+        "title": "Cada momento del cuidado, siempre contigo",
+        "subtitle": "Síntomas, medicación y notas en un diario compartido"
+      },
+      "03-documents": {
+        "title": "Documentos siempre a tu alcance",
+        "subtitle": "Recetas e informes organizados y seguros"
+      },
+      "04-doctor-questions": {
+        "title": "Las preguntas justas, listas para el médico",
+        "subtitle": "No olvides nada en la próxima visita"
+      },
+      "05-self-care": {
+        "title": "Cuídate también a ti",
+        "subtitle": "Pequeños gestos diarios para quien cuida"
+      }
+    }
+  }
+}

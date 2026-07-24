@@ -54,31 +54,49 @@ aspect ratio.
 
 ## Workflow di generazione
 
-### iOS via simulator (raccomandato)
+### iOS via GitHub Actions macOS (senza Mac locale — raccomandato)
+
+Il workflow `.github/workflows/store-screenshots.yml` gira su runner `macos-15`:
+
+1. Crea un simulator **iPhone 16 Pro Max (6.9")**.
+2. Compila l'app con EAS profilo `store-screenshots` (`ios.simulator: true`).
+3. Esegue il flow Maestro `.maestro/screenshots.yaml` (login demo → 5 schermate).
+4. Carica i PNG raw come artifact `ios-raw-screenshots`.
+
+Setup una tantum (GitHub → Settings → Secrets and variables → Actions):
+
+- secret `EAS_TOKEN` (expo.dev → account → access tokens)
+- secret `MAESTRO_EMAIL` + `MAESTRO_PASSWORD` di un account **demo** con dati
+  pre-popolati (cerchio `Famiglia Rossi`, timeline, documenti…)
+
+Esecuzione:
 
 ```pwsh
-cd mobile
-# 1. Avvia Metro (LAN o dev-client)
-npx expo start --ios
-
-# 2. Nel simulator: apri l'app col reviewer account (dati puliti pre-popolati)
-# 3. Naviga a ciascuna delle 5 schermate target
-# 4. Cmd+S nel simulator → scarica su Desktop
-# 5. Ridimensiona/verifica con:
-sips -Z 2796 ~/Desktop/Simulator-Screenshot-*.png --resampleWidth 1290
+# 1. Actions → store-screenshots → Run workflow
+# 2. Scarica l'artifact ios-raw-screenshots in:
+#    mobile/store/screenshots/_raw/ios/   (file: 01-dashboard.png … 05-self-care.png)
+# 3. Componi le canvas App Store (1320x2868 + 1284x2778):
+pwsh mobile/scripts/store-screenshots.ps1 -Mode compose-ios
 ```
 
-Alternativa: `xcrun simctl io booted screenshot ~/Desktop/screen.png` da terminale.
+Se hai un Mac a disposizione, in alternativa: `xcrun simctl io booted screenshot screen.png`
+oppure `Cmd+S` nel simulator.
 
 ### Android via emulator (Android Studio)
 
 ```pwsh
-# 1. Avvia AVD "Pixel 8 Pro" API 34 (o superiore, 1080x2400)
-# 2. Nell'emulator: avvia l'app
-# 3. Camera icon nella toolbar dell'emulator → screenshot salvato in ~/Desktop
+# 1. Avvia AVD "Pixel 8 Pro" API 34+ (1080x2400)
+# 2. Cattura automatica delle 5 schermate + composizione canvas Play (1080x1920):
+pwsh mobile/scripts/store-screenshots.ps1 -Mode capture-android
+#    (lo script usa `adb exec-out screencap -p` e ti guida schermata per schermata)
 ```
 
-Alternativa: `adb exec-out screencap -p > screen.png`.
+Cattura automatica (opzionale): esegui prima `maestro test .maestro/screenshots.yaml`
+con l'emulatore attivo, poi copia i PNG da `~/.maestro/tests/` in
+`store/screenshots/_tmp/` e riadatta.
+
+Alternativa manuale: camera icon nella toolbar dell'emulator, oppure
+`adb exec-out screencap -p > screen.png`.
 
 ### Ordine e contenuto suggerito (v1)
 
@@ -96,12 +114,23 @@ generici). Nessuna PII di persone reali.
 
 ## Text overlay / marketing frames
 
-Opzionale: incorniciare gli screenshot in un mockup device (bezel iPhone/Pixel)
-con una didascalia breve sopra. Ottimo per conversione, ma richiede tempo. Per
-la v1 si può caricare screenshot "puri" (senza cornice) — Apple e Google li
-accettano entrambi.
+Opzionale: incorniciare gli screenshot con sfondo brand + titolo/sottotitolo
+sopra lo schermo. Ottimo per conversione. **Automatizzato** in questo repo:
 
-Se vuoi cornici: [Screenshots.pro](https://screenshots.pro), [Rotato](https://rotato.app),
+```pwsh
+# Dopo aver composto i set base (capture-android / compose-ios):
+pwsh mobile/scripts/store-screenshots.ps1 -Mode frames -Locales it-IT,en-US,es-ES
+```
+
+- Copy e colori in `frames.config.json` (committato, per locale).
+- Output in `screenshots/framed/<locale>/<set>/` (gitignored), stesse dimensioni
+  del set di partenza → caricabili direttamente nelle console.
+- Rendering via `System.Drawing` (nativo Windows, zero dipendenze).
+
+Per la v1 si possono anche caricare screenshot "puri" (senza frame) — Apple e
+Google li accettano entrambi.
+
+Alternative esterne: [Screenshots.pro](https://screenshots.pro), [Rotato](https://rotato.app),
 [fastlane frameit](https://docs.fastlane.tools/actions/frameit/), o Figma
 templates community.
 

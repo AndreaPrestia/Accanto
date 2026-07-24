@@ -3,4 +3,8 @@
 *.png
 *.jpg
 *.jpeg
+_raw/
+_tmp/
+framed/
 !README.md
+!frames.config.json

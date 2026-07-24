@@ -60,5 +60,22 @@ Confronta col commento in cima al file `README.md` di ogni gruppo (soft-limit de
 
 ## Screenshot
 
-Vedi `screenshots/README.md` per dimensioni obbligatorie per device e workflow di
-generazione via simulator iOS + Android Studio emulator.
+Vedi `screenshots/README.md` per dimensioni obbligatorie e dettagli. Pipeline
+automatizzata (nessun Mac richiesto):
+
+1. **iOS** — workflow GitHub Actions `store-screenshots` (runner macOS):
+   compila l'app via EAS, esegue il flow Maestro su simulator iPhone 16 Pro Max
+   (6.9") e carica i PNG raw come artifact. Scaricali in
+   `screenshots/_raw/ios/`.
+2. **Android** — emulatore locale (Android Studio), cattura via `adb`.
+3. **Composizione + frame marketing** — via VS Code tasks
+   (Terminal → Run Task → `Store screenshots: …`) oppure direttamente:
+
+   ```pwsh
+   pwsh mobile/scripts/store-screenshots.ps1 -Mode capture-android  # adb + canvas Play
+   pwsh mobile/scripts/store-screenshots.ps1 -Mode compose-ios      # canvas App Store
+   pwsh mobile/scripts/store-screenshots.ps1 -Mode frames -Locales it-IT,en-US,es-ES
+   ```
+
+   Copy/colori dei frame in `screenshots/frames.config.json` (committato, IT di
+   riferimento → propagare a EN/ES come per gli altri metadata).

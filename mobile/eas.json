@@ -39,6 +39,22 @@
         "buildType": "apk"
       }
     },
+    "store-screenshots": {
+      "distribution": "internal",
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.staging.accanto.care",
+        "EXPO_PUBLIC_WEB_BASE_URL": "https://staging.accanto.care",
+        "APP_VARIANT": "preview"
+      },
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      }
+    },
     "production": {
       "channel": "production",
       "autoIncrement": true,

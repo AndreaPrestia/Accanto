@@ -1,0 +1,70 @@
+# Screenshot flow: login con account demo → cattura le 5 schermate store.
+#
+# Uso locale (Android emulator):
+#   $env:MAESTRO_APP_ID = "app.accanto.mobile.preview"   # dipende dalla build installata (.dev/.preview/prod)
+#   $env:MAESTRO_EMAIL  = "demo@accanto.care"     # account con dati demo pre-popolati
+#   $env:MAESTRO_PASSWORD = "***"
+#   maestro test .maestro/screenshots.yaml
+# Gli screenshot finiscono in ~/.maestro/tests/ (vedi `maestro test --output`).
+#
+# Uso in CI (iOS simulator, vedi .github/workflows/store-screenshots.yml):
+#   maestro test --output screenshots/raw .maestro/screenshots.yaml
+#
+# N.B.: i nomi file prodotti da takeScreenshot sono quelli qui sotto; gli
+# script in scripts/store/ li raccolgono e li rinominano/ridimensionano
+# secondo le specifiche in store/screenshots/README.md.
+appId: ${MAESTRO_APP_ID}
+env:
+  EMAIL: ${MAESTRO_EMAIL}
+  PASSWORD: ${MAESTRO_PASSWORD}
+---
+- launchApp:
+    clearState: true
+
+# ---- Login (riusa gli id di login.yaml) ---------------------------------
+- assertVisible:
+    id: "login-email"
+- tapOn:
+    id: "login-email"
+- inputText: ${EMAIL}
+- tapOn:
+    id: "login-password"
+- inputText: ${PASSWORD}
+- tapOn:
+    id: "login-submit"
+
+# Attende che RootNavigator switchi su AppStack e mostri la dashboard.
+- extendedWaitUntil:
+    visible: "Il tuo spazio"
+    timeout: 15000
+
+# ---- 01 · Dashboard -------------------------------------------------------
+- takeScreenshot: 01-dashboard
+
+# ---- 02 · Timeline (dentro il primo cerchio) -----------------------------
+# Il primo cerchio attivo della dashboard: tap sulla card (testo = nome
+# cerchio dell'account demo). Se il nome cambia, aggiorna anche qui.
+- tapOn: "Famiglia Rossi"
+- extendedWaitUntil:
+    visible: "Diario"
+    timeout: 10000
+- takeScreenshot: 02-timeline
+
+# ---- 03 · Documents -------------------------------------------------------
+- tapOn: "Documenti"
+- takeScreenshot: 03-documents
+
+# ---- 04 · DoctorQuestions -------------------------------------------------
+- tapOn: "Domande"
+- takeScreenshot: 04-doctor-questions
+
+# ---- 05 · SelfCare (dal drawer) ------------------------------------------
+# Torna alla dashboard e apri il drawer dall'hamburger ("Apri menu").
+- back
+- back
+- tapOn: "Apri menu"
+- tapOn: "Prenditi cura di te"
+- extendedWaitUntil:
+    visible: "Cura di te"
+    timeout: 10000
+- takeScreenshot: 05-self-care

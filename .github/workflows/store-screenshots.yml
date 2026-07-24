@@ -1,0 +1,97 @@
+name: store-screenshots
+
+# Genera gli screenshot App Store iOS su un runner macOS (non serve un Mac locale).
+# Esecuzione manuale: Actions → store-screenshots → Run workflow.
+# Gli artifact `ios-raw-screenshots` vanno scaricati in
+# mobile/store/screenshots/_raw/ios/ e poi composti con:
+#   pwsh mobile/scripts/store-screenshots.ps1 -Mode compose-ios
+#
+# Prerequisiti (una tantum):
+#   - secret EAS_TOKEN  (expo.dev → account → access tokens)
+#   - variabili/secret MAESTRO_EMAIL + MAESTRO_PASSWORD di un account demo
+#     con dati pre-popolati (cerchio "Famiglia Rossi", timeline, documenti...)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ios-screenshots:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+      # Il profilo store-screenshots (eas.json) usa APP_VARIANT=preview ->
+      # bundle id app.accanto.mobile.preview (vedi app.config.ts resolveVariant).
+      MAESTRO_APP_ID: app.accanto.mobile.preview
+      MAESTRO_EMAIL: ${{ secrets.MAESTRO_EMAIL }}
+      MAESTRO_PASSWORD: ${{ secrets.MAESTRO_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Maestro
+        run: curl -Ls https://get.maestro.mobile.dev | bash
+        # Maestro CLI si installa in $HOME/.maestro/bin
+
+      - name: Boot iPhone 16 Pro Max simulator (6.9")
+        run: |
+          UDID=$(xcrun simctl create "store-shot" "iPhone 16 Pro Max" 2>/dev/null || true)
+          if [ -z "$UDID" ]; then
+            # fallback se il device type non e' disponibile sull'immagine
+            UDID=$(xcrun simctl create "store-shot" "iPhone 15 Pro Max")
+          fi
+          echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+
+      # Il flow Maestro naviga per testi VISIBILI in italiano ("Il tuo spazio",
+      # "Diario", ...). Il simulator su runner macOS parte in inglese: senza
+      # questo step l'app userebbe EN (se l'account demo non ha lingua salvata)
+      # e le asserzioni fallirebbero. Forza IT a livello di simulator.
+      - name: Set simulator language to Italian
+        run: |
+          xcrun simctl spawn "$SIM_UDID" defaults write "Apple Global Domain" AppleLanguages -array it
+          xcrun simctl spawn "$SIM_UDID" defaults write "Apple Global Domain" AppleLocale -string it_IT
+
+      - name: Build iOS app (simulator profile) on EAS
+        run: npx eas-cli build --platform ios --profile store-screenshots --non-interactive --wait --local 2>&1 | tee eas-build.log
+        # Profilo `store-screenshots` (eas.json): ios.simulator=true -> produce
+        # un .app installabile sul simulator. --local compila sul runner
+        # (Xcode presente su macos-15), nessuna attesa della coda EAS remota.
+
+      - name: Install app on simulator
+        run: |
+          APP=$(find . -name "*.app" -maxdepth 3 | head -n1)
+          if [ -z "$APP" ]; then
+            TAR=$(find . -name "*.tar.gz" -maxdepth 2 | head -n1)
+            tar -xzf "$TAR" -C /tmp/app
+            APP=$(find /tmp/app -name "*.app" | head -n1)
+          fi
+          xcrun simctl install "$SIM_UDID" "$APP"
+
+      - name: Run Maestro screenshot flow
+        run: |
+          export PATH="$HOME/.maestro/bin:$PATH"
+          maestro test --output store/screenshots/_raw/ios .maestro/screenshots.yaml
+
+      - name: Flatten raw screenshots
+        run: |
+          # maestro salva in una sottocartella con timestamp: sposta i PNG in _raw/ios
+          find store/screenshots/_raw/ios -name "*.png" -exec mv {} store/screenshots/_raw/ios/ \;
+          ls -la store/screenshots/_raw/ios
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-raw-screenshots
+          path: mobile/store/screenshots/_raw/ios/*.png
+          retention-days: 30
