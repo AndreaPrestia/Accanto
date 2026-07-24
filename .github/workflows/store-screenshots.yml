@@ -17,9 +17,9 @@ on:
 jobs:
   ios-screenshots:
     runs-on: macos-15
-    defaults:
-      run:
-        working-directory: mobile
+    # Monorepo npm workspaces: il lockfile e' alla ROOT (workspaces: frontend,
+    # mobile, packages/*). L'install va fatta dalla root; i comandi Expo/Maestro
+    # girano invece in mobile/ (esplicitato per-step, niente defaults globale).
     env:
       EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
       # Il profilo store-screenshots (eas.json) usa APP_VARIANT=preview ->
@@ -32,12 +32,21 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
-          cache-dependency-path: mobile/package-lock.json
+          # Lockfile alla root del monorepo (mobile/package-lock.json NON esiste)
+          cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies (workspace root)
         run: npm ci
+        # npm ci dalla root installa TUTTI gli workspace (mobile incluso) e
+        # linka @accanto/shared come workspace dependency.
+
+      # Mobile importa @accanto/shared (workspace): serve la sua build (dist/)
+      # prima che Metro/EAS bundlelli l'app, altrimenti la build iOS fallisce
+      # non trovando i tipi/moduli shared compilati.
+      - name: Build shared workspace
+        run: npm run build:shared
 
       - name: Install Maestro
         run: curl -Ls https://get.maestro.mobile.dev | bash
@@ -64,12 +73,14 @@ jobs:
           xcrun simctl spawn "$SIM_UDID" defaults write "Apple Global Domain" AppleLocale -string it_IT
 
       - name: Build iOS app (simulator profile) on EAS
+        working-directory: mobile
         run: npx eas-cli build --platform ios --profile store-screenshots --non-interactive --wait --local 2>&1 | tee eas-build.log
         # Profilo `store-screenshots` (eas.json): ios.simulator=true -> produce
         # un .app installabile sul simulator. --local compila sul runner
         # (Xcode presente su macos-15), nessuna attesa della coda EAS remota.
 
       - name: Install app on simulator
+        working-directory: mobile
         run: |
           APP=$(find . -name "*.app" -maxdepth 3 | head -n1)
           if [ -z "$APP" ]; then
@@ -80,11 +91,13 @@ jobs:
           xcrun simctl install "$SIM_UDID" "$APP"
 
       - name: Run Maestro screenshot flow
+        working-directory: mobile
         run: |
           export PATH="$HOME/.maestro/bin:$PATH"
           maestro test --output store/screenshots/_raw/ios .maestro/screenshots.yaml
 
       - name: Flatten raw screenshots
+        working-directory: mobile
         run: |
           # maestro salva in una sottocartella con timestamp: sposta i PNG in _raw/ios
           find store/screenshots/_raw/ios -name "*.png" -exec mv {} store/screenshots/_raw/ios/ \;
