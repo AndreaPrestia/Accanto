@@ -33,6 +33,20 @@ env:
 - tapOn:
     id: "login-submit"
 
+# Onboarding gate: con clearState la Dashboard reindirizza a Welcome al primo
+# accesso (hasSeenWelcome=false). Attendo che compaia il titolo Welcome
+# ("Ti diamo il benvenuto") poi tap su "Salta" -> markWelcomeSeen() ->
+# Dashboard. Se il flag e' gia' visto (rerun senza clearState) la Welcome
+# non appare: il wait e il tap sono optional, si cade direttamente al wait
+# della Dashboard sotto.
+- extendedWaitUntil:
+    visible: "Ti diamo il benvenuto"
+    timeout: 15000
+    optional: true
+- tapOn:
+    text: "Salta"
+    optional: true
+
 # Attende che RootNavigator switchi su AppStack e mostri la dashboard.
 - extendedWaitUntil:
     visible: "Il tuo spazio"
