@@ -78,12 +78,20 @@ jobs:
       - name: Install app on simulator
         working-directory: mobile
         run: |
-          APP=$(find . -name "*.app" -maxdepth 3 | head -n1)
+          set -e
+          # eas build --local produce un <name>.tar.gz contenente il .app.
+          APP=$(find . -name "*.app" -maxdepth 4 | head -n1)
           if [ -z "$APP" ]; then
-            TAR=$(find . -name "*.tar.gz" -maxdepth 2 | head -n1)
+            TAR=$(find . -name "*.tar.gz" -maxdepth 3 | head -n1)
+            echo "Nessun .app diretto, estraggo $TAR"
+            mkdir -p /tmp/app          # tar -C fallisce se la dir non esiste
             tar -xzf "$TAR" -C /tmp/app
             APP=$(find /tmp/app -name "*.app" | head -n1)
           fi
+          if [ -z "$APP" ]; then
+            echo "::error::Nessun .app trovato dopo build/estrazione"; ls -la; exit 1
+          fi
+          echo "Installo $APP sul simulator $SIM_UDID"
           xcrun simctl install "$SIM_UDID" "$APP"
 
       - name: Run Maestro screenshot flow
