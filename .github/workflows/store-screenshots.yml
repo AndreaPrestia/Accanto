@@ -27,6 +27,11 @@ jobs:
       MAESTRO_APP_ID: app.accanto.mobile.preview
       MAESTRO_EMAIL: ${{ secrets.MAESTRO_EMAIL }}
       MAESTRO_PASSWORD: ${{ secrets.MAESTRO_PASSWORD }}
+      # Su runner CI freschi il driver XCTest di Maestro impiega piu' del
+      # default a installarsi/avviarsi la prima volta: alza il timeout (ms).
+      MAESTRO_DRIVER_STARTUP_TIMEOUT: '180000'
+      # Disattiva analytics anonimi di Maestro (meno rumore nei log CI).
+      MAESTRO_CLI_NO_ANALYTICS: '1'
     steps:
       - uses: actions/checkout@v4
 
@@ -68,6 +73,15 @@ jobs:
           xcrun simctl spawn "$SIM_UDID" defaults write "Apple Global Domain" AppleLanguages -array it
           xcrun simctl spawn "$SIM_UDID" defaults write "Apple Global Domain" AppleLocale -string it_IT
 
+      # "Scalda" il simulator: il primo launch inizializza i servizi XCUITest
+      # (simctl launch di un'app di sistema), riducendo il rischio che il
+      # driver Maestro vada in timeout alla prima connessione.
+      - name: Warm up simulator
+        run: |
+          xcrun simctl launch "$SIM_UDID" com.apple.mobilesafari || true
+          sleep 5
+          xcrun simctl terminate "$SIM_UDID" com.apple.mobilesafari || true
+
       - name: Build iOS app (simulator profile) on EAS
         working-directory: mobile
         run: npx eas-cli build --platform ios --profile store-screenshots --non-interactive --wait --local 2>&1 | tee eas-build.log
@@ -98,7 +112,7 @@ jobs:
         working-directory: mobile
         run: |
           export PATH="$HOME/.maestro/bin:$PATH"
-          maestro test --output store/screenshots/_raw/ios .maestro/screenshots.yaml
+          maestro test --device "$SIM_UDID" --output store/screenshots/_raw/ios .maestro/screenshots.yaml
 
       - name: Flatten raw screenshots
         working-directory: mobile
