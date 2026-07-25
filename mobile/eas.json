@@ -43,8 +43,8 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://api.staging.accanto.care",
-        "EXPO_PUBLIC_WEB_BASE_URL": "https://staging.accanto.care",
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.accanto.care",
+        "EXPO_PUBLIC_WEB_BASE_URL": "https://accanto.care",
         "APP_VARIANT": "preview"
       },
       "ios": {
