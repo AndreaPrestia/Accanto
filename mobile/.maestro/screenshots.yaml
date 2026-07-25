@@ -47,10 +47,15 @@ env:
     text: "Salta"
     optional: true
 
+# DEBUG: cattura lo schermo dopo il login+skip per capire cosa appare davvero
+# quando l'attesa della dashboard fallisce (visibile negli artifact Maestro).
+- takeScreenshot: debug-after-login
+
 # Attende che RootNavigator switchi su AppStack e mostri la dashboard.
+# Timeout generoso: la dashboard fetcha i cerchi da prod, su CI puo' essere lenta.
 - extendedWaitUntil:
     visible: "Il tuo spazio"
-    timeout: 15000
+    timeout: 30000
 
 # ---- 01 · Dashboard -------------------------------------------------------
 - takeScreenshot: 01-dashboard
