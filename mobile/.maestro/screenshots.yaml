@@ -34,21 +34,29 @@ env:
     id: "login-submit"
 
 # Onboarding gate: con clearState la Dashboard reindirizza a Welcome al primo
-# accesso (hasSeenWelcome=false). Attendo che compaia il titolo Welcome
-# ("Ti diamo il benvenuto") poi tap su "Salta" -> markWelcomeSeen() ->
-# Dashboard. Se il flag e' gia' visto (rerun senza clearState) la Welcome
-# non appare: il wait e il tap sono optional, si cade direttamente al wait
-# della Dashboard sotto.
-- extendedWaitUntil:
-    visible: "Ti diamo il benvenuto"
-    timeout: 15000
-    optional: true
+# accesso (hasSeenWelcome=false). Il link "Salta" e' piccolo e in alto (sotto
+# la status bar) -> tap inaffidabile su simulator. Navigo la Welcome col
+# bottone grande "Avanti" (sempre accessibile) SOLO se la Welcome e' visibile,
+# usando `when: visible` per non toccare elementi a caso se siamo gia' sulla
+# Dashboard. Ultimo step: "Crea il primo cerchio" -> NewCircle, poi back.
 - tapOn:
-    text: "Salta"
-    optional: true
+    text: "Avanti"
+  when:
+    visible: "Ti diamo il benvenuto"
+- tapOn:
+    text: "Avanti"
+  when:
+    visible: "Ti diamo il benvenuto"
+- tapOn:
+    text: "Crea il primo cerchio"
+  when:
+    visible: "Ti diamo il benvenuto"
+# Se siamo finiti su NewCircle (Welcome completata), torna alla Dashboard.
+- back
+  when:
+    notVisible: "Il tuo spazio"
 
-# DEBUG: cattura lo schermo dopo il login+skip per capire cosa appare davvero
-# quando l'attesa della dashboard fallisce (visibile negli artifact Maestro).
+# DEBUG: cattura lo schermo dopo il login+welcome per capire cosa appare.
 - takeScreenshot: debug-after-login
 
 # Attende che RootNavigator switchi su AppStack e mostri la dashboard.
