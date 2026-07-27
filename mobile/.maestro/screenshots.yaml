@@ -33,6 +33,14 @@ env:
 - tapOn:
     id: "login-submit"
 
+# iOS AutoFill/Keychain: dopo il login puo' apparire il dialog di sistema
+# "Vuoi salvare la password?" che COPRE la Welcome (visto nello screenshot di
+# debug). Va chiuso con "Non ora" prima di navigare. optional: se il dialog
+# non appare, il tap viene saltato.
+- tapOn:
+    text: "Non ora"
+    optional: true
+
 # Onboarding gate: con clearState la Dashboard reindirizza a Welcome al primo
 # accesso (hasSeenWelcome=false). Il link "Salta" e' piccolo e in alto (sotto
 # la status bar) -> tap inaffidabile su simulator. Completo la Welcome col
