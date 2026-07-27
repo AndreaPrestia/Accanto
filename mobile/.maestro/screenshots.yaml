@@ -61,6 +61,13 @@ env:
     visible: "Il tuo spazio"
     timeout: 30000
 
+# Attende che la fetch dei cerchi completi e la card "Famiglia Rossi" sia
+# renderizzata (arriva DOPO il titolo "Il tuo spazio"). Senza questa attesa il
+# tap e lo screenshot arrivano mentre la lista e' ancora in caricamento.
+- extendedWaitUntil:
+    visible: "Famiglia Rossi"
+    timeout: 30000
+
 # ---- 01 · Dashboard -------------------------------------------------------
 - takeScreenshot: 01-dashboard
 
