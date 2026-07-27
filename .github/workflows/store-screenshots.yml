@@ -73,6 +73,16 @@ jobs:
           xcrun simctl spawn "$SIM_UDID" defaults write "Apple Global Domain" AppleLanguages -array it
           xcrun simctl spawn "$SIM_UDID" defaults write "Apple Global Domain" AppleLocale -string it_IT
 
+      # Status bar pulita (orario fisso 9:41, batteria piena, no sovrapposizioni):
+      # l'ora reale del simulator si sovrapponeva al layout della Welcome
+      # ("Passo 1 di 3" + ora) coprendo il link "Salta". status_bar override
+      # standard per screenshot store: rende la status bar discreta e fissa.
+      - name: Clean status bar for screenshots
+        run: |
+          xcrun simctl status_bar "$SIM_UDID" override \
+            --time "9:41" --batteryLevel 100 --batteryState charged \
+            --wifiMode active --cellularMode active || echo "status_bar override non supportato, continuo"
+
       # "Scalda" il simulator: il primo launch inizializza i servizi XCUITest
       # (simctl launch di un'app di sistema), riducendo il rischio che il
       # driver Maestro vada in timeout alla prima connessione.

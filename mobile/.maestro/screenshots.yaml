@@ -42,14 +42,33 @@ env:
     optional: true
 
 # Onboarding gate: con clearState la Dashboard reindirizza a Welcome al primo
-# accesso (hasSeenWelcome=false). Il link "Salta" porta DIRETTAMENTE alla
-# Dashboard (skip() -> navigation.replace('Dashboard')), senza passare da
-# NewCircle/back. Prima falliva perche' il dialog password lo copriva; ora
-# che il dialog e' gestito sopra, il tap funziona. optional: se la Welcome
-# non appare (flag gia' visto), Maestro salta. Su Dashboard non esiste "Salta".
-# `when:` NON supportato su tapOn nella CLI installata -> optional.
+# accesso (hasSeenWelcome=false). Il link "Salta" e' in alto a destra SOTTO la
+# status bar: sul simulator l'ora si sovrappone al layout ("Passo 1 di 3" +
+# ora) e "Salta" risulta coperto/non cliccabile (visto nello screenshot). Uso
+# il bottone grande "Avanti" (in basso, sempre visibile): 1->2, 2->3, poi
+# l'ultimo step mostra "Crea il primo cerchio" che porta a NewCircle (header
+# con back nativo). Infine back -> Dashboard. Tutti optional: se la Welcome
+# non appare (flag gia' visto), Maestro salta. Su Dashboard "Avanti"/"Crea il
+# primo cerchio" non esistono -> nessun tap a vuoto.
+# Provo prima "Salta" (status bar ora ripulita via workflow -> torna visibile;
+# skip() porta DIRETTAMENTE alla Dashboard). Se non basta, "Avanti" x2 +
+# "Crea il primo cerchio" completa la Welcome fino a NewCircle, poi back
+# (optional, supportato da YamlActionBack) torna alla Dashboard. Tutti
+# optional: se la Welcome non appare (flag gia' visto), Maestro salta. Su
+# Dashboard nessuno di questi testi/esiti esiste -> nessun tap a vuoto.
 - tapOn:
     text: "Salta"
+    optional: true
+- tapOn:
+    text: "Avanti"
+    optional: true
+- tapOn:
+    text: "Avanti"
+    optional: true
+- tapOn:
+    text: "Crea il primo cerchio"
+    optional: true
+- back:
     optional: true
 
 # DEBUG: cattura lo schermo dopo il login+welcome per capire cosa appare.
