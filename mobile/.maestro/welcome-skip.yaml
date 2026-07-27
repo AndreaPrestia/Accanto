@@ -1,0 +1,14 @@
+# Sub-flow: completa la Welcome onboarding premendo "Avanti" fino in fondo.
+# Chiamato da screenshots.yaml SOLO quando la Welcome e' visibile
+# (runFlow ... when: visible "Ti diamo il benvenuto").
+# Il link "Salta" e' piccolo e sotto la status bar (tap inaffidabile su
+# simulator): usiamo il bottone grande "Avanti", sempre accessibile.
+# 3 step: Avanti (1->2), Avanti (2->3), poi l'ultimo step mostra
+# "Crea il primo cerchio" -> NewCircle. Infine back -> Dashboard.
+appId: ${MAESTRO_APP_ID}
+---
+- tapOn: "Avanti"
+- tapOn: "Avanti"
+- tapOn: "Crea il primo cerchio"
+# Ora siamo su NewCircle: torna alla Dashboard.
+- back

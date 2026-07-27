@@ -35,26 +35,14 @@ env:
 
 # Onboarding gate: con clearState la Dashboard reindirizza a Welcome al primo
 # accesso (hasSeenWelcome=false). Il link "Salta" e' piccolo e in alto (sotto
-# la status bar) -> tap inaffidabile su simulator. Navigo la Welcome col
-# bottone grande "Avanti" (sempre accessibile) SOLO se la Welcome e' visibile,
-# usando `when: visible` per non toccare elementi a caso se siamo gia' sulla
-# Dashboard. Ultimo step: "Crea il primo cerchio" -> NewCircle, poi back.
-- tapOn:
-    text: "Avanti"
+# la status bar) -> tap inaffidabile su simulator. Completo la Welcome col
+# sub-flow welcome-skip.yaml (bottone grande "Avanti"), eseguito SOLO se il
+# titolo Welcome e' visibile: `when:` a livello di runFlow e' supportato
+# (a differenza dei singoli comandi).
+- runFlow:
+    file: welcome-skip.yaml
     when:
       visible: "Ti diamo il benvenuto"
-- tapOn:
-    text: "Avanti"
-    when:
-      visible: "Ti diamo il benvenuto"
-- tapOn:
-    text: "Crea il primo cerchio"
-    when:
-      visible: "Ti diamo il benvenuto"
-# Se siamo finiti su NewCircle (Welcome completata), torna alla Dashboard.
-- back:
-    when:
-      notVisible: "Il tuo spazio"
 
 # DEBUG: cattura lo schermo dopo il login+welcome per capire cosa appare.
 - takeScreenshot: debug-after-login
