@@ -116,13 +116,26 @@ jobs:
 
       - name: Flatten raw screenshots
         working-directory: mobile
+        if: success()
         run: |
           # maestro salva in una sottocartella con timestamp: sposta i PNG in _raw/ios
           find store/screenshots/_raw/ios -name "*.png" -exec mv {} store/screenshots/_raw/ios/ \;
           ls -la store/screenshots/_raw/ios
 
       - uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: ios-raw-screenshots
           path: mobile/store/screenshots/_raw/ios/*.png
           retention-days: 30
+
+      # Carica SEMPRE (anche su fallimento) i debug artifact di Maestro:
+      # contengono gli screenshot dello schermo al momento del fallimento
+      # (incl. debug-after-login.png) e la UI hierarchy. Indispensabili per
+      # capire perche' un assertVisible fallisce.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: maestro-debug
+          path: /Users/runner/.maestro/tests/
+          retention-days: 14
