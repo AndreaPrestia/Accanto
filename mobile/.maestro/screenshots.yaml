@@ -33,23 +33,24 @@ env:
 - tapOn:
     id: "login-submit"
 
-# iOS AutoFill/Keychain: dopo il login puo' apparire il dialog di sistema
-# "Vuoi salvare la password?" che COPRE la Welcome (visto nello screenshot di
-# debug). `when:` e' supportato SOLO su runFlow/runScript (non su tapOn):
-# chiudo il dialog via sub-flow condizionale. Se il dialog non c'e', il
-# sub-flow viene saltato.
-- runFlow:
-    file: dismiss-password-dialog.yaml
-    when:
-      visible: "Non ora"
+# iOS AutoFill/Keychain: il dialog "Vuoi salvare la password?" (testo "Non
+# ora") puo' apparire dopo il login e copre la Welcome. Tap su "Non ora":
+# optional -> se il dialog non c'e', Maestro salta senza fallire. Sulla
+# Dashboard non esiste testo "Non ora", quindi nessun rischio di tap a vuoto.
+- tapOn:
+    text: "Non ora"
+    optional: true
 
 # Onboarding gate: con clearState la Dashboard reindirizza a Welcome al primo
-# accesso (hasSeenWelcome=false). Completo la Welcome col sub-flow
-# welcome-skip.yaml (bottone grande "Avanti"), SOLO se il titolo e' visibile.
-- runFlow:
-    file: welcome-skip.yaml
-    when:
-      visible: "Ti diamo il benvenuto"
+# accesso (hasSeenWelcome=false). Il link "Salta" porta DIRETTAMENTE alla
+# Dashboard (skip() -> navigation.replace('Dashboard')), senza passare da
+# NewCircle/back. Prima falliva perche' il dialog password lo copriva; ora
+# che il dialog e' gestito sopra, il tap funziona. optional: se la Welcome
+# non appare (flag gia' visto), Maestro salta. Su Dashboard non esiste "Salta".
+# `when:` NON supportato su tapOn nella CLI installata -> optional.
+- tapOn:
+    text: "Salta"
+    optional: true
 
 # DEBUG: cattura lo schermo dopo il login+welcome per capire cosa appare.
 - takeScreenshot: debug-after-login
