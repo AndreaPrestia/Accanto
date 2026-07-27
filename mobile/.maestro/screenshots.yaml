@@ -88,12 +88,12 @@ env:
 - tapOn: "Domande"
 - takeScreenshot: 04-doctor-questions
 
-# ---- 05 · SelfCare (dal drawer) ------------------------------------------
-# Torna alla dashboard e apri il drawer dall'hamburger ("Apri menu").
-- back
-- back
-- tapOn: "Apri menu"
-- tapOn: "Prenditi cura di te"
+# ---- 05 · SelfCare --------------------------------------------------------
+# Invece di uscire dal cerchio con back x2 + aprire il drawer (fragile:
+# dipende dalla navigazione e dall'hamburger), uso il DEEP LINK configurato in
+# linking.ts: <scheme>://self-care -> SelfCareScreen (schermata pubblica,
+# non richiede circleId). Scheme della build preview: accanto.preview.
+- openLink: accanto.preview://self-care
 - extendedWaitUntil:
     visible: "Cura di te"
     timeout: 10000
