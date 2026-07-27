@@ -45,7 +45,11 @@ export default function WelcomeScreen({ navigation }: Props) {
   };
 
   return (
-    <Screen>
+    // La Welcome ha headerShown:false (vedi MainStack): senza l'edge `top` la
+    // prima riga (contatore "Passo X di Y" + link "Salta") finisce SOTTO la
+    // status bar e "Salta" risulta coperto/non cliccabile. Passo tutti gli
+    // edge cosi' la SafeArea riserva spazio anche sopra.
+    <Screen edges={['top', 'bottom', 'left', 'right']}>
       <View className="max-w-md w-full self-center pt-2">
         <View className="flex-row items-center justify-between mb-6">
           <Text className="text-sm text-accanto-500">
