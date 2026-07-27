@@ -35,18 +35,17 @@ env:
 
 # iOS AutoFill/Keychain: dopo il login puo' apparire il dialog di sistema
 # "Vuoi salvare la password?" che COPRE la Welcome (visto nello screenshot di
-# debug). Va chiuso con "Non ora" prima di navigare. optional: se il dialog
-# non appare, il tap viene saltato.
-- tapOn:
-    text: "Non ora"
-    optional: true
+# debug). `when:` e' supportato SOLO su runFlow/runScript (non su tapOn):
+# chiudo il dialog via sub-flow condizionale. Se il dialog non c'e', il
+# sub-flow viene saltato.
+- runFlow:
+    file: dismiss-password-dialog.yaml
+    when:
+      visible: "Non ora"
 
 # Onboarding gate: con clearState la Dashboard reindirizza a Welcome al primo
-# accesso (hasSeenWelcome=false). Il link "Salta" e' piccolo e in alto (sotto
-# la status bar) -> tap inaffidabile su simulator. Completo la Welcome col
-# sub-flow welcome-skip.yaml (bottone grande "Avanti"), eseguito SOLO se il
-# titolo Welcome e' visibile: `when:` a livello di runFlow e' supportato
-# (a differenza dei singoli comandi).
+# accesso (hasSeenWelcome=false). Completo la Welcome col sub-flow
+# welcome-skip.yaml (bottone grande "Avanti"), SOLO se il titolo e' visibile.
 - runFlow:
     file: welcome-skip.yaml
     when:
