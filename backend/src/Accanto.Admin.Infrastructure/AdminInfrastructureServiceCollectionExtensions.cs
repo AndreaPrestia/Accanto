@@ -1,7 +1,13 @@
+using Accanto.Admin.Application.Audit;
+using Accanto.Admin.Application.Common.Persistence;
+using Accanto.Admin.Application.Common.Security;
+using Accanto.Admin.Infrastructure.Audit;
 using Accanto.Admin.Infrastructure.Persistence;
+using Accanto.Admin.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Accanto.Admin.Infrastructure;
 
@@ -19,6 +25,16 @@ public static class AdminInfrastructureServiceCollectionExtensions
             var conn = configuration.GetConnectionString("AdminDatabase");
             opt.UseNpgsql(conn);
         });
+        services.AddScoped<IAccantoAdminDbContext>(sp => sp.GetRequiredService<AccantoAdminDbContext>());
+
+        // JWT admin: sezione dedicata AdminJwt (issuer/audience/chiavi separati da Jwt pubblico).
+        services.Configure<AdminJwtOptions>(configuration.GetSection("AdminJwt"));
+        services.AddSingleton<AdminJwtSigningMaterial>(sp =>
+            sp.GetRequiredService<IOptions<AdminJwtOptions>>().Value.ResolveSigningMaterial());
+
+        services.AddScoped<IAdminJwtTokenService, AdminJwtTokenService>();
+        services.AddSingleton<IAdminPasswordHasher, AdminPasswordHasher>();
+        services.AddScoped<IAdminAuditLog, AdminAuditLogWriter>();
 
         return services;
     }

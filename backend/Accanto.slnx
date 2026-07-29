@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Accanto.Admin.Api/Accanto.Admin.Api.csproj" />
+    <Project Path="src/Accanto.Admin.Application/Accanto.Admin.Application.csproj" />
     <Project Path="src/Accanto.Admin.Domain/Accanto.Admin.Domain.csproj" />
     <Project Path="src/Accanto.Admin.Infrastructure/Accanto.Admin.Infrastructure.csproj" />
     <Project Path="src/Accanto.Api/Accanto.Api.csproj" />
