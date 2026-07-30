@@ -126,6 +126,13 @@ services:
       ClamAV__Host: ${ClamAV__Host:-}
       ClamAV__Port: ${ClamAV__Port:-3310}
       ClamAV__TimeoutSeconds: ${ClamAV__TimeoutSeconds:-30}
+      # Service-to-service auth per gli endpoint interni /internal/admin/*
+      # (chiamati SOLO dall'Admin API). La SigningKey deve MATCHARE
+      # InternalApp__SigningKey del servizio accanto-admin-api. Opt-in:
+      # se vuota, gli endpoint interni non accettano alcun token.
+      InternalAdmin__Issuer: ${InternalAdmin__Issuer:-accanto-internal-admin}
+      InternalAdmin__Audience: ${InternalAdmin__Audience:-accanto-internal-admin}
+      InternalAdmin__SigningKey: ${InternalAdmin__SigningKey:-}
     volumes:
       - ./storage:/data/storage
     ports:
@@ -254,8 +261,105 @@ services:
       timeout: 10s
       retries: 5
 
+  # ==========================================================================
+  # Admin Control Plane (ADDITIVO: i servizi pubblici sopra restano invariati)
+  # ==========================================================================
+
+  # Database admin DEDICATO, separato dal Postgres pubblico (servizio `db`).
+  # Isolamento fisico completo: volume, ruolo e credenziali propri. Nessuna
+  # relazione con il DB pubblico `accanto`.
+  postgres-admin:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${ADMIN_POSTGRES_DB:-accanto_admin}
+      POSTGRES_USER: ${ADMIN_POSTGRES_USER:-accanto_admin}
+      POSTGRES_PASSWORD: ${ADMIN_POSTGRES_PASSWORD:-change-me-admin-local}
+    volumes:
+      - admin-db-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ADMIN_POSTGRES_USER:-accanto_admin} -d ${ADMIN_POSTGRES_DB:-accanto_admin}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Admin API (control plane). DB proprio, JWT admin dedicato, client
+  # service-to-service verso il backend pubblico. Mai il DB pubblico.
+  accanto-admin-api:
+    build:
+      context: .
+      dockerfile: backend/src/Accanto.Admin.Api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres-admin:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://+:8080}
+      # DB admin dedicato (servizio postgres-admin).
+      ConnectionStrings__AdminDatabase: ${ConnectionStrings__AdminDatabase:-Host=postgres-admin;Port=5432;Database=accanto_admin;Username=accanto_admin;Password=change-me-admin-local}
+      # JWT admin: issuer/audience/chiave DISTINTI dal Jwt__ pubblico.
+      AdminJwt__Issuer: ${AdminJwt__Issuer:-accanto-admin}
+      AdminJwt__Audience: ${AdminJwt__Audience:-accanto-admin}
+      AdminJwt__Key: ${AdminJwt__Key:-please-change-me-admin-secret-at-least-32-chars}
+      AdminJwt__ExpiryMinutes: ${AdminJwt__ExpiryMinutes:-60}
+      AdminJwt__RefreshTokenExpiryDays: ${AdminJwt__RefreshTokenExpiryDays:-7}
+      # CORS admin (origine dell'admin-web).
+      AdminCors__AllowedOrigins: ${AdminCors__AllowedOrigins:-http://localhost:5174,http://localhost:8082}
+      # Service-to-service verso il backend pubblico. La SigningKey deve
+      # MATCHARE InternalAdmin__SigningKey del servizio `backend`.
+      InternalApp__BaseUrl: ${InternalApp__BaseUrl:-http://backend:8080}
+      InternalApp__Issuer: ${InternalApp__Issuer:-accanto-internal-admin}
+      InternalApp__Audience: ${InternalApp__Audience:-accanto-internal-admin}
+      InternalApp__SigningKey: ${InternalApp__SigningKey:-please-change-me-internal-secret-at-least-32-chars}
+      InternalApp__TokenLifetimeMinutes: ${InternalApp__TokenLifetimeMinutes:-5}
+      # Log Seq opt-in (profilo observability).
+      Logging__SeqUrl: ${Logging__SeqUrl:-}
+      Logging__SeqApiKey: ${Logging__SeqApiKey:-}
+      # Seed admin SOLO in Development (mai in Production).
+      AdminSeed__Email: ${AdminSeed__Email:-}
+      AdminSeed__Password: ${AdminSeed__Password:-}
+      AdminSeed__DisplayName: ${AdminSeed__DisplayName:-Administrator}
+    ports:
+      - "8082:8080"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /home/app/.aspnet:size=8m,uid=1654,gid=1654,mode=0700
+
+  # Admin frontend (React separato dalla PWA pubblica). Proxy /admin-api ->
+  # accanto-admin-api via nginx interno.
+  accanto-admin-web:
+    build:
+      context: .
+      dockerfile: admin/accanto-admin-web/Dockerfile
+      args:
+        VITE_ADMIN_API_BASE_URL: ${VITE_ADMIN_API_BASE_URL:-/admin-api}
+    restart: unless-stopped
+    depends_on:
+      - accanto-admin-api
+    ports:
+      - "5174:8080"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777,uid=101,gid=101
+      - /var/cache/nginx:size=32m,uid=101,gid=101
+
 volumes:
   db-data:
+  admin-db-data:
   ollama-data:
   seq-data:
   clamav-data:
