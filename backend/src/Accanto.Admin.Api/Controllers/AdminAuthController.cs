@@ -31,8 +31,13 @@ public class AdminAuthController : ControllerBase
     public async Task<ActionResult<AdminAuthResponse>> Refresh([FromBody] AdminRefreshRequest request, CancellationToken ct)
         => Ok(await _auth.RefreshAsync(request, BuildClientInfo(), ct));
 
+    // Logout richiede un Admin JWT valido ([Authorize] ereditato dal controller
+    // non e' presente qui, quindi lo dichiariamo esplicito): l'admin deve essere
+    // autenticato per terminare la propria sessione. Solo login/refresh restano
+    // anonimi. Soddisfa anche il controllo CodeQL di access-control a livello di
+    // funzione (nessun endpoint autenticato marcato AllowAnonymous per errore).
     [HttpPost("logout")]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> Logout([FromBody] AdminLogoutRequest request, CancellationToken ct)
     {
         await _auth.LogoutAsync(request, ct);
