@@ -13,6 +13,7 @@ public interface IAdminUserOperationsService
     Task<AdminOperationResultDto> StartDeletionAsync(AdminOperationContext ctx, Guid targetUserId, AdminUserOperationRequest request, CancellationToken cancellationToken = default);
 
     Task<AdminOperationListResponse> ListOperationsAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<AdminOperationDto> GetOperationAsync(Guid operationId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Contesto dell'admin che richiede l'operazione (id, ruoli, client).</summary>

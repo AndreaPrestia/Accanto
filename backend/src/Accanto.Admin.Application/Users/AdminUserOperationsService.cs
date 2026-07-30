@@ -127,4 +127,15 @@ public class AdminUserOperationsService : IAdminUserOperationsService
 
         return new AdminOperationListResponse(items, page, pageSize, total);
     }
+
+    public async Task<AdminOperationDto> GetOperationAsync(Guid operationId, CancellationToken cancellationToken = default)
+    {
+        var o = await _db.AdminOperations.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == operationId, cancellationToken)
+            ?? throw new AdminNotFoundException("Operazione non trovata.");
+
+        return new AdminOperationDto(
+            o.Id, o.RequestedByAdminUserId, o.OperationType, o.TargetUserId,
+            o.Status, o.Reason, o.CreatedAt, o.CompletedAt, o.ErrorMessage);
+    }
 }

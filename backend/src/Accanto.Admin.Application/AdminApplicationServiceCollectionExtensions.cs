@@ -1,3 +1,4 @@
+using Accanto.Admin.Application.Audit;
 using Accanto.Admin.Application.Auth;
 using Accanto.Admin.Application.Users;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ public static class AdminApplicationServiceCollectionExtensions
     {
         services.AddScoped<IAdminAuthService, AdminAuthService>();
         services.AddScoped<IAdminUserOperationsService, AdminUserOperationsService>();
+        services.AddScoped<IAdminAuditQueryService, AdminAuditQueryService>();
         services.AddSingleton(TimeProvider.System);
         return services;
     }

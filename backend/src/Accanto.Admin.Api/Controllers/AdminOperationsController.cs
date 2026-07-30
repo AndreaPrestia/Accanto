@@ -23,4 +23,8 @@ public class AdminOperationsController : ControllerBase
         [FromQuery] int pageSize = 20,
         CancellationToken ct = default)
         => Ok(await _ops.ListOperationsAsync(page, pageSize, ct));
+
+    [HttpGet("{operationId:guid}")]
+    public async Task<ActionResult<AdminOperationDto>> Get(Guid operationId, CancellationToken ct)
+        => Ok(await _ops.GetOperationAsync(operationId, ct));
 }
