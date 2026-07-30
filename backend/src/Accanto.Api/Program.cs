@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Accanto.Api.Common;
 using Accanto.Api.Configuration;
+using Accanto.Api.Controllers;
 using Accanto.Application;
 using Accanto.Application.Auth;
 using Accanto.Infrastructure;
@@ -107,6 +108,44 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             // configurabile semplicemente tenendo la vecchia chiave nel
             // dizionario per il tempo necessario.
             IssuerSigningKeyResolver = (_, _, kid, _) => jwtSigning.Resolve(kid),
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    })
+    // Scheme service-to-service per gli endpoint interni /internal/admin/*.
+    // Issuer/audience/chiave DISTINTI dal JWT pubblico: un token utente o un
+    // token admin-frontend NON sono accettati qui (e viceversa). Lo scheme e'
+    // registrato solo se la chiave e' configurata (opt-in): in assenza gli
+    // endpoint interni risultano semplicemente non autenticabili.
+    .AddJwtBearer(InternalAdminScheme.Name, opt =>
+    {
+        var internalOpt = builder.Configuration.GetSection("InternalAdmin").Get<InternalAdminOptions>() ?? new InternalAdminOptions();
+        if (string.IsNullOrWhiteSpace(internalOpt.SigningKey))
+        {
+            // Chiave assente: lo scheme non valida nulla (nessun token accettato).
+            opt.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ValidateIssuerSigningKey = true,
+                RequireSignedTokens = true,
+                IssuerSigningKey = new SymmetricSecurityKey(new byte[32])
+            };
+            return;
+        }
+
+        opt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
+            RequireSignedTokens = true,
+            RequireExpirationTime = true,
+            ValidIssuer = internalOpt.Issuer,
+            ValidAudience = internalOpt.Audience,
+            IssuerSigningKey = internalOpt.ResolveKey(),
             ClockSkew = TimeSpan.FromMinutes(1)
         };
     });

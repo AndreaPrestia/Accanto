@@ -7,6 +7,7 @@ using Accanto.Application.Auth.TwoFactor;
 using Accanto.Application.CareCircles;
 using Accanto.Application.DoctorQuestions;
 using Accanto.Application.Documents;
+using Accanto.Application.Internal;
 using Accanto.Application.Invites;
 using Accanto.Application.Notifications;
 using Accanto.Application.Push;
@@ -45,6 +46,10 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<INotificationPreferenceService, NotificationPreferenceService>();
         services.AddScoped<IDevicePushTokenService, DevicePushTokenService>();
         services.AddScoped<ICheckInService, CheckInService>();
+
+        // Endpoint interni service-to-service per il control plane admin.
+        services.AddScoped<IInternalUserMetadataService, InternalUserMetadataService>();
+        services.AddScoped<IInternalAdminAccountService, InternalAdminAccountService>();
 
         services.AddSingleton<IDoctorQuestionTemplateProvider, StaticDoctorQuestionTemplateProvider>();
         services.AddSingleton<ISharedUpdateTemplateProvider, StaticSharedUpdateTemplateProvider>();

@@ -14,6 +14,16 @@ public class User
     public DateTimeOffset? LockoutEndsAt { get; set; }
     public DateTimeOffset? LastFailedLoginAt { get; set; }
 
+    /// <summary>
+    /// Disabilitazione amministrativa dell'account (operazione del control plane
+    /// admin). Quando true il login e' impossibile. NON e' un flag di ruolo:
+    /// resta vietato User.IsAdmin. La cancellazione GDPR resta separata (IsErased).
+    /// </summary>
+    public bool IsDisabled { get; set; }
+    public DateTimeOffset? DisabledAt { get; set; }
+    /// <summary>Motivazione testuale della disabilitazione (metadata, non contenuto).</summary>
+    public string? DisabledReason { get; set; }
+
     // 2FA TOTP. Segreti cifrati con IFieldProtector prima di persistere.
     public bool TwoFactorEnabled { get; set; }
     public string? TwoFactorSecret { get; set; }
