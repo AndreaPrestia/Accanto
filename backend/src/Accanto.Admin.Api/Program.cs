@@ -41,6 +41,7 @@ builder.Host.UseSerilog((ctx, services, logger) =>
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<ICurrentAdmin, CurrentAdmin>();
 
 builder.Services.AddAccantoAdminApplication();
