@@ -6,6 +6,7 @@ public interface ICurrentAdmin
 {
     Guid? AdminUserId { get; }
     Guid RequireAdminUserId();
+    IReadOnlyList<string> Roles { get; }
 }
 
 public class CurrentAdmin : ICurrentAdmin
@@ -22,6 +23,10 @@ public class CurrentAdmin : ICurrentAdmin
             return Guid.TryParse(sub, out var id) ? id : null;
         }
     }
+
+    public IReadOnlyList<string> Roles
+        => _accessor.HttpContext?.User?.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList()
+           ?? new List<string>();
 
     public Guid RequireAdminUserId() => AdminUserId ?? throw new UnauthorizedAccessException("Admin non autenticato.");
 }

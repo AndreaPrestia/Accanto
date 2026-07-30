@@ -1,7 +1,9 @@
 using Accanto.Admin.Application.Audit;
 using Accanto.Admin.Application.Common.Persistence;
 using Accanto.Admin.Application.Common.Security;
+using Accanto.Admin.Application.Users;
 using Accanto.Admin.Infrastructure.Audit;
+using Accanto.Admin.Infrastructure.Internal;
 using Accanto.Admin.Infrastructure.Persistence;
 using Accanto.Admin.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +37,16 @@ public static class AdminInfrastructureServiceCollectionExtensions
         services.AddScoped<IAdminJwtTokenService, AdminJwtTokenService>();
         services.AddSingleton<IAdminPasswordHasher, AdminPasswordHasher>();
         services.AddScoped<IAdminAuditLog, AdminAuditLogWriter>();
+
+        // Client service-to-service verso gli endpoint interni della app pubblica.
+        services.Configure<InternalAppOptions>(configuration.GetSection("InternalApp"));
+        services.AddSingleton<InternalServiceTokenIssuer>();
+        services.AddHttpClient<IInternalAppClient, InternalAppClient>((sp, client) =>
+        {
+            var opt = sp.GetRequiredService<IOptions<InternalAppOptions>>().Value;
+            if (!string.IsNullOrWhiteSpace(opt.BaseUrl))
+                client.BaseAddress = new Uri(opt.BaseUrl, UriKind.Absolute);
+        });
 
         return services;
     }

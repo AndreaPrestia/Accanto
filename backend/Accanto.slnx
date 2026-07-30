@@ -11,6 +11,7 @@
     <Project Path="src/Accanto.Infrastructure/Accanto.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Accanto.Admin.Tests/Accanto.Admin.Tests.csproj" />
     <Project Path="tests/Accanto.Tests/Accanto.Tests.csproj" />
   </Folder>
 </Solution>
