@@ -82,18 +82,25 @@ env:
 - takeScreenshot: 01-dashboard
 
 # ---- 02 · Timeline (dentro il primo cerchio) -----------------------------
-# Tap sulla card del cerchio (regex parziale, vedi sopra).
+# Tap sulla card del cerchio (regex parziale). Aprendo il cerchio si arriva
+# su CircleOverview ("Panoramica"), NON su Timeline: "Diario" e' un TAB in
+# basso (tab bar: Panoramica | Diario | Documenti | Domande | Aggiornamenti).
+# Attendo la tab bar (aspetto "Panoramica"), poi tappo il tab "Diario".
 - tapOn: "Famiglia.*"
+- extendedWaitUntil:
+    visible: "Panoramica"
+    timeout: 15000
+- tapOn: "Diario"
 - extendedWaitUntil:
     visible: "Diario"
     timeout: 10000
 - takeScreenshot: 02-timeline
 
-# ---- 03 · Documents -------------------------------------------------------
+# ---- 03 · Documents (tab) -------------------------------------------------
 - tapOn: "Documenti"
 - takeScreenshot: 03-documents
 
-# ---- 04 · DoctorQuestions -------------------------------------------------
+# ---- 04 · DoctorQuestions (tab) -------------------------------------------
 - tapOn: "Domande"
 - takeScreenshot: 04-doctor-questions
 
