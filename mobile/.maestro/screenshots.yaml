@@ -69,19 +69,21 @@ env:
 # DEBUG: cattura lo schermo dopo essere arrivati alla dashboard.
 - takeScreenshot: debug-after-login
 
-# Attende che la fetch dei cerchi completi e la card "Famiglia Rossi" sia
-# renderizzata (arriva DOPO il titolo "Il tuo spazio", fetch asincrona da prod).
+# Attende che la fetch dei cerchi completi e la card cerchio sia renderizzata.
+# Uso regex PARZIALE "Famiglia" (non il testo esatto "Famiglia Rossi"): la card
+# ha <Text numberOfLines={1} className="flex-shrink"> -> Maestro non matcha
+# sempre la stringa completa (troncamento/misura), ma matcha il prefisso.
+# Nel debug-after-login il cerchio E' visibile, quindi era un problema di match.
 - extendedWaitUntil:
-    visible: "Famiglia Rossi"
+    visible: "Famiglia.*"
     timeout: 30000
 
 # ---- 01 · Dashboard -------------------------------------------------------
 - takeScreenshot: 01-dashboard
 
 # ---- 02 · Timeline (dentro il primo cerchio) -----------------------------
-# Il primo cerchio attivo della dashboard: tap sulla card (testo = nome
-# cerchio dell'account demo). Se il nome cambia, aggiorna anche qui.
-- tapOn: "Famiglia Rossi"
+# Tap sulla card del cerchio (regex parziale, vedi sopra).
+- tapOn: "Famiglia.*"
 - extendedWaitUntil:
     visible: "Diario"
     timeout: 10000
