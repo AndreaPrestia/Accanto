@@ -17,6 +17,8 @@ appId: ${MAESTRO_APP_ID}
 env:
   EMAIL: ${MAESTRO_EMAIL}
   PASSWORD: ${MAESTRO_PASSWORD}
+  # circleId del cerchio demo (Famiglia Rossi) per i deep link ai tab.
+  MAESTRO_CIRCLE_ID: ${MAESTRO_CIRCLE_ID}
 ---
 - launchApp:
     clearState: true
@@ -81,34 +83,36 @@ env:
 # ---- 01 · Dashboard -------------------------------------------------------
 - takeScreenshot: 01-dashboard
 
-# ---- 02 · Timeline (dentro il primo cerchio) -----------------------------
-# Tap sulla card del cerchio (regex parziale). Aprendo il cerchio si arriva
-# su CircleOverview ("Panoramica"), NON su Timeline: "Diario" e' un TAB in
-# basso (tab bar: Panoramica | Diario | Documenti | Domande | Aggiornamenti).
-# Attendo la tab bar (aspetto "Panoramica"), poi tappo il tab "Diario".
-- tapOn: "Famiglia.*"
-- extendedWaitUntil:
-    visible: "Panoramica"
-    timeout: 15000
-- tapOn: "Diario"
+# Navigazione robusta via DEEP LINK (linking.ts) invece di tap sui tab:
+# i tab in basso non sono matchabili in modo affidabile da Maestro (testo
+# combinato con icona, tap "Diario" non trovato anche se visibile). I deep
+# link portano direttamente alla schermata target. circleId dell'account demo
+# passato via env MAESTRO_CIRCLE_ID. Scheme build preview: accanto.preview.
+#   <scheme>://care-circles/:id/timeline | documents | questions
+#   <scheme>://self-care
+
+# ---- 02 · Timeline (Diario) ----------------------------------------------
+- openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/timeline
 - extendedWaitUntil:
     visible: "Diario"
-    timeout: 10000
+    timeout: 15000
 - takeScreenshot: 02-timeline
 
-# ---- 03 · Documents (tab) -------------------------------------------------
-- tapOn: "Documenti"
+# ---- 03 · Documents -------------------------------------------------------
+- openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/documents
+- extendedWaitUntil:
+    visible: "Documenti"
+    timeout: 15000
 - takeScreenshot: 03-documents
 
-# ---- 04 · DoctorQuestions (tab) -------------------------------------------
-- tapOn: "Domande"
+# ---- 04 · DoctorQuestions -------------------------------------------------
+- openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/questions
+- extendedWaitUntil:
+    visible: "Domande"
+    timeout: 15000
 - takeScreenshot: 04-doctor-questions
 
 # ---- 05 · SelfCare --------------------------------------------------------
-# Invece di uscire dal cerchio con back x2 + aprire il drawer (fragile:
-# dipende dalla navigazione e dall'hamburger), uso il DEEP LINK configurato in
-# linking.ts: <scheme>://self-care -> SelfCareScreen (schermata pubblica,
-# non richiede circleId). Scheme della build preview: accanto.preview.
 - openLink: accanto.preview://self-care
 - extendedWaitUntil:
     visible: "Cura di te"

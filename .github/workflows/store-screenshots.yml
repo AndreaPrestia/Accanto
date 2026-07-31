@@ -27,6 +27,10 @@ jobs:
       MAESTRO_APP_ID: app.accanto.mobile.preview
       MAESTRO_EMAIL: ${{ secrets.MAESTRO_EMAIL }}
       MAESTRO_PASSWORD: ${{ secrets.MAESTRO_PASSWORD }}
+      # circleId del cerchio demo "Famiglia Rossi" (account reviewer), usato
+      # dai deep link del flow Maestro per navigare ai tab del cerchio.
+      # Non e' sensibile (id pubblico). Override via repo variable se cambia.
+      MAESTRO_CIRCLE_ID: ${{ vars.MAESTRO_CIRCLE_ID || 'f5003a91-79d4-41fb-9f20-d300a0707232' }}
       # Su runner CI freschi il driver XCTest di Maestro impiega piu' del
       # default a installarsi/avviarsi la prima volta: alza il timeout (ms).
       MAESTRO_DRIVER_STARTUP_TIMEOUT: '180000'
