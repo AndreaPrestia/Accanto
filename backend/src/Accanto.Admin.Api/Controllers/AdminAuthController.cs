@@ -49,6 +49,10 @@ public class AdminAuthController : ControllerBase
     // Reset password admin. Anonimo + rate-limited. forgot-password risponde
     // sempre 204 (anti-enumerazione). Nessun account viene creato qui: il flusso
     // agisce solo su admin gia' esistenti (seedati).
+    // forgot/reset DEVONO essere anonimi: chi ha dimenticato la password (o fa il
+    // primo accesso dopo il seed senza password) non e' autenticato. Sono protetti
+    // da rate limit, anti-enumerazione e token monouso. Il warning CodeQL
+    // "missing function level access control" e' un falso positivo qui.
     [HttpPost("forgot-password")]
     [AllowAnonymous]
     [EnableRateLimiting("admin-auth-login")]
@@ -58,6 +62,9 @@ public class AdminAuthController : ControllerBase
         return NoContent();
     }
 
+    // codeql[cs/web/missing-function-level-access-control]: endpoint pubblico
+    // per intento (reset password con token monouso); autenticazione qui sarebbe
+    // impossibile per l'utente che deve reimpostare la password.
     [HttpPost("reset-password")]
     [AllowAnonymous]
     [EnableRateLimiting("admin-auth-login")]

@@ -72,6 +72,9 @@ public static class AdminSeed
             admin.Roles.Add(new AdminUserRole { Id = Guid.NewGuid(), AdminUserId = admin.Id, AdminRoleId = role.Id });
             db.AdminUsers.Add(admin);
             createdCount++;
+            // L'email admin nel log di seed e' intenzionale (diagnostica ops su
+            // account amministrativi, non utenti finali) e finisce solo nei log server.
+            // codeql[cs/exposure-of-sensitive-information]
             logger.LogInformation("AdminSeed: creato admin {Email} (ruolo {Role}), senza password. Usare forgot-password per impostarla.", email, roleName);
         }
 

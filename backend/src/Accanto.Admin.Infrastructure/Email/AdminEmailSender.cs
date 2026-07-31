@@ -31,7 +31,8 @@ public class AdminEmailSender : IAdminEmailSender
     {
         if (!IsConfigured)
         {
-            _logger.LogDebug("AdminEmailSender non configurato: email a {Recipient} ignorata.", recipientEmail);
+            // Non logghiamo l'indirizzo (PII): solo il fatto che il sender e' off.
+            _logger.LogDebug("AdminEmailSender non configurato: email admin ignorata.");
             return;
         }
         if (string.IsNullOrWhiteSpace(recipientEmail))
@@ -60,7 +61,8 @@ public class AdminEmailSender : IAdminEmailSender
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Errore invio email admin a {Recipient}", recipientEmail);
+            // Non logghiamo l'indirizzo del destinatario (PII).
+            _logger.LogWarning(ex, "Errore invio email admin.");
         }
     }
 }
