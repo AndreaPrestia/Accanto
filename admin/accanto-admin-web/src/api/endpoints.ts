@@ -66,3 +66,12 @@ export async function getSystemHealth(): Promise<SystemHealth> {
   const { data } = await adminApi.get<SystemHealth>('/api/admin/system/health');
   return data;
 }
+
+// --- Password reset (anonimo) ---
+export async function forgotPassword(email: string): Promise<void> {
+  await adminApi.post('/api/admin/auth/forgot-password', { email });
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  await adminApi.post('/api/admin/auth/reset-password', { token, newPassword });
+}

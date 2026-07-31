@@ -184,29 +184,71 @@ titoli/contenuti timeline, nomi file, path, domande, aggiornamenti, body request
 
 ## Creazione del primo admin
 
-Non esiste registrazione pubblica per gli admin.
+Non esiste registrazione pubblica per gli admin. Gli admin vengono **seedati senza
+password** (email + display name + ruolo); ciascuno imposta poi la propria password
+tramite il flusso di reset. Il seed è **idempotente** e gira in **tutti gli ambienti**
+(Development e Production): non introduce credenziali long-lived in configurazione.
 
-### Sviluppo (seed automatico)
+### Seed (email + display name + ruolo, senza password)
 
-In `appsettings.Development.json` (o via env `AdminSeed__*`), se **non esiste
-alcun admin**, l'Admin API crea i ruoli canonici e un utente `Owner`:
+Config `AdminSeed:Admins` come **JSON array** (env `AdminSeed__Admins`):
 
 ```json
 "AdminSeed": {
-  "Email": "admin@example.com",
-  "Password": "ChangeMe!Dev0nly",
-  "DisplayName": "Administrator"
+  "Admins": "[{\"email\":\"admin@accanto.care\",\"displayName\":\"Admin\",\"role\":\"Owner\"}]"
 }
 ```
 
-Il seed è attivo **solo in Development**. La password non viene mai loggata.
+- `role` opzionale (default `Owner`); valori: `Owner`, `Operator`, `SecurityAuditor`.
+- `displayName` opzionale (fallback: prefisso dell'email).
+- All'avvio l'Admin API garantisce i ruoli canonici e crea gli admin elencati **solo
+  se l'email non esiste già**. Gli account nascono con `PasswordHash` vuoto e
+  `IsActive = true`: **non possono loggare** finché non impostano la password.
 
-### Produzione
+### Impostare la password (primo accesso)
 
-Il seed automatico è **disabilitato** in Production. Il primo admin va creato con
-una procedura operativa manuale (INSERT diretta sul DB admin con hash PBKDF2 della
-password, oppure un CLI dedicato), documentata nel runbook operativo. Ruoli da
-creare: `Owner`, `Operator`, `SecurityAuditor`.
+L'admin usa il flusso di reset (vedi sotto): dalla pagina di login dell'admin-web →
+"Password dimenticata / primo accesso?" → inserisce l'email → riceve il link → imposta
+la password.
+
+### Bootstrap senza email (SMTP non configurato)
+
+Se `AdminEmail__*` non è configurato, il sender è no-op e il link non viene inviato.
+In tal caso il primo reset si completa via **injection del token** (stesso pattern
+della app pubblica): generare un token URL-safe, calcolarne l'hash SHA-256,
+`INSERT` in `admin_password_reset_tokens` per l'admin, poi `POST /api/admin/auth/reset-password`
+con `{token, newPassword}`.
+
+---
+
+## Reset password admin
+
+Flusso self-contained nel control plane (nessun riuso del flusso pubblico).
+
+```text
+POST /api/admin/auth/forgot-password  { "email": "..." }      → 204 (sempre, anti-enumerazione)
+POST /api/admin/auth/reset-password   { "token": "...", "newPassword": "..." }  → 204 / 403
+```
+
+Regole:
+
+- **Anti-enumerazione**: `forgot-password` risponde sempre 204, esista o no l'email;
+  nessun token emesso per admin inattivi.
+- Il token è salvato **solo come hash SHA-256** in `admin_password_reset_tokens`
+  (mai il valore raw); il raw esiste solo nel link email. Scadenza default 60 min,
+  monouso (`UsedAt`).
+- Il reset imposta l'hash PBKDF2 e **revoca tutte le sessioni admin** dell'utente.
+- Entrambi gli endpoint sono anonimi e **rate-limited** (bucket `admin-auth-login`).
+- Eventi audit: `Admin.PasswordResetRequested`, `Admin.PasswordResetCompleted`.
+
+Config:
+
+```text
+AdminAuth__PasswordReset__PublicUrl=https://admin.accanto.care   # base URL admin-web (fallback: primo AdminCors origin)
+AdminAuth__PasswordReset__ResetPath=/reset-password
+AdminAuth__PasswordReset__TokenLifetimeMinutes=60
+AdminEmail__SmtpHost=...   AdminEmail__FromAddress=...           # vuoto = sender no-op
+```
 
 ---
 
@@ -320,8 +362,16 @@ Ruoli:
 ## Troubleshooting
 
 **Login admin fallisce con 401 "Credenziali non valide".**
-Verifica email/password. Controlla che l'admin esista e `IsActive=true`. In dev,
-assicurati che il seed sia stato eseguito (log `Seed admin creato per ...`).
+Verifica email/password. Controlla che l'admin esista e `IsActive=true`. Se l'admin
+è stato appena seedato, ha `PasswordHash` vuoto e **non può loggare**: deve prima
+impostare la password via `forgot-password`. Nei log del seed cerca
+`AdminSeed: creato admin ...`.
+
+**L'email di reset admin non arriva.**
+`AdminEmail__*` è opzionale: se `SmtpHost`/`FromAddress` sono vuoti il sender è
+no-op (nessuna email). Configura SMTP oppure completa il primo reset via injection
+del token (vedi "Bootstrap senza email"). `forgot-password` risponde comunque 204
+per anti-enumerazione, anche quando l'email non viene inviata.
 
 **Gli endpoint `/internal/admin/*` rispondono 401 anche con un token.**
 La chiave `InternalApp__SigningKey` (Admin API) deve **matchare**

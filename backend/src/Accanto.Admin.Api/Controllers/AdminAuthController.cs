@@ -11,11 +11,13 @@ namespace Accanto.Admin.Api.Controllers;
 public class AdminAuthController : ControllerBase
 {
     private readonly IAdminAuthService _auth;
+    private readonly IAdminPasswordResetService _reset;
     private readonly ICurrentAdmin _currentAdmin;
 
-    public AdminAuthController(IAdminAuthService auth, ICurrentAdmin currentAdmin)
+    public AdminAuthController(IAdminAuthService auth, IAdminPasswordResetService reset, ICurrentAdmin currentAdmin)
     {
         _auth = auth;
+        _reset = reset;
         _currentAdmin = currentAdmin;
     }
 
@@ -42,6 +44,27 @@ public class AdminAuthController : ControllerBase
     {
         await _auth.LogoutAsync(request, ct);
         return Ok(new { ok = true });
+    }
+
+    // Reset password admin. Anonimo + rate-limited. forgot-password risponde
+    // sempre 204 (anti-enumerazione). Nessun account viene creato qui: il flusso
+    // agisce solo su admin gia' esistenti (seedati).
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting("admin-auth-login")]
+    public async Task<IActionResult> ForgotPassword([FromBody] AdminForgotPasswordRequest request, CancellationToken ct)
+    {
+        await _reset.RequestResetAsync(request, BuildClientInfo(), ct);
+        return NoContent();
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting("admin-auth-login")]
+    public async Task<IActionResult> ResetPassword([FromBody] AdminResetPasswordRequest request, CancellationToken ct)
+    {
+        await _reset.ResetAsync(request, BuildClientInfo(), ct);
+        return NoContent();
     }
 
     [HttpGet("me")]

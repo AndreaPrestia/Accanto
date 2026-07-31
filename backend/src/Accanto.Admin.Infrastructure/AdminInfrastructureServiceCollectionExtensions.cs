@@ -1,8 +1,10 @@
 using Accanto.Admin.Application.Audit;
 using Accanto.Admin.Application.Common.Persistence;
 using Accanto.Admin.Application.Common.Security;
+using Accanto.Admin.Application.Email;
 using Accanto.Admin.Application.Users;
 using Accanto.Admin.Infrastructure.Audit;
+using Accanto.Admin.Infrastructure.Email;
 using Accanto.Admin.Infrastructure.Internal;
 using Accanto.Admin.Infrastructure.Persistence;
 using Accanto.Admin.Infrastructure.Security;
@@ -37,6 +39,10 @@ public static class AdminInfrastructureServiceCollectionExtensions
         services.AddScoped<IAdminJwtTokenService, AdminJwtTokenService>();
         services.AddSingleton<IAdminPasswordHasher, AdminPasswordHasher>();
         services.AddScoped<IAdminAuditLog, AdminAuditLogWriter>();
+
+        // Email admin (SMTP MailKit). Sezione AdminEmail; no-op se non configurato.
+        services.Configure<AdminEmailOptions>(configuration.GetSection("AdminEmail"));
+        services.AddScoped<IAdminEmailSender, AdminEmailSender>();
 
         // Client service-to-service verso gli endpoint interni della app pubblica.
         services.Configure<InternalAppOptions>(configuration.GetSection("InternalApp"));

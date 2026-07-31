@@ -58,6 +58,15 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
         p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
 }));
 
+// --- Reset password admin: base URL dell'admin-web per il link -----------------
+// Default: primo origin di AdminCors, cosi' in setup minimi non serve config extra.
+builder.Services.Configure<Accanto.Admin.Application.Auth.AdminPasswordResetOptions>(opt =>
+{
+    builder.Configuration.GetSection("AdminAuth:PasswordReset").Bind(opt);
+    if (string.IsNullOrWhiteSpace(opt.PublicUrl))
+        opt.PublicUrl = adminCors.FirstOrDefault() ?? string.Empty;
+});
+
 // --- JWT admin (separato dal JWT pubblico) -----------------------------------
 // Signing material risolto eager: fail-fast su config invalida e condivisione
 // dello stesso snapshot tra AddJwtBearer e AdminJwtTokenService.
@@ -125,12 +134,12 @@ BEGIN
     END IF;
 END$$;");
 
-    // Seed SOLO in Development (mai in Production).
-    if (app.Environment.IsDevelopment())
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AdminSeed");
-        await AdminSeed.EnsureSeedAsync(app.Services, app.Configuration, logger);
-    }
+    // Seed admin: eseguito in TUTTI gli ambienti (Development e Production).
+    // Password-less e idempotente: crea i ruoli canonici e gli admin dichiarati
+    // in config (AdminSeed:Admins) senza password. L'admin imposta la password
+    // via forgot-password. Non introduce credenziali long-lived in config.
+    var seedLogger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AdminSeed");
+    await AdminSeed.EnsureSeedAsync(app.Services, app.Configuration, seedLogger);
 }
 
 app.UseSerilogRequestLogging();

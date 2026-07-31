@@ -1,5 +1,5 @@
+using System.Text.Json;
 using Accanto.Admin.Application.Common.Persistence;
-using Accanto.Admin.Application.Common.Security;
 using Accanto.Admin.Domain.Authorization;
 using Accanto.Admin.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -7,59 +7,121 @@ using Microsoft.EntityFrameworkCore;
 namespace Accanto.Admin.Api.Common;
 
 /// <summary>
-/// Seed di sviluppo: crea i ruoli admin canonici e, SOLO se non esiste alcun
-/// admin, un utente Owner iniziale. Eseguito solo in ambiente Development.
-/// La password NON viene mai loggata. In produzione gli admin vanno creati
-/// tramite procedura operativa documentata (non seed automatico).
+/// Seed degli admin: garantisce sempre i ruoli canonici e provisiona gli admin
+/// dichiarati in config **senza password** (email + display name + ruolo). Ogni
+/// admin imposta poi la propria password tramite il flusso di reset.
+///
+/// Idempotente ed eseguibile anche in produzione: i ruoli sono garantiti sempre,
+/// gli admin vengono creati solo se l'email non esiste gia'. NON introduce
+/// credenziali long-lived in configurazione (nessuna password nel seed).
 /// </summary>
 public static class AdminSeed
 {
+    private sealed record SeedAdmin(string Email, string? DisplayName, string? Role);
+
     public static async Task EnsureSeedAsync(IServiceProvider services, IConfiguration config, ILogger logger, CancellationToken ct = default)
     {
         using var scope = services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<IAccantoAdminDbContext>();
-        var hasher = scope.ServiceProvider.GetRequiredService<IAdminPasswordHasher>();
         var time = scope.ServiceProvider.GetRequiredService<TimeProvider>();
 
-        // Ruoli canonici (idempotente).
-        var existingRoles = await db.AdminRoles.Select(r => r.Name).ToListAsync(ct);
+        // 1) Ruoli canonici (idempotente).
+        var existingRoles = await db.AdminRoles.ToListAsync(ct);
         foreach (var roleName in AdminRoles.All)
         {
-            if (!existingRoles.Contains(roleName))
-                db.AdminRoles.Add(new AdminRole { Id = Guid.NewGuid(), Name = roleName });
+            if (!existingRoles.Any(r => r.Name == roleName))
+            {
+                var role = new AdminRole { Id = Guid.NewGuid(), Name = roleName };
+                db.AdminRoles.Add(role);
+                existingRoles.Add(role);
+            }
         }
         await db.SaveChangesAsync(ct);
 
-        // Nessun admin seed se ne esiste gia' almeno uno.
-        if (await db.AdminUsers.AnyAsync(ct))
-            return;
-
-        var email = config["AdminSeed:Email"];
-        var password = config["AdminSeed:Password"];
-        var displayName = config["AdminSeed:DisplayName"] ?? "Administrator";
-
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        // 2) Admin da config (senza password).
+        var seedAdmins = ParseSeedAdmins(config, logger);
+        if (seedAdmins.Count == 0)
         {
-            logger.LogWarning("Nessun admin presente e AdminSeed:Email/Password non configurati: seed admin saltato.");
+            logger.LogInformation("AdminSeed: nessun admin da seedare (AdminSeed:Admins / AdminSeed:Email non impostati).");
             return;
         }
 
-        var ownerRole = await db.AdminRoles.FirstAsync(r => r.Name == AdminRoles.Owner, ct);
-        var admin = new AdminUser
+        var createdCount = 0;
+        foreach (var seed in seedAdmins)
         {
-            Id = Guid.NewGuid(),
-            Email = email.Trim().ToLowerInvariant(),
-            DisplayName = displayName,
-            PasswordHash = hasher.Hash(password),
-            MfaEnabled = false,
-            IsActive = true,
-            CreatedAt = time.GetUtcNow()
-        };
-        admin.Roles.Add(new AdminUserRole { Id = Guid.NewGuid(), AdminUserId = admin.Id, AdminRoleId = ownerRole.Id });
+            var email = seed.Email.Trim().ToLowerInvariant();
+            if (await db.AdminUsers.AnyAsync(u => u.Email == email, ct))
+                continue; // idempotente: non duplicare
 
-        db.AdminUsers.Add(admin);
-        await db.SaveChangesAsync(ct);
+            var roleName = ResolveRole(seed.Role);
+            var role = existingRoles.First(r => r.Name == roleName);
+            var displayName = string.IsNullOrWhiteSpace(seed.DisplayName)
+                ? email.Split('@')[0]
+                : seed.DisplayName!.Trim();
 
-        logger.LogInformation("Seed admin creato per {Email} (ruolo Owner). Password non loggata.", admin.Email);
+            var admin = new AdminUser
+            {
+                Id = Guid.NewGuid(),
+                Email = email,
+                DisplayName = displayName,
+                PasswordHash = string.Empty, // login bloccato finche' non completa il reset
+                MfaEnabled = false,
+                IsActive = true,
+                CreatedAt = time.GetUtcNow()
+            };
+            admin.Roles.Add(new AdminUserRole { Id = Guid.NewGuid(), AdminUserId = admin.Id, AdminRoleId = role.Id });
+            db.AdminUsers.Add(admin);
+            createdCount++;
+            logger.LogInformation("AdminSeed: creato admin {Email} (ruolo {Role}), senza password. Usare forgot-password per impostarla.", email, roleName);
+        }
+
+        if (createdCount > 0)
+            await db.SaveChangesAsync(ct);
+        else
+            logger.LogInformation("AdminSeed: tutti gli admin richiesti esistono gia' (nessuna creazione).");
+    }
+
+    private static string ResolveRole(string? role)
+    {
+        if (!string.IsNullOrWhiteSpace(role))
+        {
+            var match = AdminRoles.All.FirstOrDefault(r => string.Equals(r, role.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (match is not null) return match;
+        }
+        return AdminRoles.Owner;
+    }
+
+    private static List<SeedAdmin> ParseSeedAdmins(IConfiguration config, ILogger logger)
+    {
+        var result = new List<SeedAdmin>();
+
+        // Formato primario: AdminSeed:Admins = JSON array.
+        var json = config["AdminSeed:Admins"];
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            try
+            {
+                var parsed = JsonSerializer.Deserialize<List<SeedAdmin>>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+                if (parsed is not null)
+                    result.AddRange(parsed.Where(a => !string.IsNullOrWhiteSpace(a.Email)));
+            }
+            catch (JsonException ex)
+            {
+                logger.LogWarning(ex, "AdminSeed:Admins non e' un JSON array valido; verra' ignorato.");
+            }
+        }
+
+        // Retro-compat: AdminSeed:Email singolo (senza password).
+        var singleEmail = config["AdminSeed:Email"];
+        if (!string.IsNullOrWhiteSpace(singleEmail) &&
+            !result.Any(a => string.Equals(a.Email, singleEmail, StringComparison.OrdinalIgnoreCase)))
+        {
+            result.Add(new SeedAdmin(singleEmail, config["AdminSeed:DisplayName"], config["AdminSeed:Role"]));
+        }
+
+        return result;
     }
 }

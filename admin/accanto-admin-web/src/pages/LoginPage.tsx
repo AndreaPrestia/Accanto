@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useAuth } from '../auth/AuthContext';
 import { ErrorBox } from '../components/ui';
@@ -76,6 +76,10 @@ export default function LoginPage() {
         <button type="submit" className="btn-primary mt-5 w-full" disabled={loading}>
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
+
+        <Link to="/forgot-password" className="mt-3 block text-center text-xs text-accanto-600 hover:underline">
+          Password dimenticata / primo accesso?
+        </Link>
 
         <p className="mt-4 text-center text-xs text-accanto-500">
           Technical access only. All actions are audited.

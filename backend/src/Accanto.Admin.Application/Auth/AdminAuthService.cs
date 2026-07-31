@@ -46,7 +46,11 @@ public class AdminAuthService : IAdminAuthService
             .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 
         // Messaggio generico anti-enumerazione: non rivelare se l'account esiste.
-        if (admin is null || !admin.IsActive || !_hasher.Verify(request.Password, admin.PasswordHash))
+        // Un admin seedato senza password (PasswordHash vuoto) NON puo' loggare
+        // finche' non completa il flusso di reset/impostazione password.
+        if (admin is null || !admin.IsActive
+            || string.IsNullOrEmpty(admin.PasswordHash)
+            || !_hasher.Verify(request.Password, admin.PasswordHash))
             throw new AdminUnauthorizedException("Credenziali non valide.");
 
         admin.LastLoginAt = _time.GetUtcNow();

@@ -317,13 +317,24 @@ services:
       InternalApp__Audience: ${InternalApp__Audience:-accanto-internal-admin}
       InternalApp__SigningKey: ${InternalApp__SigningKey:-please-change-me-internal-secret-at-least-32-chars}
       InternalApp__TokenLifetimeMinutes: ${InternalApp__TokenLifetimeMinutes:-5}
+      # Reset password admin: base URL dell'admin-web per il link (default: primo AdminCors origin).
+      AdminAuth__PasswordReset__PublicUrl: ${AdminAuth__PasswordReset__PublicUrl:-}
+      AdminAuth__PasswordReset__ResetPath: ${AdminAuth__PasswordReset__ResetPath:-/reset-password}
+      AdminAuth__PasswordReset__TokenLifetimeMinutes: ${AdminAuth__PasswordReset__TokenLifetimeMinutes:-60}
+      # Email admin (SMTP) per il link di reset. Vuoto = sender no-op.
+      AdminEmail__SmtpHost: ${AdminEmail__SmtpHost:-}
+      AdminEmail__SmtpPort: ${AdminEmail__SmtpPort:-587}
+      AdminEmail__Username: ${AdminEmail__Username:-}
+      AdminEmail__Password: ${AdminEmail__Password:-}
+      AdminEmail__UseStartTls: ${AdminEmail__UseStartTls:-true}
+      AdminEmail__FromAddress: ${AdminEmail__FromAddress:-}
+      AdminEmail__FromName: ${AdminEmail__FromName:-Accanto Admin}
       # Log Seq opt-in (profilo observability).
       Logging__SeqUrl: ${Logging__SeqUrl:-}
       Logging__SeqApiKey: ${Logging__SeqApiKey:-}
-      # Seed admin SOLO in Development (mai in Production).
-      AdminSeed__Email: ${AdminSeed__Email:-}
-      AdminSeed__Password: ${AdminSeed__Password:-}
-      AdminSeed__DisplayName: ${AdminSeed__DisplayName:-Administrator}
+      # Seed admin SENZA password (email+displayName+ruolo). Idempotente, anche in prod.
+      # JSON array: [{"email":"...","displayName":"...","role":"Owner"}]
+      AdminSeed__Admins: ${AdminSeed__Admins:-}
     ports:
       - "8082:8080"
     security_opt:

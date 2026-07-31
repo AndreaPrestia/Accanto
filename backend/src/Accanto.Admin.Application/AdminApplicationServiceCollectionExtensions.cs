@@ -10,6 +10,7 @@ public static class AdminApplicationServiceCollectionExtensions
     public static IServiceCollection AddAccantoAdminApplication(this IServiceCollection services)
     {
         services.AddScoped<IAdminAuthService, AdminAuthService>();
+        services.AddScoped<IAdminPasswordResetService, AdminPasswordResetService>();
         services.AddScoped<IAdminUserOperationsService, AdminUserOperationsService>();
         services.AddScoped<IAdminAuditQueryService, AdminAuditQueryService>();
         services.AddSingleton(TimeProvider.System);

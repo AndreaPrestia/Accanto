@@ -3,6 +3,8 @@ namespace Accanto.Admin.Application.Auth;
 public sealed record AdminLoginRequest(string Email, string Password);
 public sealed record AdminRefreshRequest(string RefreshToken);
 public sealed record AdminLogoutRequest(string RefreshToken);
+public sealed record AdminForgotPasswordRequest(string Email);
+public sealed record AdminResetPasswordRequest(string Token, string NewPassword);
 
 public sealed record AdminUserDto(
     Guid Id,

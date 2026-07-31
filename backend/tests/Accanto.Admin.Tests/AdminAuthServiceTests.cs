@@ -89,6 +89,33 @@ public class AdminAuthServiceTests
     }
 
     [Fact]
+    public async Task Login_fails_for_admin_without_password_until_reset()
+    {
+        // Admin seedato senza password (PasswordHash vuoto): non puo' loggare.
+        using var db = AdminTestDb.Create();
+        var role = new AdminRole { Id = Guid.NewGuid(), Name = AdminRoles.Owner };
+        db.AdminRoles.Add(role);
+        var admin = new AdminUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "seeded@example.com",
+            DisplayName = "Seeded",
+            PasswordHash = string.Empty,
+            IsActive = true,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        admin.Roles.Add(new AdminUserRole { Id = Guid.NewGuid(), AdminUserId = admin.Id, AdminRoleId = role.Id });
+        db.AdminUsers.Add(admin);
+        await db.SaveChangesAsync();
+        var svc = Create(db, new NoOpAdminAuditLog());
+
+        // Anche con una password plausibile, il login fallisce: l'hash e' vuoto
+        // (l'admin deve prima completare il flusso di reset).
+        await FluentActions.Invoking(() => svc.LoginAsync(new AdminLoginRequest("seeded@example.com", "anyRealPassword")))
+            .Should().ThrowAsync<AdminUnauthorizedException>();
+    }
+
+    [Fact]
     public async Task Refresh_token_is_stored_hashed_not_raw()
     {
         using var db = AdminTestDb.Create();

@@ -21,6 +21,7 @@ public class AccantoAdminDbContext : DbContext, IAccantoAdminDbContext
     public DbSet<AdminSession> AdminSessions => Set<AdminSession>();
     public DbSet<AdminAuditLog> AdminAuditLogs => Set<AdminAuditLog>();
     public DbSet<AdminOperation> AdminOperations => Set<AdminOperation>();
+    public DbSet<AdminPasswordResetToken> AdminPasswordResetTokens => Set<AdminPasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

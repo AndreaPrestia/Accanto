@@ -15,6 +15,7 @@ public interface IAccantoAdminDbContext
     DbSet<AdminSession> AdminSessions { get; }
     DbSet<AdminAuditLog> AdminAuditLogs { get; }
     DbSet<AdminOperation> AdminOperations { get; }
+    DbSet<AdminPasswordResetToken> AdminPasswordResetTokens { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
