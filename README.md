@@ -273,6 +273,21 @@ Elenco non esaustivo (per i dettagli completi vedi Swagger):
 
 Swagger UI: `http://localhost:8080/swagger`.
 
+## Admin Control Plane
+
+Accanto include un sistema **Admin separato** (control plane) per operazioni tecniche
+minime sugli account: disabilitare/riabilitare utenti, revocare sessioni, avviare la
+cancellazione dati, consultare audit log e stato tecnico. È composto da un'Admin API,
+un frontend admin e un DB admin **separati** dall'app pubblica, con autenticazione e
+JWT dedicati.
+
+Per progettazione l'admin **non può leggere i contenuti degli utenti** (timeline,
+documenti, domande ai medici, aggiornamenti, nomi dei cerchi, nomi dei file), non può
+impersonare utenti e non può cancellare direttamente dati. Ogni azione mutativa
+richiede una motivazione ed è registrata in un audit log append-only.
+
+Documentazione completa: [`docs/admin-system.md`](docs/admin-system.md).
+
 ## Privacy e dati
 
 Accanto è progettato per essere **self-hostable** (sul tuo PC, su un piccolo VPS, in una intranet). Non esiste un servizio centralizzato Accanto SaaS. Nessun dato lascia mai l'istanza che gestisci.

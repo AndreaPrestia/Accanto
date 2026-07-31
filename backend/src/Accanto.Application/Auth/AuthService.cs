@@ -128,6 +128,14 @@ public class AuthService : IAuthService
 
         var now = _time.GetUtcNow();
 
+        // Account disabilitato dal control plane admin: accesso negato.
+        // Messaggio generico per non rivelare lo stato amministrativo.
+        if (user.IsDisabled)
+        {
+            await _audit.LogAsync(user.Id, SecurityAuditEventType.LoginFailed, "Account disabilitato", email, client, cancellationToken);
+            throw new ForbiddenException("Account disabilitato. Contatta il supporto.");
+        }
+
         if (user.LockoutEndsAt is { } lockedUntil && lockedUntil > now)
         {
             var minutes = (int)Math.Ceiling((lockedUntil - now).TotalMinutes);

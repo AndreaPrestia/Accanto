@@ -46,6 +46,8 @@ storage/*
 
 # Docker
 *.pid
+# Override compose locali per test manuali (es. remap porte, seed di test).
+docker-compose.*-test.yml
 
 # Playwright
 frontend/test-results/

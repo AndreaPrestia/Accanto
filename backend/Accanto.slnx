@@ -1,5 +1,9 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Accanto.Admin.Api/Accanto.Admin.Api.csproj" />
+    <Project Path="src/Accanto.Admin.Application/Accanto.Admin.Application.csproj" />
+    <Project Path="src/Accanto.Admin.Domain/Accanto.Admin.Domain.csproj" />
+    <Project Path="src/Accanto.Admin.Infrastructure/Accanto.Admin.Infrastructure.csproj" />
     <Project Path="src/Accanto.Api/Accanto.Api.csproj" />
     <Project Path="src/Accanto.Application/Accanto.Application.csproj" />
     <Project Path="src/Accanto.Cli/Accanto.Cli.csproj" />
@@ -7,6 +11,7 @@
     <Project Path="src/Accanto.Infrastructure/Accanto.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Accanto.Admin.Tests/Accanto.Admin.Tests.csproj" />
     <Project Path="tests/Accanto.Tests/Accanto.Tests.csproj" />
   </Folder>
 </Solution>
