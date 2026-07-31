@@ -52,18 +52,25 @@ env:
     text: "Salta"
     optional: true
 
-# DEBUG: cattura lo schermo dopo il login+welcome per capire cosa appare.
-- takeScreenshot: debug-after-login
+# Attende che la Welcome SPARISCA dopo il tap "Salta" (skip() ->
+# navigation.replace('Dashboard') non e' istantaneo). Senza questo, il flow
+# proseguiva mentre era ancora sulla Welcome (visto in debug-after-login).
+# optional: se la Welcome non c'era, notVisible e' gia' vero.
+- extendedWaitUntil:
+    notVisible: "Ti diamo il benvenuto"
+    timeout: 15000
+    optional: true
 
 # Attende che RootNavigator switchi su AppStack e mostri la dashboard.
-# Timeout generoso: la dashboard fetcha i cerchi da prod, su CI puo' essere lenta.
 - extendedWaitUntil:
     visible: "Il tuo spazio"
     timeout: 30000
 
+# DEBUG: cattura lo schermo dopo essere arrivati alla dashboard.
+- takeScreenshot: debug-after-login
+
 # Attende che la fetch dei cerchi completi e la card "Famiglia Rossi" sia
-# renderizzata (arriva DOPO il titolo "Il tuo spazio"). Senza questa attesa il
-# tap e lo screenshot arrivano mentre la lista e' ancora in caricamento.
+# renderizzata (arriva DOPO il titolo "Il tuo spazio", fetch asincrona da prod).
 - extendedWaitUntil:
     visible: "Famiglia Rossi"
     timeout: 30000
