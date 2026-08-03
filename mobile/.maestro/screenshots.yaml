@@ -108,7 +108,10 @@ env:
 - takeScreenshot: 02-timeline
 
 # ---- 03 · Documents -------------------------------------------------------
-- tapOn: "Panoramica"
+# NB: il tab bar iOS espone la label COMPOSITA "Panoramica, tab, 1 of 5"
+# (non solo "Panoramica") -> uso regex parziale "Panoramica.*" altrimenti
+# il match del testo esatto fallisce (Element not found).
+- tapOn: "Panoramica.*"
 - extendedWaitUntil:
     visible:
       id: "overview-card-documents"
@@ -120,7 +123,7 @@ env:
 - takeScreenshot: 03-documents
 
 # ---- 04 · DoctorQuestions -------------------------------------------------
-- tapOn: "Panoramica"
+- tapOn: "Panoramica.*"
 - extendedWaitUntil:
     visible:
       id: "overview-card-questions"
