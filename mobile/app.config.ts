@@ -64,7 +64,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     assetBundlePatterns: ['**/*'],
     ios: {
-      supportsTablet: true,
+      // iPad disattivato per il primo rilascio: l'app e' mobile-first
+      // portrait-only, non ancora ottimizzata per tablet. Evita gli
+      // screenshot 13" obbligatori e il rischio di rejection per UI iPad.
+      // Riattivare (true) quando il layout tablet sara' curato.
+      supportsTablet: false,
       bundleIdentifier: bundleId,
       // applinks: copre TUTTI i path di accanto.care (universal links).
       // Niente activitycontinuation: non usiamo Handoff.
