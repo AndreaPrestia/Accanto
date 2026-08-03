@@ -84,12 +84,12 @@ env:
 - takeScreenshot: 01-dashboard
 
 # I deep link NON navigano (l'app resta sulla Dashboard anche dopo tap "Open"):
-# React Navigation non processa il link con l'app gia' in foreground. Torno
-# alla navigazione per TAP sulle card della schermata Panoramica del cerchio.
-# Ogni card ha una DESCRIZIONE univoca (niente ambiguita' con i tab in basso):
-#   Diario     -> "Annota appuntamenti, sintomi, decisioni."
-#   Documenti  -> "Conserva referti, esami, prescrizioni."
-#   Domande    -> "Prepara cosa chiedere alla prossima visita."
+# React Navigation non processa il link con l'app gia' in foreground. Navigo
+# per TAP sulle CARD della Panoramica del cerchio. Le card sono <Pressable>
+# con DUE <Text> figli (titolo + descrizione): iOS li fonde in un unico nodo
+# accessibile con label combinata, quindi il match per la sola descrizione
+# FALLISCE. Ho aggiunto testID espliciti a ogni SectionCard -> match per id:
+#   overview-card-timeline | -documents | -questions
 # Le card fanno navigation.navigate('Timeline'|'Documents'|'DoctorQuestions').
 
 # Apro il cerchio: tap sulla card Dashboard -> CircleOverview (Panoramica).
@@ -99,20 +99,22 @@ env:
     timeout: 20000
 
 # ---- 02 · Timeline (Diario) ----------------------------------------------
-# Tap sulla descrizione della card "Diario" (univoca). Poi torno alla
-# Panoramica per la card successiva (i tab si navigano dalla Panoramica).
-- tapOn: "Annota appuntamenti, sintomi, decisioni."
+# Tap sulla card "Diario" via testID. Poi torno alla Panoramica (tab) per la
+# card successiva.
+- tapOn:
+    id: "overview-card-timeline"
 - waitForAnimationToEnd:
     timeout: 6000
 - takeScreenshot: 02-timeline
 
 # ---- 03 · Documents -------------------------------------------------------
-# Torno al tab Panoramica (tab bar in basso) e apro la card Documenti.
 - tapOn: "Panoramica"
 - extendedWaitUntil:
-    visible: "Conserva referti, esami, prescrizioni."
+    visible:
+      id: "overview-card-documents"
     timeout: 10000
-- tapOn: "Conserva referti, esami, prescrizioni."
+- tapOn:
+    id: "overview-card-documents"
 - waitForAnimationToEnd:
     timeout: 6000
 - takeScreenshot: 03-documents
@@ -120,22 +122,26 @@ env:
 # ---- 04 · DoctorQuestions -------------------------------------------------
 - tapOn: "Panoramica"
 - extendedWaitUntil:
-    visible: "Prepara cosa chiedere alla prossima visita."
+    visible:
+      id: "overview-card-questions"
     timeout: 10000
-- tapOn: "Prepara cosa chiedere alla prossima visita."
+- tapOn:
+    id: "overview-card-questions"
 - waitForAnimationToEnd:
     timeout: 6000
 - takeScreenshot: 04-doctor-questions
 
 # ---- 05 · SelfCare --------------------------------------------------------
-# SelfCare e' nel drawer (voce "Prenditi cura di te"), non nei tab del cerchio.
-# Apro il drawer dall'hamburger (accessibilityLabel "Apri menu") e tappo la voce.
+# SelfCare e' nel drawer (Drawer.Screen title "Prenditi cura di te"), non nei
+# tab del cerchio. Apro il drawer dall'hamburger (accessibilityLabel
+# "Apri menu", vedi MenuButton.tsx) e tappo la voce. L'header della schermata
+# ha lo stesso title -> asserisco "Prenditi cura di te" visibile.
 - tapOn: "Apri menu"
 - extendedWaitUntil:
     visible: "Prenditi cura di te"
     timeout: 10000
 - tapOn: "Prenditi cura di te"
 - extendedWaitUntil:
-    visible: "Cura di te"
+    visible: "Prenditi cura di te"
     timeout: 10000
 - takeScreenshot: 05-self-care

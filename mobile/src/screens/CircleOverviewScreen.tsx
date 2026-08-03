@@ -116,26 +116,31 @@ export default function CircleOverviewScreen() {
       ) : (
         <View className="mt-6 gap-3">
           <SectionCard
+            testID="overview-card-timeline"
             title="Diario"
             desc="Annota appuntamenti, sintomi, decisioni."
             onPress={() => navigation.navigate('Timeline')}
           />
           <SectionCard
+            testID="overview-card-documents"
             title="Documenti"
             desc="Conserva referti, esami, prescrizioni."
             onPress={() => navigation.navigate('Documents')}
           />
           <SectionCard
+            testID="overview-card-questions"
             title="Domande per il medico"
             desc="Prepara cosa chiedere alla prossima visita."
             onPress={() => navigation.navigate('DoctorQuestions')}
           />
           <SectionCard
+            testID="overview-card-updates"
             title="Aggiornamenti per gli altri"
             desc="Componi messaggi da copiare e inviare."
             onPress={() => navigation.navigate('SharedUpdates')}
           />
           <SectionCard
+            testID="overview-card-difficult-day"
             emphasis
             title="Giornata difficile"
             desc="Un piccolo respiro quando serve."
@@ -263,16 +268,24 @@ function SectionCard({
   title,
   desc,
   onPress,
-  emphasis
+  emphasis,
+  testID
 }: {
   title: string;
   desc: string;
   onPress: () => void;
   emphasis?: boolean;
+  testID?: string;
 }) {
   return (
     <Pressable
       onPress={onPress}
+      testID={testID}
+      // accessibilityLabel esplicito = testo stabile e univoco per gli E2E
+      // (Maestro). Senza, iOS fonde i due <Text> figli in un unico nodo con
+      // label combinata "Titolo, Descrizione", difficile da matchare.
+      accessibilityRole="button"
+      accessibilityLabel={title}
       className={`rounded-lg border bg-white p-4 active:bg-accanto-50 ${
         emphasis ? 'border-accanto-500' : 'border-accanto-100'
       }`}
