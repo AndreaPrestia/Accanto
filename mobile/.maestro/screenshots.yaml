@@ -91,8 +91,16 @@ env:
 #   <scheme>://care-circles/:id/timeline | documents | questions
 #   <scheme>://self-care
 
+# N.B.: iOS mostra un dialog di SISTEMA "Open in 'Accanto (Preview)'?" (in
+# inglese, e' del sistema non dell'app) con bottoni Cancel/Open dopo openLink.
+# Serve tap su "Open" per confermare la navigazione, altrimenti si resta sulla
+# schermata corrente. optional: se il dialog non appare, non blocca.
+
 # ---- 02 · Timeline (Diario) ----------------------------------------------
 - openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/timeline
+- tapOn:
+    text: "Open"
+    optional: true
 - extendedWaitUntil:
     visible: "Diario"
     timeout: 15000
@@ -100,6 +108,9 @@ env:
 
 # ---- 03 · Documents -------------------------------------------------------
 - openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/documents
+- tapOn:
+    text: "Open"
+    optional: true
 - extendedWaitUntil:
     visible: "Documenti"
     timeout: 15000
@@ -107,6 +118,9 @@ env:
 
 # ---- 04 · DoctorQuestions -------------------------------------------------
 - openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/questions
+- tapOn:
+    text: "Open"
+    optional: true
 - extendedWaitUntil:
     visible: "Domande"
     timeout: 15000
@@ -114,6 +128,9 @@ env:
 
 # ---- 05 · SelfCare --------------------------------------------------------
 - openLink: accanto.preview://self-care
+- tapOn:
+    text: "Open"
+    optional: true
 - extendedWaitUntil:
     visible: "Cura di te"
     timeout: 10000
