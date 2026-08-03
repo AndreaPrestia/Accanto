@@ -96,14 +96,19 @@ env:
 # Serve tap su "Open" per confermare la navigazione, altrimenti si resta sulla
 # schermata corrente. optional: se il dialog non appare, non blocca.
 
+# Non asserisco un testo specifico prima dello screenshot: non e' certo che il
+# deep link /timeline attivi il tab Timeline (React Navigation potrebbe restare
+# su CircleOverview). waitForAnimationToEnd stabilizza la transizione, poi
+# screenshot. Cosi' un solo run mi mostra dove atterra ogni deep link e posso
+# correggere senza asserzioni fragili che bloccano. Tap "Open" per il dialog iOS.
+
 # ---- 02 · Timeline (Diario) ----------------------------------------------
 - openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/timeline
 - tapOn:
     text: "Open"
     optional: true
-- extendedWaitUntil:
-    visible: "Diario"
-    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 8000
 - takeScreenshot: 02-timeline
 
 # ---- 03 · Documents -------------------------------------------------------
@@ -111,9 +116,8 @@ env:
 - tapOn:
     text: "Open"
     optional: true
-- extendedWaitUntil:
-    visible: "Documenti"
-    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 8000
 - takeScreenshot: 03-documents
 
 # ---- 04 · DoctorQuestions -------------------------------------------------
@@ -121,9 +125,8 @@ env:
 - tapOn:
     text: "Open"
     optional: true
-- extendedWaitUntil:
-    visible: "Domande"
-    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 8000
 - takeScreenshot: 04-doctor-questions
 
 # ---- 05 · SelfCare --------------------------------------------------------
@@ -131,7 +134,6 @@ env:
 - tapOn:
     text: "Open"
     optional: true
-- extendedWaitUntil:
-    visible: "Cura di te"
-    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 8000
 - takeScreenshot: 05-self-care
