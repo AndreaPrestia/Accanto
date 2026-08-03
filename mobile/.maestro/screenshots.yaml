@@ -83,57 +83,59 @@ env:
 # ---- 01 · Dashboard -------------------------------------------------------
 - takeScreenshot: 01-dashboard
 
-# Navigazione robusta via DEEP LINK (linking.ts) invece di tap sui tab:
-# i tab in basso non sono matchabili in modo affidabile da Maestro (testo
-# combinato con icona, tap "Diario" non trovato anche se visibile). I deep
-# link portano direttamente alla schermata target. circleId dell'account demo
-# passato via env MAESTRO_CIRCLE_ID. Scheme build preview: accanto.preview.
-#   <scheme>://care-circles/:id/timeline | documents | questions
-#   <scheme>://self-care
+# I deep link NON navigano (l'app resta sulla Dashboard anche dopo tap "Open"):
+# React Navigation non processa il link con l'app gia' in foreground. Torno
+# alla navigazione per TAP sulle card della schermata Panoramica del cerchio.
+# Ogni card ha una DESCRIZIONE univoca (niente ambiguita' con i tab in basso):
+#   Diario     -> "Annota appuntamenti, sintomi, decisioni."
+#   Documenti  -> "Conserva referti, esami, prescrizioni."
+#   Domande    -> "Prepara cosa chiedere alla prossima visita."
+# Le card fanno navigation.navigate('Timeline'|'Documents'|'DoctorQuestions').
 
-# N.B.: iOS mostra un dialog di SISTEMA "Open in 'Accanto (Preview)'?" (in
-# inglese, e' del sistema non dell'app) con bottoni Cancel/Open dopo openLink.
-# Serve tap su "Open" per confermare la navigazione, altrimenti si resta sulla
-# schermata corrente. optional: se il dialog non appare, non blocca.
-
-# Non asserisco un testo specifico prima dello screenshot: non e' certo che il
-# deep link /timeline attivi il tab Timeline (React Navigation potrebbe restare
-# su CircleOverview). waitForAnimationToEnd stabilizza la transizione, poi
-# screenshot. Cosi' un solo run mi mostra dove atterra ogni deep link e posso
-# correggere senza asserzioni fragili che bloccano. Tap "Open" per il dialog iOS.
+# Apro il cerchio: tap sulla card Dashboard -> CircleOverview (Panoramica).
+- tapOn: "Famiglia.*"
+- extendedWaitUntil:
+    visible: "Panoramica"
+    timeout: 20000
 
 # ---- 02 · Timeline (Diario) ----------------------------------------------
-- openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/timeline
-- tapOn:
-    text: "Open"
-    optional: true
+# Tap sulla descrizione della card "Diario" (univoca). Poi torno alla
+# Panoramica per la card successiva (i tab si navigano dalla Panoramica).
+- tapOn: "Annota appuntamenti, sintomi, decisioni."
 - waitForAnimationToEnd:
-    timeout: 8000
+    timeout: 6000
 - takeScreenshot: 02-timeline
 
 # ---- 03 · Documents -------------------------------------------------------
-- openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/documents
-- tapOn:
-    text: "Open"
-    optional: true
+# Torno al tab Panoramica (tab bar in basso) e apro la card Documenti.
+- tapOn: "Panoramica"
+- extendedWaitUntil:
+    visible: "Conserva referti, esami, prescrizioni."
+    timeout: 10000
+- tapOn: "Conserva referti, esami, prescrizioni."
 - waitForAnimationToEnd:
-    timeout: 8000
+    timeout: 6000
 - takeScreenshot: 03-documents
 
 # ---- 04 · DoctorQuestions -------------------------------------------------
-- openLink: accanto.preview://care-circles/${MAESTRO_CIRCLE_ID}/questions
-- tapOn:
-    text: "Open"
-    optional: true
+- tapOn: "Panoramica"
+- extendedWaitUntil:
+    visible: "Prepara cosa chiedere alla prossima visita."
+    timeout: 10000
+- tapOn: "Prepara cosa chiedere alla prossima visita."
 - waitForAnimationToEnd:
-    timeout: 8000
+    timeout: 6000
 - takeScreenshot: 04-doctor-questions
 
 # ---- 05 · SelfCare --------------------------------------------------------
-- openLink: accanto.preview://self-care
-- tapOn:
-    text: "Open"
-    optional: true
-- waitForAnimationToEnd:
-    timeout: 8000
+# SelfCare e' nel drawer (voce "Prenditi cura di te"), non nei tab del cerchio.
+# Apro il drawer dall'hamburger (accessibilityLabel "Apri menu") e tappo la voce.
+- tapOn: "Apri menu"
+- extendedWaitUntil:
+    visible: "Prenditi cura di te"
+    timeout: 10000
+- tapOn: "Prenditi cura di te"
+- extendedWaitUntil:
+    visible: "Cura di te"
+    timeout: 10000
 - takeScreenshot: 05-self-care
