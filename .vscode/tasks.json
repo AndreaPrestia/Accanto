@@ -4,9 +4,11 @@
     {
       "label": "Store screenshots: Android (capture)",
       "type": "shell",
-      "command": "pwsh",
+      "command": "powershell",
       "args": [
         "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
         "-File",
         "${workspaceFolder}/mobile/scripts/store-screenshots.ps1",
         "-Mode",
@@ -25,13 +27,17 @@
     {
       "label": "Store screenshots: iOS (compose canvas)",
       "type": "shell",
-      "command": "pwsh",
+      "command": "powershell",
       "args": [
         "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
         "-File",
         "${workspaceFolder}/mobile/scripts/store-screenshots.ps1",
         "-Mode",
-        "compose-ios"
+        "compose-ios",
+        "-RawIosDir",
+        "${workspaceFolder}/mobile/store/screenshots/_raw/ios"
       ],
       "options": {
         "cwd": "${workspaceFolder}/mobile"
@@ -46,15 +52,13 @@
     {
       "label": "Store screenshots: marketing frames (all locales)",
       "type": "shell",
-      "command": "pwsh",
+      "command": "powershell",
       "args": [
         "-NoProfile",
-        "-File",
-        "${workspaceFolder}/mobile/scripts/store-screenshots.ps1",
-        "-Mode",
-        "frames",
-        "-Locales",
-        "it-IT,en-US,es-ES"
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "& '${workspaceFolder}/mobile/scripts/store-screenshots.ps1' -Mode frames -RawIosDir '${workspaceFolder}/mobile/store/screenshots/_raw/ios' -Locales @('it-IT','en-US','es-ES')"
       ],
       "options": {
         "cwd": "${workspaceFolder}/mobile"
@@ -65,6 +69,72 @@
         "panel": "dedicated"
       },
       "detail": "Compositore frame marketing (sfondo brand + titolo/sottotitolo + screenshot arrotondato) per tutte le locali in frames.config.json."
+    },
+    {
+      "label": "Release iOS: build only (production)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/mobile/scripts/release-ios.ps1"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "detail": "Controlli preliminari + eas build --platform ios --profile production (senza submit). Richiede conferma."
+    },
+    {
+      "label": "Release iOS: build + submit to App Store",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/mobile/scripts/release-ios.ps1",
+        "-Submit"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "detail": "Controlli preliminari + eas build --platform ios --profile production --auto-submit (invia ad App Store Connect). Richiede conferma."
+    },
+    {
+      "label": "Release iOS: dry-run (checks only)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/mobile/scripts/release-ios.ps1",
+        "-Submit",
+        "-DryRun"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "detail": "Esegue solo i controlli preliminari e stampa il comando eas senza eseguirlo (nessuna build)."
     },
     {
       "label": "Store screenshots: Maestro flow (Android emulator)",
