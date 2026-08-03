@@ -74,6 +74,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         // expo-secure-store): rientra nell'esenzione export USA, così App
         // Store non chiede la export compliance a ogni submit.
         ITSAppUsesNonExemptEncryption: false,
+        // expo-local-authentication e' fra le dependency: il binario linka le
+        // API Face ID/Touch ID, quindi la purpose string e' OBBLIGATORIA anche
+        // se lo sblocco biometrico non e' ancora esposto nell'UI (senza,
+        // Apple rifiuta o l'app crasha al primo accesso alle API). Non
+        // pubblicizzare la biometria nelle review notes finche' non c'e' UI.
         NSFaceIDUsageDescription:
           'Usa Face ID per sbloccare Accanto rapidamente senza inserire la password.',
         // Stringa richiesta da App Store review nel caso DocumentPicker

@@ -14,9 +14,10 @@ al momento della prima submission (e ad ogni resubmit di build significativa).
   Non committare la password in questo file. Usa password random 16+ char,
   cambiala dopo ogni ciclo di review.
 - **Nota**: l'account demo è pre-popolato con:
-  - 1 cerchio di cura "Nonna Maria" con qualche voce di timeline di esempio
-  - 1 documento PDF di test
-  - 1 domanda per il medico
+  - 1 cerchio di cura **"Famiglia Rossi"** (assistenza alla nonna Maria) con
+    4 voci di timeline di esempio (nota personale, appuntamento, sintomo, terapia)
+  - 5 documenti PDF di test (referto, esami, ricetta, imaging, dieta — 1 pagina, zero PII)
+  - 3 domande per il medico (stati: da chiedere / chiesta / risposta ricevuta)
   - Verifica in due passaggi **disattivata** (per evitare che il reviewer debba
     accedere a un secondo dispositivo/canale)
 
@@ -35,17 +36,22 @@ advice, or any form of health monitoring. All content (notes, documents, questio
 is user-generated free-form text or uploaded files — the app does not analyse
 or interpret it.
 
-Universal Links: to validate the deep-link flow, open
-https://accanto.care/invite/DEMO123 in Safari on a device with the app installed.
-The app should open directly without a chooser dialog.
+Navigation: open the drawer (top-left menu "Apri menu"). "Le mie care circle"
+is the home. Tap the "Famiglia Rossi" card to open a care circle, then use the
+bottom tabs: Panoramica (overview), Diario (timeline), Documenti (documents),
+Domande (doctor questions), Aggiornamenti (shared updates). The drawer also has
+"Prenditi cura di te" (self-care content for the caregiver).
 
-Push notifications: after login, go to Account → Notifiche, tap "Attiva
-notifiche" and grant permission. Then trigger a demo notification from the
-"Test push" button (visible only for the reviewer account).
+Push notifications: after login, open the drawer → Account → "Sicurezza"
+section → "Dispositivi push" / "Preferenze notifiche". Granting permission
+registers the device; notifications are triggered by real events (e.g. a new
+timeline entry from another member). There is no synthetic "test" trigger.
 
-Face ID / Touch ID: after login, go to Account → Sicurezza → "Sblocco con
-biometria" to enable. On next launch, the app will prompt for biometrics before
-showing content.
+Universal Links: the app declares associatedDomains applinks:accanto.care.
+Invite links have the form https://accanto.care/invite/<token>; open one in
+Safari on a device with the app installed and it opens the in-app invite flow.
+(No pre-generated public demo token is shipped; the flow can be exercised by
+sending a real invite from the demo circle → InvitesPanel.)
 
 Data controller: PRESTIA.DEV S.A.S., Rome, Italy. Full privacy policy:
 https://accanto.care/en/privacy

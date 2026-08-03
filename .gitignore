@@ -4,11 +4,7 @@ Thumbs.db
 
 # IDE
 .vs/
-# Escludiamo .vscode/ ma NON i task condivisi (pipeline screenshot store, ecc.).
-# Serve de-escludere sia la cartella sia il file: git non ri-includes un file
-# se la sua directory parent e' ignorata.
-.vscode/*
-!.vscode/tasks.json
+.vscode/
 .idea/
 *.user
 *.suo
