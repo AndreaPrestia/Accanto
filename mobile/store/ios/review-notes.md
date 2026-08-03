@@ -13,13 +13,15 @@ al momento della prima submission (e ad ogni resubmit di build significativa).
 - **Password**: da generare in produzione **prima del submit** e inserire qui.
   Non committare la password in questo file. Usa password random 16+ char,
   cambiala dopo ogni ciclo di review.
-- **Nota**: l'account demo è pre-popolato con:
-  - 1 cerchio di cura **"Famiglia Rossi"** (assistenza alla nonna Maria) con
-    4 voci di timeline di esempio (nota personale, appuntamento, sintomo, terapia)
-  - 5 documenti PDF di test (referto, esami, ricetta, imaging, dieta — 1 pagina, zero PII)
-  - 3 domande per il medico (stati: da chiedere / chiesta / risposta ricevuta)
+- **Nota**: l'account demo è pre-popolato con (verificato via API su prod, 2026-08-03):
+  - 1 cerchio di cura **"Famiglia Rossi"** (assistenza alla nonna Maria), status
+    Active, ruolo Owner — con diverse voci di timeline (nota personale,
+    appuntamento, sintomo, terapia)
+  - documenti PDF di test (referto, esami, ricetta, imaging, dieta — 1 pagina, zero PII)
+  - domande per il medico (stati: da chiedere / chiesta / risposta ricevuta)
   - Verifica in due passaggi **disattivata** (per evitare che il reviewer debba
-    accedere a un secondo dispositivo/canale)
+    accedere a un secondo dispositivo/canale); deadline 2FA Owner estesa così il
+    middleware non blocca l'account durante la review
 
 ## Contact information
 
