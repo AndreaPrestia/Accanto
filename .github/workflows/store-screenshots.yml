@@ -126,14 +126,28 @@ jobs:
         working-directory: mobile
         run: |
           export PATH="$HOME/.maestro/bin:$PATH"
-          maestro test --device "$SIM_UDID" --output store/screenshots/_raw/ios .maestro/screenshots.yaml
+          # `takeScreenshot: NAME` salva NAME.png nella working directory (mobile/),
+          # non in --output (che e' il report JUnit). Non passo --output.
+          maestro test --device "$SIM_UDID" .maestro/screenshots.yaml
 
-      - name: Flatten raw screenshots
+      - name: Collect screenshots
         working-directory: mobile
         if: success()
         run: |
-          # maestro salva in una sottocartella con timestamp: sposta i PNG in _raw/ios
-          find store/screenshots/_raw/ios -name "*.png" -exec mv {} store/screenshots/_raw/ios/ \;
+          set -e
+          mkdir -p store/screenshots/_raw/ios
+          # I 5 screenshot dello store hanno prefisso NN-. Il debug-after-login
+          # lo escludiamo (serve solo per diagnostica). Cerco nella cwd (mobile/)
+          # e, per sicurezza, nella cartella tests di maestro.
+          for f in 01-dashboard 02-timeline 03-documents 04-doctor-questions 05-self-care; do
+            SRC=$(find . "$HOME/.maestro/tests" -name "$f.png" 2>/dev/null | head -n1)
+            if [ -n "$SRC" ]; then
+              cp "$SRC" "store/screenshots/_raw/ios/$f.png"
+              echo "raccolto $f.png da $SRC"
+            else
+              echo "::warning::screenshot $f.png non trovato"
+            fi
+          done
           ls -la store/screenshots/_raw/ios
 
       - uses: actions/upload-artifact@v4
