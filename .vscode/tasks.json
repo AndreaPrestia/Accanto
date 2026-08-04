@@ -137,6 +137,70 @@
       "detail": "Esegue solo i controlli preliminari e stampa il comando eas senza eseguirlo (nessuna build)."
     },
     {
+      "label": "Release Android: build only (production .aab)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/mobile/scripts/release-android.ps1"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "detail": "Controlli preliminari + eas build --platform android --profile production (.aab). Da caricare a mano in Play Console per il primo rilascio."
+    },
+    {
+      "label": "Release Android: build + submit to Play",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/mobile/scripts/release-android.ps1",
+        "-Submit"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "detail": "eas build --platform android --profile production --auto-submit. Richiede service account Play e primo upload manuale gia' avvenuto."
+    },
+    {
+      "label": "Store assets Android: screenshots + feature graphic + icona",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "& '${workspaceFolder}/mobile/scripts/store-screenshots.ps1' -Mode compose-android -RawIosDir '${workspaceFolder}/mobile/store/screenshots/_raw/ios'; & '${workspaceFolder}/mobile/scripts/store-screenshots.ps1' -Mode feature-graphic -RawIosDir '${workspaceFolder}/mobile/store/screenshots/_raw/ios' -Locales @('it-IT','en-US','es-ES'); & '${workspaceFolder}/mobile/scripts/store-screenshots.ps1' -Mode icon-android -RawIosDir '${workspaceFolder}/mobile/store/screenshots/_raw/ios'"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "detail": "Genera tutti gli asset grafici Play (5 screenshot 1080x1920 + feature graphic 1024x500 IT/EN/ES + icona 512x512) dai raw iOS."
+    },
+    {
       "label": "Store screenshots: Maestro flow (Android emulator)",
       "type": "shell",
       "command": "maestro",
