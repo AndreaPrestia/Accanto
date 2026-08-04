@@ -16,9 +16,10 @@
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
 # Topologia HTTPS:
-#  - https://${ACCANTO_DOMAIN}     → sito vetrina (Astro statico, container "web")
-#  - https://${ACCANTO_APP_DOMAIN} → SPA React (solo statico, niente API)
-#  - https://${ACCANTO_API_DOMAIN} → API .NET (anche /health, /health/ready)
+#  - https://${ACCANTO_DOMAIN}       → sito vetrina (Astro statico, container "web")
+#  - https://${ACCANTO_APP_DOMAIN}   → SPA React (solo statico, niente API)
+#  - https://${ACCANTO_API_DOMAIN}   → API .NET (anche /health, /health/ready)
+#  - https://${ACCANTO_ADMIN_DOMAIN} → Admin control plane (admin-web; /admin-api interno)
 #
 # Prerequisiti:
 #  - DNS A/AAAA dei 3 host puntano al server.
@@ -56,6 +57,32 @@ services:
     expose:
       - "8080"
 
+  # --- Admin Control Plane (prod) ---
+  # DB admin: mai esposto su internet.
+  postgres-admin:
+    ports: !reset []
+
+  # Admin API: solo rete interna. Ci arriva l'admin-web (via /admin-api) e da
+  # essa parte la chiamata service-to-service alla app pubblica (backend).
+  accanto-admin-api:
+    image: ghcr.io/andreaprestia/accanto-admin-api:${ACCANTO_VERSION:-latest}
+    ports: !reset []
+    expose:
+      - "8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      # CORS admin: origine dell'admin-web pubblico.
+      AdminCors__AllowedOrigins: ${AdminCors__AllowedOrigins:-https://${ACCANTO_ADMIN_DOMAIN:-admin.${ACCANTO_DOMAIN}}}
+      # Link di reset password: base URL dell'admin-web pubblico.
+      AdminAuth__PasswordReset__PublicUrl: ${AdminAuth__PasswordReset__PublicUrl:-https://${ACCANTO_ADMIN_DOMAIN:-admin.${ACCANTO_DOMAIN}}}
+
+  # Admin frontend: solo dietro Caddy (host admin.).
+  accanto-admin-web:
+    image: ghcr.io/andreaprestia/accanto-admin-web:${ACCANTO_VERSION:-latest}
+    ports: !reset []
+    expose:
+      - "8080"
+
   # Modulo AI (profilo "ai"): in produzione NON va mai esposto su internet.
   # Il backend lo raggiunge via rete Docker interna come http://ollama:11434.
   # Per attivarlo in prod:
@@ -82,6 +109,7 @@ services:
       - backend
       - frontend
       - web
+      - accanto-admin-web
     ports:
       - "80:80"
       - "443:443"
@@ -99,6 +127,7 @@ services:
       ACCANTO_DOMAIN: ${ACCANTO_DOMAIN:?ACCANTO_DOMAIN richiesto (es. accanto.care)}
       ACCANTO_APP_DOMAIN: ${ACCANTO_APP_DOMAIN:-app.${ACCANTO_DOMAIN}}
       ACCANTO_API_DOMAIN: ${ACCANTO_API_DOMAIN:-api.${ACCANTO_DOMAIN}}
+      ACCANTO_ADMIN_DOMAIN: ${ACCANTO_ADMIN_DOMAIN:-admin.${ACCANTO_DOMAIN}}
       ACCANTO_TLS_EMAIL: ${ACCANTO_TLS_EMAIL:?ACCANTO_TLS_EMAIL richiesto per Let's Encrypt}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro

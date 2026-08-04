@@ -166,6 +166,24 @@
 		reverse_proxy backend:8080
 	}
 }
+
+# --- Admin Control Plane (sottodominio admin.) ---
+# Un solo host pubblico: l'admin-web (SPA React separata). L'admin-web fa da
+# reverse-proxy interno /admin-api -> accanto-admin-api (via nginx nel container),
+# quindi l'Admin API NON e' esposta direttamente su internet. L'Admin API a sua
+# volta chiama la app pubblica via rete Docker interna (InternalApp__BaseUrl).
+# CSP: la SPA admin chiama solo same-origin (/admin-api), quindi connect-src 'self'.
+{$ACCANTO_ADMIN_DOMAIN} {
+	encode zstd gzip
+	import security_headers
+
+	header {
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+	}
+
+	reverse_proxy accanto-admin-web:8080
+}
+
 # --- Siti aggiuntivi (multi-tenant edge) ---
 # Carica eventuali blocchi-sito esterni montati in /etc/caddy/sites.d/.
 # I file *.caddy in quella cartella vengono inclusi cosi' come sono: ogni
