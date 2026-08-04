@@ -33,7 +33,7 @@
 #>
 [CmdletBinding()]
 param(
-  [ValidateSet('capture-android', 'compose-ios', 'compose-android', 'feature-graphic', 'frames', 'all')]
+  [ValidateSet('capture-android', 'compose-ios', 'compose-android', 'feature-graphic', 'icon-android', 'frames', 'all')]
   [string]$Mode = 'all',
 
   [string]$RawIosDir = (Join-Path $PSScriptRoot '..\store\screenshots\_raw\ios'),
@@ -433,11 +433,24 @@ function Compose-FeatureGraphic {
   Write-Host "`nFeature graphic in: $FeatureOut" -ForegroundColor Cyan
 }
 
+# Icona Play Store 512x512: resize di assets/icon.png (Expo, 1024x1024).
+function Compose-IconAndroid {
+  New-Dir $AndroidOut
+  $iconSrc = Join-Path $MobileRoot 'assets\icon.png'
+  if (-not (Test-Path $iconSrc)) { throw "assets/icon.png non trovato: $iconSrc" }
+  $dst = Join-Path (Join-Path $StoreRoot 'android') 'icon-512.png'
+  New-Dir (Split-Path $dst)
+  Save-Canvas -SrcPath $iconSrc -DstPath $dst -Width 512 -Height 512
+  Write-Host "==> Icona Play Store" -ForegroundColor Cyan
+  Write-Host ("  - {0} (512x512)" -f $dst) -ForegroundColor Green
+}
+
 switch ($Mode) {
   'capture-android' { Capture-Android }
   'compose-ios'     { Compose-Ios }
   'compose-android' { Compose-Android }
   'feature-graphic' { Compose-FeatureGraphic }
+  'icon-android'    { Compose-IconAndroid }
   'frames'          { Compose-Frames }
   'all'             { Capture-Android; Compose-Ios }
 }
