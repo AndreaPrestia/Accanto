@@ -3,6 +3,20 @@
   "foreground": "#f8fafc",
   "subtle": "#94a3b8",
   "fontFamily": "Inter, Segoe UI, Arial",
+  "featureGraphic": {
+    "it-IT": {
+      "title": "Il cerchio di cura",
+      "subtitle": "Tutto in un unico spazio sicuro"
+    },
+    "en-US": {
+      "title": "Your care circle",
+      "subtitle": "Everything in one secure space"
+    },
+    "es-ES": {
+      "title": "Tu círculo de cuidado",
+      "subtitle": "Todo en un espacio seguro"
+    }
+  },
   "locales": {
     "it-IT": {
       "01-dashboard": {

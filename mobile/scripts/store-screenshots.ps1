@@ -33,7 +33,7 @@
 #>
 [CmdletBinding()]
 param(
-  [ValidateSet('capture-android', 'compose-ios', 'frames', 'all')]
+  [ValidateSet('capture-android', 'compose-ios', 'compose-android', 'feature-graphic', 'frames', 'all')]
   [string]$Mode = 'all',
 
   [string]$RawIosDir = (Join-Path $PSScriptRoot '..\store\screenshots\_raw\ios'),
@@ -54,6 +54,7 @@ $StoreRoot    = Join-Path $MobileRoot 'store\screenshots'
 $AndroidOut   = Join-Path $StoreRoot 'android\phone'
 $Ios69Out     = Join-Path $StoreRoot 'ios\6.9-inch'
 $Ios65Out     = Join-Path $StoreRoot 'ios\6.5-inch'
+$FeatureOut   = Join-Path $StoreRoot 'android\feature-graphic'
 $TmpDir       = Join-Path $StoreRoot '_tmp'
 
 # Le 5 schermate target, nell'ordine del flow Maestro .maestro/screenshots.yaml
@@ -306,9 +307,137 @@ function Compose-Frames {
   Write-Host "`nFrame marketing in: $(Join-Path $StoreRoot 'framed')" -ForegroundColor Cyan
 }
 
+# Compone i canvas telefono Google Play (1080x1920, ratio 9:16) dai raw iOS.
+# Google Play accetta screenshot da qualsiasi fonte: riusiamo i PNG del
+# simulator iOS senza bisogno di un emulatore Android.
+function Compose-Android {
+  New-Dir $AndroidOut
+
+  if (-not (Test-Path $RawIosDir)) {
+    throw "Cartella raw non trovata: $RawIosDir`nScarica prima gli artifact dal workflow 'store-screenshots' o copia qui i PNG."
+  }
+
+  Write-Host "==> Composizione canvas Android (Play) da $RawIosDir" -ForegroundColor Cyan
+  foreach ($shot in $Shots) {
+    $src = Join-Path $RawIosDir "$shot.png"
+    if (-not (Test-Path $src)) {
+      Write-Warning "  ! manca $shot.png in $RawIosDir - salto."
+      continue
+    }
+    Save-Canvas -SrcPath $src -DstPath (Join-Path $AndroidOut "$shot.png") -Width 1080 -Height 1920
+    Write-Host ('  - {0}: phone (1080x1920)' -f $shot) -ForegroundColor Green
+  }
+}
+
+# Feature graphic Google Play (1024x500): banner brand con titolo, sottotitolo
+# e (se presente) l'icona app centrata a destra. Obbligatorio per Play Console.
+function Save-FeatureGraphic {
+  param(
+    [Parameter(Mandatory)] [string]$DstPath,
+    [Parameter(Mandatory)] $Config,
+    [Parameter(Mandatory)] [string]$Title,
+    [Parameter(Mandatory)] [string]$Subtitle,
+    [string]$IconPath
+  )
+  $W = 1024; $H = 500
+  $bmp = New-Object System.Drawing.Bitmap $W, $H
+  try {
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    try {
+      $g.SmoothingMode     = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+      $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+      $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAlias
+
+      $bg  = [System.Drawing.ColorTranslator]::FromHtml([string]$Config.background)
+      $fg  = [System.Drawing.ColorTranslator]::FromHtml([string]$Config.foreground)
+      $sub = [System.Drawing.ColorTranslator]::FromHtml([string]$Config.subtle)
+      $g.Clear($bg)
+
+      $family = Get-FontFamily ([string]$Config.fontFamily)
+
+      # Icona app a destra (se esiste), tonda con angoli arrotondati.
+      $iconBox = 300
+      $hasIcon = $IconPath -and (Test-Path $IconPath)
+      if ($hasIcon) {
+        $icon = [System.Drawing.Image]::FromFile($IconPath)
+        try {
+          $ix = [float]($W - $iconBox - 60)
+          $iy = [float](($H - $iconBox) / 2)
+          $radius = [float]($iconBox * 0.22)
+          $clip = New-RoundedRectPath $ix $iy $iconBox $iconBox $radius
+          $g.SetClip($clip)
+          $g.DrawImage($icon, $ix, $iy, [float]$iconBox, [float]$iconBox)
+          $g.ResetClip()
+          $clip.Dispose()
+        } finally { $icon.Dispose() }
+      }
+
+      # Testo a sinistra, allineato verticalmente al centro.
+      $textLeft  = 70
+      $textWidth = if ($hasIcon) { $W - $iconBox - 160 } else { $W - 140 }
+
+      $sf = New-Object System.Drawing.StringFormat
+      $sf.Alignment     = [System.Drawing.StringAlignment]::Near
+      $sf.LineAlignment = [System.Drawing.StringAlignment]::Center
+      $sf.Trimming      = [System.Drawing.StringTrimming]::EllipsisWord
+
+      $titleFont = New-Object System.Drawing.Font($family, 58, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
+      $titleRect = New-Object System.Drawing.RectangleF([float]$textLeft, [float]140, [float]$textWidth, [float]140)
+      $brushFg = New-Object System.Drawing.SolidBrush($fg)
+      $g.DrawString($Title, $titleFont, $brushFg, $titleRect, $sf)
+      $titleFont.Dispose()
+
+      $subFont = New-Object System.Drawing.Font($family, 30, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Pixel)
+      $subRect = New-Object System.Drawing.RectangleF([float]$textLeft, [float]290, [float]$textWidth, [float]90)
+      $brushSub = New-Object System.Drawing.SolidBrush($sub)
+      $g.DrawString($Subtitle, $subFont, $brushSub, $subRect, $sf)
+      $subFont.Dispose()
+
+      $brushFg.Dispose(); $brushSub.Dispose(); $sf.Dispose()
+    } finally { $g.Dispose() }
+    $bmp.Save($DstPath, [System.Drawing.Imaging.ImageFormat]::Png)
+  } finally { $bmp.Dispose() }
+}
+
+function Compose-FeatureGraphic {
+  New-Dir $FeatureOut
+  $configPath = Join-Path $StoreRoot 'frames.config.json'
+  if (-not (Test-Path $configPath)) { throw "Config non trovata: $configPath" }
+  $cfg = Get-Content $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+
+  # Icona app: prova assets/icon.png (1024x1024 tipico Expo).
+  $iconPath = Join-Path $MobileRoot 'assets\icon.png'
+  if (-not (Test-Path $iconPath)) { $iconPath = $null }
+
+  # Copy: preferisce la sezione dedicata `featureGraphic.<locale>` (testi corti
+  # pensati per il banner 1024x500); fallback sulla caption 01-dashboard.
+  Write-Host "==> Feature graphic Google Play (1024x500)" -ForegroundColor Cyan
+  foreach ($locale in $Locales) {
+    $cap = $null
+    if ($cfg.PSObject.Properties.Name -contains 'featureGraphic' -and
+        $cfg.featureGraphic.PSObject.Properties.Name -contains $locale) {
+      $cap = $cfg.featureGraphic.$locale
+    }
+    if (-not $cap) {
+      $locCfg = $cfg.locales.$locale
+      if ($locCfg -and $locCfg.'01-dashboard') { $cap = $locCfg.'01-dashboard' }
+    }
+    if (-not $cap) {
+      Write-Warning "Locale '$locale' senza copy feature graphic - salto."
+      continue
+    }
+    $dst = Join-Path $FeatureOut "$locale.png"
+    Save-FeatureGraphic -DstPath $dst -Config $cfg -Title $cap.title -Subtitle $cap.subtitle -IconPath $iconPath
+    Write-Host ("  - {0}.png (1024x500){1}" -f $locale, $(if ($iconPath) { ' + icona' } else { ' (senza icona: assets/icon.png assente)' })) -ForegroundColor Green
+  }
+  Write-Host "`nFeature graphic in: $FeatureOut" -ForegroundColor Cyan
+}
+
 switch ($Mode) {
   'capture-android' { Capture-Android }
   'compose-ios'     { Compose-Ios }
+  'compose-android' { Compose-Android }
+  'feature-graphic' { Compose-FeatureGraphic }
   'frames'          { Compose-Frames }
   'all'             { Capture-Android; Compose-Ios }
 }
