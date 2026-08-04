@@ -1,10 +1,12 @@
 name: Release (build & push images)
 
 # Triggera solo su tag versione, es. `git tag v0.7.1 && git push --tags`.
-# Pubblica 3 immagini multi-arch su GHCR:
-#   ghcr.io/andreaprestia/accanto-backend:<tag>   (+ :latest)
-#   ghcr.io/andreaprestia/accanto-frontend:<tag>  (+ :latest)
-#   ghcr.io/andreaprestia/accanto-web:<tag>       (+ :latest)
+# Pubblica le immagini su GHCR (ciascuna con :<tag> + :latest):
+#   ghcr.io/andreaprestia/accanto-backend:<tag>
+#   ghcr.io/andreaprestia/accanto-frontend:<tag>
+#   ghcr.io/andreaprestia/accanto-web:<tag>
+#   ghcr.io/andreaprestia/accanto-admin-api:<tag>
+#   ghcr.io/andreaprestia/accanto-admin-web:<tag>
 #
 # Per il sito vetrina (web) e la SPA (frontend), gli URL pubblici sono baked at build time.
 # Configurali su GitHub → Settings → Secrets and variables → Actions → Variables:
@@ -54,6 +56,12 @@ jobs:
           - name: web
             context: ./web
             dockerfile: ./web/Dockerfile
+          - name: admin-api
+            context: .
+            dockerfile: ./backend/src/Accanto.Admin.Api/Dockerfile
+          - name: admin-web
+            context: .
+            dockerfile: ./admin/accanto-admin-web/Dockerfile
 
     steps:
       - uses: actions/checkout@v4
@@ -105,6 +113,7 @@ jobs:
           build-args: |
             APP_VERSION=${{ steps.tag.outputs.version }}
             VITE_API_BASE_URL=${{ vars.WEB_API_BASE_URL || '/api' }}
+            VITE_ADMIN_API_BASE_URL=${{ vars.WEB_ADMIN_API_BASE_URL || '/admin-api' }}
             SITE_URL=${{ vars.WEB_SITE_URL || 'http://localhost:4321' }}
             PUBLIC_APP_URL=${{ vars.WEB_PUBLIC_APP_URL || 'http://localhost:5173' }}
           cache-from: type=gha,scope=${{ matrix.image.name }}
