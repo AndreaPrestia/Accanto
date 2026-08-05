@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'it' as const;
+const lastUpdated = '5 agosto 2026';
+---
+<BaseLayout
+  title="Elimina account · Accanto"
+  description="Come richiedere l'eliminazione del tuo account Accanto e dei dati associati: dall'app o via email. Tempi di cancellazione e cosa viene rimosso."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Account</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Eliminazione dell'account e dei dati</h1>
+    <p class="text-sm text-accanto-500 mb-8">Ultimo aggiornamento: {lastUpdated}</p>
+
+    <section>
+      <p>Puoi richiedere in qualsiasi momento l'eliminazione del tuo account Accanto
+      (<strong>app.accanto.mobile</strong>) e di tutti i dati personali associati. Hai due modi.</p>
+    </section>
+
+    <section>
+      <h2>1. Dall'app (consigliato)</h2>
+      <ol>
+        <li>Apri Accanto ed effettua l'accesso.</li>
+        <li>Apri il menu (in alto a sinistra) e vai su <strong>Account</strong>.</li>
+        <li>Apri la sezione <strong>Sicurezza</strong> e scorri fino a <strong>"Elimina account"</strong>.</li>
+        <li>Conferma l'operazione. La cancellazione è irreversibile.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>2. Via email</h2>
+      <p>Se non riesci ad accedere all'app, scrivi a
+      <a href="mailto:support@accanto.care?subject=Richiesta%20eliminazione%20account" class="font-semibold underline">support@accanto.care</a>
+      dall'indirizzo email del tuo account, indicando che desideri eliminare l'account.
+      Verificheremo l'identità e procederemo con la cancellazione.</p>
+    </section>
+
+    <section>
+      <h2>Quali dati vengono eliminati</h2>
+      <p>Con la cancellazione dell'account rimuoviamo tutti i dati personali collegati:</p>
+      <ul>
+        <li>Dati dell'account (email, nome visualizzato, hash della password, eventuale 2FA).</li>
+        <li>Contenuti che hai creato: voci del diario/timeline, documenti caricati, domande per il medico.</li>
+        <li>I cerchi di cura di cui sei unico titolare e i relativi contenuti.</li>
+        <li>Token dei dispositivi per le notifiche push e le sessioni attive.</li>
+        <li>Log tecnici e di audit associati al tuo account.</li>
+      </ul>
+      <p>Se sei membro (non titolare) di un cerchio condiviso con altri, i contenuti creati da
+      altri membri restano al cerchio; vengono rimossi i tuoi dati personali e i contributi
+      riconducibili a te secondo quanto previsto dall'informativa.</p>
+    </section>
+
+    <section>
+      <h2>Tempi di cancellazione</h2>
+      <ul>
+        <li><strong>Sistemi attivi:</strong> i dati sono eliminati entro <strong>30 giorni</strong> dalla richiesta.</li>
+        <li><strong>Backup cifrati ciclici:</strong> rimossi entro ulteriori <strong>60 giorni</strong> con la naturale rotazione dei backup.</li>
+        <li><strong>Dati conservati per obbligo di legge</strong> (es. documenti fiscali, se applicabili) sono mantenuti solo per il periodo minimo previsto dalla normativa e non usati per altre finalità.</li>
+      </ul>
+    </section>
+
+    <section>
+      <p class="text-sm text-accanto-600">
+        Per i dettagli sul trattamento dei tuoi dati consulta l'<a href={routeUrl('privacy', lang)}>Informativa privacy</a>
+        o scrivi a <a href="mailto:support@accanto.care">support@accanto.care</a>.
+        Rispondiamo entro 30 giorni come previsto dal GDPR.
+      </p>
+    </section>
+  </article>
+</BaseLayout>

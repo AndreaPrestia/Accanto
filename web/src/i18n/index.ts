@@ -58,6 +58,7 @@ export const ROUTES: Record<string, Record<Locale, string>> = {
   privacy: { it: 'privacy', en: 'privacy', es: 'privacidad' },
   terms: { it: 'termini', en: 'terms', es: 'terminos' },
   support: { it: 'supporto', en: 'support', es: 'soporte' },
+  deleteAccount: { it: 'elimina-account', en: 'delete-account', es: 'eliminar-cuenta' },
   faq: { it: 'faq', en: 'faq', es: 'preguntas' },
   pricing: { it: 'prezzi', en: 'pricing', es: 'precios' },
   contact: { it: 'contatti', en: 'contact', es: 'contacto' }

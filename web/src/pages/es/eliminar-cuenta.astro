@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'es' as const;
+const lastUpdated = '5 de agosto de 2026';
+---
+<BaseLayout
+  title="Eliminar cuenta · Accanto"
+  description="Cómo solicitar la eliminación de tu cuenta de Accanto y los datos asociados: desde la app o por correo. Plazos de eliminación y qué se borra."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Cuenta</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Eliminar tu cuenta y tus datos</h1>
+    <p class="text-sm text-accanto-500 mb-8">Última actualización: {lastUpdated}</p>
+
+    <section>
+      <p>Puedes solicitar en cualquier momento la eliminación de tu cuenta de Accanto
+      (<strong>app.accanto.mobile</strong>) y de todos los datos personales asociados.
+      Tienes dos maneras.</p>
+    </section>
+
+    <section>
+      <h2>1. Desde la app (recomendado)</h2>
+      <ol>
+        <li>Abre Accanto e inicia sesión.</li>
+        <li>Abre el menú (arriba a la izquierda) y ve a <strong>Cuenta</strong>.</li>
+        <li>Abre la sección <strong>Seguridad</strong> y baja hasta <strong>"Eliminar cuenta"</strong>.</li>
+        <li>Confirma. La eliminación es irreversible.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>2. Por correo electrónico</h2>
+      <p>Si no puedes iniciar sesión, escribe a
+      <a href="mailto:support@accanto.care?subject=Solicitud%20de%20eliminaci%C3%B3n%20de%20cuenta" class="font-semibold underline">support@accanto.care</a>
+      desde el correo de tu cuenta, indicando que deseas eliminar tu cuenta.
+      Verificaremos tu identidad y procederemos con la eliminación.</p>
+    </section>
+
+    <section>
+      <h2>Qué datos se eliminan</h2>
+      <p>Al eliminar tu cuenta borramos todos los datos personales asociados:</p>
+      <ul>
+        <li>Datos de la cuenta (correo, nombre visible, hash de la contraseña, 2FA si está activa).</li>
+        <li>Contenido que has creado: entradas del diario/cronología, documentos subidos, preguntas para el médico.</li>
+        <li>Los círculos de cuidado de los que eres único titular y su contenido.</li>
+        <li>Tokens de dispositivo para notificaciones push y sesiones activas.</li>
+        <li>Registros técnicos y de auditoría asociados a tu cuenta.</li>
+      </ul>
+      <p>Si eres miembro (no titular) de un círculo compartido con otras personas, el contenido
+      creado por otros miembros permanece en el círculo; se eliminan tus datos personales y las
+      contribuciones atribuibles a ti según lo previsto en el aviso de privacidad.</p>
+    </section>
+
+    <section>
+      <h2>Plazos de eliminación</h2>
+      <ul>
+        <li><strong>Sistemas activos:</strong> los datos se eliminan en un plazo de <strong>30 días</strong> desde la solicitud.</li>
+        <li><strong>Copias de seguridad cíclicas cifradas:</strong> se eliminan en otros <strong>60 días</strong> con la rotación natural de las copias.</li>
+        <li><strong>Datos conservados por obligación legal</strong> (p. ej. registros fiscales, cuando corresponda) se mantienen solo durante el periodo mínimo exigido por la ley y no se usan para otros fines.</li>
+      </ul>
+    </section>
+
+    <section>
+      <p class="text-sm text-accanto-600">
+        Para más detalles sobre el tratamiento de tus datos, consulta el <a href={routeUrl('privacy', lang)}>Aviso de privacidad</a>
+        o escribe a <a href="mailto:support@accanto.care">support@accanto.care</a>.
+        Respondemos en un plazo de 30 días, según el RGPD.
+      </p>
+    </section>
+  </article>
+</BaseLayout>

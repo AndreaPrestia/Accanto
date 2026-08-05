@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { routeUrl } from '../../i18n';
+
+const lang = 'en' as const;
+const lastUpdated = 'August 5, 2026';
+---
+<BaseLayout
+  title="Delete account · Accanto"
+  description="How to request deletion of your Accanto account and associated data: in the app or by email. Deletion timelines and what gets removed."
+>
+  <article class="container-page container-prose">
+    <p class="eyebrow mb-3">Account</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold mb-4">Delete your account and data</h1>
+    <p class="text-sm text-accanto-500 mb-8">Last updated: {lastUpdated}</p>
+
+    <section>
+      <p>You can request deletion of your Accanto account
+      (<strong>app.accanto.mobile</strong>) and all associated personal data at any time.
+      There are two ways.</p>
+    </section>
+
+    <section>
+      <h2>1. In the app (recommended)</h2>
+      <ol>
+        <li>Open Accanto and sign in.</li>
+        <li>Open the menu (top left) and go to <strong>Account</strong>.</li>
+        <li>Open the <strong>Security</strong> section and scroll to <strong>"Delete account"</strong>.</li>
+        <li>Confirm. Deletion is irreversible.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>2. By email</h2>
+      <p>If you can't sign in, email
+      <a href="mailto:support@accanto.care?subject=Account%20deletion%20request" class="font-semibold underline">support@accanto.care</a>
+      from your account's email address, stating that you want to delete your account.
+      We will verify your identity and proceed with deletion.</p>
+    </section>
+
+    <section>
+      <h2>What data is deleted</h2>
+      <p>Deleting your account removes all associated personal data:</p>
+      <ul>
+        <li>Account data (email, display name, password hash, optional 2FA).</li>
+        <li>Content you created: timeline entries, uploaded documents, doctor questions.</li>
+        <li>Care circles you solely own, and their content.</li>
+        <li>Device push tokens and active sessions.</li>
+        <li>Technical and audit logs tied to your account.</li>
+      </ul>
+      <p>If you are a member (not the owner) of a circle shared with others, content created by
+      other members stays with the circle; your personal data and contributions attributable to
+      you are removed as described in the privacy notice.</p>
+    </section>
+
+    <section>
+      <h2>Deletion timelines</h2>
+      <ul>
+        <li><strong>Active systems:</strong> data is deleted within <strong>30 days</strong> of the request.</li>
+        <li><strong>Cyclic encrypted backups:</strong> removed within a further <strong>60 days</strong> through natural backup rotation.</li>
+        <li><strong>Data retained by legal obligation</strong> (e.g. tax records, where applicable) is kept only for the minimum period required by law and not used for any other purpose.</li>
+      </ul>
+    </section>
+
+    <section>
+      <p class="text-sm text-accanto-600">
+        For details on how we handle your data, see our <a href={routeUrl('privacy', lang)}>Privacy notice</a>
+        or email <a href="mailto:support@accanto.care">support@accanto.care</a>.
+        We respond within 30 days as required by the GDPR.
+      </p>
+    </section>
+  </article>
+</BaseLayout>
