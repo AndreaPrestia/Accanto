@@ -18,7 +18,7 @@
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "autoprefixer": "^10.5.2",
+    "autoprefixer": "^10.5.4",
     "postcss": "^8.5.16"
   },
   "overrides": {
