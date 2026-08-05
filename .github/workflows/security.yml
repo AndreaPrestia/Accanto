@@ -121,7 +121,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [frontend, web]
+        include:
+          - project: frontend
+            install_dir: .
+            lock: package-lock.json
+          - project: web
+            install_dir: web
+            lock: web/package-lock.json
     steps:
       - uses: actions/checkout@v4
 
@@ -130,10 +136,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+          cache-dependency-path: ${{ matrix.lock }}
 
       - name: Install (no scripts)
-        working-directory: ${{ matrix.project }}
+        working-directory: ${{ matrix.install_dir }}
         run: npm ci --ignore-scripts
 
       # Script custom: fallisce su High/Critical NON in allowlist.
@@ -196,9 +202,12 @@ jobs:
         run: npm install -g @cyclonedx/cyclonedx-npm
 
       - name: Generate frontend SBOM
-        working-directory: frontend
         run: |
-          npm ci --ignore-scripts
+          npm ci --ignore-scripts --include-workspace-root
+          # cyclonedx-npm richiede il lock nel workspace; in un monorepo npm
+          # il lock sta a root: copia a runtime per fornire l'evidence.
+          cp package-lock.json frontend/package-lock.json
+          cd frontend
           cyclonedx-npm --output-format JSON --spec-version 1.5 \
             --output-file ../sbom/frontend.cdx.json
 

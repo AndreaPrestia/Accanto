@@ -1,4 +1,5 @@
 using Accanto.Admin.Application.Common.Persistence;
+using Accanto.Admin.Application.Stats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,10 @@ public class AdminSystemController : ControllerBase
         var allHealthy = adminDb == "Healthy" && publicInternal == "Healthy";
         return allHealthy ? Ok(payload) : StatusCode(StatusCodes.Status503ServiceUnavailable, payload);
     }
+
+    [HttpGet("stats")]
+    public async Task<ActionResult<AdminStatsDto>> Stats([FromServices] IAdminStatsService svc, CancellationToken ct)
+        => Ok(await svc.GetStatsAsync(ct));
 
     private async Task<string> ProbeAdminDbAsync(CancellationToken ct)
     {

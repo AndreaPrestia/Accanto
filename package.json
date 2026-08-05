@@ -12,5 +12,9 @@
     "dev:frontend": "npm --workspace frontend run dev",
     "build:shared": "npm --workspace @accanto/shared run build",
     "typecheck:shared": "npm --workspace @accanto/shared run typecheck"
+  },
+  "overrides": {
+    "form-data": "^4.0.6",
+    "brace-expansion@5": "^5.0.9"
   }
 }

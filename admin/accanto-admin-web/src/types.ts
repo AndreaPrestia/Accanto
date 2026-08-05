@@ -94,3 +94,11 @@ export interface SystemHealth {
   publicApiInternal: string;
   checkedAt: string;
 }
+
+export interface AdminStats {
+  totalUsers: number;
+  disabledUsers: number;
+  totalStorageBytes: number;
+  totalDocuments: number;
+  totalTimelineEntries: number;
+}

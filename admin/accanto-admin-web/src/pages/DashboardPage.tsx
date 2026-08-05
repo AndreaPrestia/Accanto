@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getSystemHealth, listOperations, listUsers } from '../api/endpoints';
+import { getStats, getSystemHealth, listOperations } from '../api/endpoints';
 import { ErrorBox, StatusBadge, formatBytes, formatDate } from '../components/ui';
-import { Operation, SystemHealth, UserListResponse } from '../types';
+import { AdminStats, Operation, SystemHealth } from '../types';
 
 export default function DashboardPage() {
-  const [users, setUsers] = useState<UserListResponse | null>(null);
-  const [disabled, setDisabled] = useState<UserListResponse | null>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [operations, setOperations] = useState<Operation[]>([]);
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -15,15 +14,13 @@ export default function DashboardPage() {
     let cancelled = false;
     (async () => {
       try {
-        const [u, d, ops, h] = await Promise.all([
-          listUsers({ page: 1, pageSize: 1 }),
-          listUsers({ disabled: true, page: 1, pageSize: 1 }),
+        const [s, ops, h] = await Promise.all([
+          getStats(),
           listOperations({ page: 1, pageSize: 5 }),
           getSystemHealth()
         ]);
         if (cancelled) return;
-        setUsers(u);
-        setDisabled(d);
+        setStats(s);
         setOperations(ops.items);
         setHealth(h);
       } catch {
@@ -33,32 +30,46 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const totalStorage = null; // aggregated storage requires a dedicated metric; omitted in v0.1 (non-invasive).
-
   return (
     <div className="space-y-6">
       <h1 className="text-lg font-semibold text-accanto-900">Dashboard</h1>
       <ErrorBox message={error} />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <div className="card">
           <div className="label">Total users</div>
-          <div className="text-2xl font-semibold text-accanto-900">{users?.total ?? '—'}</div>
+          <div className="text-2xl font-semibold text-accanto-900">{stats?.totalUsers ?? '—'}</div>
         </div>
         <div className="card">
           <div className="label">Disabled users</div>
-          <div className="text-2xl font-semibold text-accanto-900">{disabled?.total ?? '—'}</div>
+          <div className="text-2xl font-semibold text-accanto-900">{stats?.disabledUsers ?? '—'}</div>
         </div>
         <div className="card">
           <div className="label">Total storage used</div>
-          <div className="text-2xl font-semibold text-accanto-900">{totalStorage ?? '—'}</div>
+          <div className="text-2xl font-semibold text-accanto-900">
+            {stats ? formatBytes(stats.totalStorageBytes) : '—'}
+          </div>
         </div>
         <div className="card">
-          <div className="label">System</div>
-          <div className="mt-1 flex flex-col gap-1 text-sm">
-            <span>Admin API {health ? <StatusBadge status={health.adminApi} /> : '—'}</span>
-            <span>Admin DB {health ? <StatusBadge status={health.adminDb} /> : '—'}</span>
-            <span>Public API (internal) {health ? <StatusBadge status={health.publicApiInternal} /> : '—'}</span>
+          <div className="label">Documents</div>
+          <div className="text-2xl font-semibold text-accanto-900">{stats?.totalDocuments ?? '—'}</div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="label mb-2">System</div>
+        <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+          <div className="flex items-center justify-between sm:block">
+            <span className="text-accanto-500">Admin API</span>
+            <div className="mt-0.5">{health ? <StatusBadge status={health.adminApi} /> : '—'}</div>
+          </div>
+          <div className="flex items-center justify-between sm:block">
+            <span className="text-accanto-500">Admin DB</span>
+            <div className="mt-0.5">{health ? <StatusBadge status={health.adminDb} /> : '—'}</div>
+          </div>
+          <div className="flex items-center justify-between sm:block">
+            <span className="text-accanto-500">Public API (internal)</span>
+            <div className="mt-0.5">{health ? <StatusBadge status={health.publicApiInternal} /> : '—'}</div>
           </div>
         </div>
       </div>
@@ -73,7 +84,10 @@ export default function DashboardPage() {
         ) : (
           <ul className="divide-y divide-accanto-100">
             {operations.map((op) => (
-              <li key={op.id} className="flex items-center justify-between py-2 text-sm">
+              <li
+                key={op.id}
+                className="flex flex-col gap-1 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div>
                   <span className="font-medium text-accanto-900">{op.operationType}</span>
                   <span className="ml-2 text-accanto-500">{formatDate(op.createdAt)}</span>
@@ -86,7 +100,7 @@ export default function DashboardPage() {
       </div>
 
       <p className="text-xs text-accanto-500">
-        Last health check: {health ? formatDate(health.checkedAt) : '—'} · {formatBytes(0)} metrics are non-invasive.
+        Last health check: {health ? formatDate(health.checkedAt) : '—'}
       </p>
     </div>
   );

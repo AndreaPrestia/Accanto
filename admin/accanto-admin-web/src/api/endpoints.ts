@@ -1,5 +1,6 @@
 import { adminApi } from './client';
 import {
+  AdminStats,
   AuditLogListResponse,
   Operation,
   OperationListResponse,
@@ -64,6 +65,11 @@ export async function getOperation(operationId: string): Promise<Operation> {
 // --- System ---
 export async function getSystemHealth(): Promise<SystemHealth> {
   const { data } = await adminApi.get<SystemHealth>('/api/admin/system/health');
+  return data;
+}
+
+export async function getStats(): Promise<AdminStats> {
+  const { data } = await adminApi.get<AdminStats>('/api/admin/system/stats');
   return data;
 }
 
