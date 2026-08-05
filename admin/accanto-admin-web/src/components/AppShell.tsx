@@ -1,4 +1,5 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 const NAV = [
@@ -12,6 +13,10 @@ const NAV = [
 export default function AppShell() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
 
   const onLogout = () => {
     logout();
@@ -19,13 +24,25 @@ export default function AppShell() {
   };
 
   return (
-    <div className="flex h-full">
-      <aside className="w-56 shrink-0 border-r border-accanto-200 bg-white">
+    <div className="relative flex h-full">
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-56 shrink-0 flex-col border-r border-accanto-200 bg-white transition-transform md:static md:translate-x-0 ${
+          drawerOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+      >
         <div className="border-b border-accanto-200 px-4 py-4">
           <div className="text-sm font-semibold text-accanto-900">Accanto</div>
           <div className="text-xs uppercase tracking-wide text-accanto-500">Control Plane</div>
         </div>
-        <nav className="p-2">
+        <nav className="flex-1 p-2">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
@@ -43,17 +60,29 @@ export default function AppShell() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-accanto-200 bg-white px-6 py-3">
-          <div className="text-sm text-accanto-500">Technical operations console</div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
+        <header className="flex items-center justify-between gap-2 border-b border-accanto-200 bg-white px-3 py-3 md:px-6">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              className="btn-ghost !px-2 !py-1 md:hidden"
+              aria-label="Open menu"
+            >
+              ☰
+            </button>
+            <div className="hidden text-sm text-accanto-500 sm:block">
+              Technical operations console
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden text-right sm:block">
               <div className="text-sm font-medium text-accanto-900">{user?.email}</div>
               <div className="text-xs text-accanto-500">{user?.roles.join(', ')}</div>
             </div>
             <button onClick={onLogout} className="btn-ghost">Logout</button>
           </div>
         </header>
-        <main className="min-h-0 flex-1 overflow-y-auto p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
           <Outlet />
         </main>
       </div>
