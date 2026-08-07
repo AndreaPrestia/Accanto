@@ -53,6 +53,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     slug: 'accanto-app',
     scheme,
     version: '0.1.0',
+    // OTA updates via EAS Update: runtimeVersion legato alla versione app
+    // (bump manuale = nuova baseline; patch JS via `eas update`).
+    runtimeVersion: { policy: 'appVersion' },
+    updates: { url: 'https://u.expo.dev/54f532b4-9b94-4dae-80d6-4b169f15d775' },
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'automatic',
