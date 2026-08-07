@@ -64,7 +64,7 @@ jobs:
             dockerfile: ./admin/accanto-admin-web/Dockerfile
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -150,17 +150,17 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
