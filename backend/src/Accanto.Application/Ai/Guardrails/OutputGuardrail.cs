@@ -95,22 +95,40 @@ public sealed class OutputGuardrail
 
     private async Task<bool> SelfCheckAsync(string responseText, string language, IAiAssistant assistant, CancellationToken ct)
     {
-        var isEn = string.Equals(language, "en", StringComparison.OrdinalIgnoreCase);
-        var prompt = isEn
-            ? "You review whether the ASSISTANT REPLY below is appropriate for a family-caregiving app. " +
-              "It is APPROPRIATE if it talks about a sick or fragile relative, the caregiver's feelings, " +
-              "updates to share with family, messages to or from doctors, daily care, logistics, emotional support. " +
-              "It is INAPPROPRIATE only if it is clearly off-topic (politics, finance, programming, sexual content) " +
-              "or contains explicit medical/legal/financial advice with prescriptions. " +
-              "Reply with exactly one token: YES (appropriate) or NO (inappropriate). Default to YES if unsure.\n\n" +
-              "ASSISTANT REPLY:\n" + responseText
-            : "Devi valutare se la RISPOSTA DELL'ASSISTENTE qui sotto è adeguata per un'app di caregiving familiare. " +
-              "È ADEGUATA se parla di un familiare malato o fragile, dei sentimenti del caregiver, " +
-              "di aggiornamenti da condividere con la famiglia, messaggi da/per i medici, cura quotidiana, logistica, supporto emotivo. " +
-              "È INADEGUATA solo se è chiaramente fuori tema (politica, finanza, programmazione, contenuti sessuali) " +
-              "o contiene pareri medici/legali/finanziari espliciti con prescrizioni. " +
-              "Rispondi con un solo token: SI (adeguata) oppure NO (inadeguata). Se hai dubbi, rispondi SI.\n\n" +
-              "RISPOSTA DELL'ASSISTENTE:\n" + responseText;
+        string prompt;
+        if (string.Equals(language, "en", StringComparison.OrdinalIgnoreCase))
+        {
+            prompt =
+                "You review whether the ASSISTANT REPLY below is appropriate for a family-caregiving app. " +
+                "It is APPROPRIATE if it talks about a sick or fragile relative, the caregiver's feelings, " +
+                "updates to share with family, messages to or from doctors, daily care, logistics, emotional support. " +
+                "It is INAPPROPRIATE only if it is clearly off-topic (politics, finance, programming, sexual content) " +
+                "or contains explicit medical/legal/financial advice with prescriptions. " +
+                "Reply with exactly one token: YES (appropriate) or NO (inappropriate). Default to YES if unsure.\n\n" +
+                "ASSISTANT REPLY:\n" + responseText;
+        }
+        else if (string.Equals(language, "es", StringComparison.OrdinalIgnoreCase))
+        {
+            prompt =
+                "Debes evaluar si la RESPUESTA DEL ASISTENTE de abajo es adecuada para una app de cuidado familiar. " +
+                "Es ADECUADA si habla de un familiar enfermo o frágil, de los sentimientos del cuidador, " +
+                "de actualizaciones para compartir con la familia, mensajes de/para los médicos, cuidado diario, logística, apoyo emocional. " +
+                "Es INADECUADA solo si está claramente fuera de tema (política, finanzas, programación, contenido sexual) " +
+                "o contiene consejos médicos/legales/financieros explícitos con prescripciones. " +
+                "Responde con un solo token: SI (adecuada) o NO (inadecuada). Si tienes dudas, responde SI.\n\n" +
+                "RESPUESTA DEL ASISTENTE:\n" + responseText;
+        }
+        else
+        {
+            prompt =
+                "Devi valutare se la RISPOSTA DELL'ASSISTENTE qui sotto è adeguata per un'app di caregiving familiare. " +
+                "È ADEGUATA se parla di un familiare malato o fragile, dei sentimenti del caregiver, " +
+                "di aggiornamenti da condividere con la famiglia, messaggi da/per i medici, cura quotidiana, logistica, supporto emotivo. " +
+                "È INADEGUATA solo se è chiaramente fuori tema (politica, finanza, programmazione, contenuti sessuali) " +
+                "o contiene pareri medici/legali/finanziari espliciti con prescrizioni. " +
+                "Rispondi con un solo token: SI (adeguata) oppure NO (inadeguata). Se hai dubbi, rispondi SI.\n\n" +
+                "RISPOSTA DELL'ASSISTENTE:\n" + responseText;
+        }
 
         try
         {
@@ -121,7 +139,7 @@ public sealed class OutputGuardrail
             // Default → PASS (i 3B sbagliano spesso il formato; meglio non bloccare l'utente).
             var first = new string(raw.TakeWhile(c => char.IsLetter(c) || c == 'ì' || c == 'Ì').Take(6).ToArray())
                               .ToLowerInvariant();
-            var passed = first.StartsWith("si") || first.StartsWith("sì") || first.StartsWith("yes");
+            var passed = first.StartsWith("si") || first.StartsWith("sì") || first.StartsWith("sí") || first.StartsWith("yes");
             var failed = first == "no" || first == "non";
             if (failed)
             {
@@ -144,7 +162,11 @@ public sealed class OutputGuardrail
     private static string Truncate(string s, int max) => string.IsNullOrEmpty(s) || s.Length <= max ? s ?? string.Empty : s[..max] + "…";
 
     public static string OutOfScopeMessage(string language)
-        => string.Equals(language, "en", StringComparison.OrdinalIgnoreCase)
-            ? "I can only help with family caregiving topics. Try reformulating your request around caregiving for a relative."
-            : "Posso aiutarti solo su temi legati al caregiving familiare. Prova a riformulare la richiesta concentrandoti sull'assistenza a un familiare.";
+    {
+        if (string.Equals(language, "en", StringComparison.OrdinalIgnoreCase))
+            return "I can only help with family caregiving topics. Try reformulating your request around caregiving for a relative.";
+        if (string.Equals(language, "es", StringComparison.OrdinalIgnoreCase))
+            return "Solo puedo ayudarte con temas de cuidado familiar. Intenta reformular tu petición centrándote en el cuidado de un familiar.";
+        return "Posso aiutarti solo su temi legati al caregiving familiare. Prova a riformulare la richiesta concentrandoti sull'assistenza a un familiare.";
+    }
 }

@@ -111,7 +111,9 @@ public sealed class AiService : IAiService
         var lang = _prompt.ResolveLanguage(acceptLanguage);
         var instruction = string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase)
             ? $"Summarize the following caregiving timeline of the last {days} days in 4-6 bullet points. Highlight recurring themes."
-            : $"Riassumi la seguente timeline di assistenza degli ultimi {days} giorni in 4-6 punti. Evidenzia i temi ricorrenti.";
+            : string.Equals(lang, "es", StringComparison.OrdinalIgnoreCase)
+                ? $"Resume la siguiente cronología de cuidados de los últimos {days} días en 4-6 viñetas. Destaca los temas recurrentes."
+                : $"Riassumi la seguente timeline di assistenza degli ultimi {days} giorni in 4-6 punti. Evidenzia i temi ricorrenti.";
 
         var context = string.Join("\n", entries.Select(e =>
             $"- {e.OccurredAt:yyyy-MM-dd} [{e.Type}] {e.Title}: {Truncate(e.Content, 240)}"));
@@ -136,7 +138,9 @@ public sealed class AiService : IAiService
         var lang = _prompt.ResolveLanguage(acceptLanguage);
         var instruction = string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase)
             ? "Draft 3 concise, respectful questions a family caregiver could ask a doctor about the topic below. Avoid medical jargon."
-            : "Proponi 3 domande concise e rispettose che un caregiver familiare potrebbe rivolgere al medico sull'argomento sotto. Evita gergo medico.";
+            : string.Equals(lang, "es", StringComparison.OrdinalIgnoreCase)
+                ? "Redacta 3 preguntas concisas y respetuosas que un familiar cuidador podría hacer al médico sobre el tema de abajo. Evita la jerga médica."
+                : "Proponi 3 domande concise e rispettose che un caregiver familiare potrebbe rivolgere al medico sull'argomento sotto. Evita gergo medico.";
 
         var context = $"Argomento: {request.Topic}";
         if (!string.IsNullOrWhiteSpace(request.Notes)) context += $"\nNote: {request.Notes}";
@@ -162,7 +166,9 @@ public sealed class AiService : IAiService
         var tone = string.IsNullOrWhiteSpace(request.Tone) ? "neutro" : request.Tone.Trim();
         var instruction = string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase)
             ? $"Rephrase the following short update for sharing with relatives. Keep the meaning, use a {tone} tone, max 4 sentences."
-            : $"Riformula il seguente aggiornamento destinato ai familiari. Mantieni il significato, usa un tono {tone}, massimo 4 frasi.";
+            : string.Equals(lang, "es", StringComparison.OrdinalIgnoreCase)
+                ? $"Reformula la siguiente actualización para compartir con los familiares. Mantén el significado, usa un tono {tone}, máximo 4 frases."
+                : $"Riformula il seguente aggiornamento destinato ai familiari. Mantieni il significato, usa un tono {tone}, massimo 4 frasi.";
 
         return await RunPipelineAsync(
             userId, careCircleId, AiInteractionFunction.Rephrase, lang,
@@ -192,7 +198,9 @@ public sealed class AiService : IAiService
         var lang = _prompt.ResolveLanguage(acceptLanguage);
         var instruction = string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase)
             ? $"Reflect briefly (3-5 sentences) on the caregiver's well-being over the last {days} days based on the check-ins below. Be supportive, non-clinical."
-            : $"Rifletti brevemente (3-5 frasi) sul benessere del caregiver negli ultimi {days} giorni, basandoti sui check-in sotto. Tono di supporto, non clinico.";
+            : string.Equals(lang, "es", StringComparison.OrdinalIgnoreCase)
+                ? $"Reflexiona brevemente (3-5 frases) sobre el bienestar del cuidador en los últimos {days} días, basándote en los registros de abajo. Tono de apoyo, no clínico."
+                : $"Rifletti brevemente (3-5 frasi) sul benessere del caregiver negli ultimi {days} giorni, basandoti sui check-in sotto. Tono di supporto, non clinico.";
 
         var context = string.Join("\n", checkIns.Select(c =>
             $"- {c.CreatedAt:yyyy-MM-dd} umore={c.Mood} energia={c.Energy} stress={c.Stress}{(string.IsNullOrWhiteSpace(c.Note) ? "" : $" note=\"{Truncate(c.Note!, 160)}\"")}"));

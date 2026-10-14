@@ -74,6 +74,32 @@ public class AiPromptBuilderTests
     }
 
     [Fact]
+    public void Resolves_spanish_from_accept_language()
+    {
+        _b.ResolveLanguage("es").Should().Be("es");
+        _b.ResolveLanguage("es-ES,es;q=0.9").Should().Be("es");
+    }
+
+    [Fact]
+    public void Italian_still_wins_over_spanish_when_present()
+    {
+        _b.ResolveLanguage("it-IT,es;q=0.9").Should().Be("it");
+    }
+
+    [Fact]
+    public void English_wins_over_spanish_when_italian_absent()
+    {
+        _b.ResolveLanguage("en-US,en;q=0.9,es;q=0.8").Should().Be("en");
+    }
+
+    [Fact]
+    public void BuildSystemPrompt_emits_spanish_directive()
+    {
+        var sys = _b.BuildSystemPrompt("es", "Ayudas al cuidador a resumir.");
+        sys.Should().Contain("español").And.Contain("Ayudas al cuidador");
+    }
+
+    [Fact]
     public void BuildSystemPrompt_includes_role_and_language()
     {
         var sys = _b.BuildSystemPrompt("it", "Aiuti il caregiver a riassumere.");
@@ -85,6 +111,7 @@ public class AiPromptBuilderTests
     {
         _b.GetDisclaimer("it").Should().NotBeNullOrWhiteSpace();
         _b.GetDisclaimer("en").Should().NotBeNullOrWhiteSpace();
+        _b.GetDisclaimer("es").Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]

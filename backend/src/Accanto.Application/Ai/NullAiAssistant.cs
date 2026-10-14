@@ -28,9 +28,13 @@ public sealed class NullAiAssistant : IAiAssistant
 
     private static AiResponse Build(string language)
     {
-        var disclaimer = string.Equals(language, "en", StringComparison.OrdinalIgnoreCase)
-            ? "AI-generated text. Not medical, legal, or financial advice."
-            : "Testo generato da AI. Non sostituisce un parere medico o professionale.";
+        string disclaimer;
+        if (string.Equals(language, "en", StringComparison.OrdinalIgnoreCase))
+            disclaimer = "AI-generated text. Not medical, legal, or financial advice.";
+        else if (string.Equals(language, "es", StringComparison.OrdinalIgnoreCase))
+            disclaimer = "Texto generado por IA. No sustituye un consejo médico o profesional.";
+        else
+            disclaimer = "Testo generato da AI. Non sostituisce un parere medico o professionale.";
         return new AiResponse(Placeholder, "null", 0, disclaimer);
     }
 }
