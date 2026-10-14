@@ -49,8 +49,8 @@ section → "Dispositivi push" / "Preferenze notifiche". Granting permission
 registers the device; notifications are triggered by real events (e.g. a new
 timeline entry from another member). There is no synthetic "test" trigger.
 
-Universal Links: the app declares associatedDomains applinks:accanto.care.
-Invite links have the form https://accanto.care/invite/<token>; open one in
+Universal Links: the app declares associatedDomains applinks:app.accanto.care.
+Invite links have the form https://app.accanto.care/invite/<token>; open one in
 Safari on a device with the app installed and it opens the in-app invite flow.
 (No pre-generated public demo token is shipped; the flow can be exercised by
 sending a real invite from the demo circle → InvitesPanel.)

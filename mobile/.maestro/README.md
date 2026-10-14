@@ -56,9 +56,9 @@ maestro test .maestro
 Per testare gli universal link reali (HTTPS) servono prerequisiti che
 NON dipendono da Maestro:
 
-- Android: `https://accanto.care/.well-known/assetlinks.json` deve
-  contenere il SHA-256 del cert di firma reale + `adb shell pm verify-app-links --re-verify <pkg>`.
-- iOS: `https://accanto.care/.well-known/apple-app-site-association`
+- Android: `https://app.accanto.care/.well-known/assetlinks.json` deve
+  contenere il SHA-256 della Play App Signing key + `adb shell pm verify-app-links --re-verify <pkg>`.
+- iOS: `https://app.accanto.care/.well-known/apple-app-site-association`
   deve essere `application/json`, accessibile in chiaro, e l'app deve
   essere installata tramite TestFlight o App Store (le build internal
   non scaricano AASA su prima install).

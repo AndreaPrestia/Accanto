@@ -74,9 +74,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       // Riattivare (true) quando il layout tablet sara' curato.
       supportsTablet: false,
       bundleIdentifier: bundleId,
-      // applinks: copre TUTTI i path di accanto.care (universal links).
-      // Niente activitycontinuation: non usiamo Handoff.
-      associatedDomains: ['applinks:accanto.care'],
+      // applinks: copre i path della PWA su app.accanto.care (dove vivono
+      // reset-password, invite, care-circles). Niente activitycontinuation:
+      // non usiamo Handoff.
+      associatedDomains: ['applinks:app.accanto.care'],
       infoPlist: {
         // Solo crittografia standard/esente (HTTPS/TLS + keychain OS via
         // expo-secure-store): rientra nell'esenzione export USA, così App
@@ -102,16 +103,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         backgroundColor: '#f8fafc'
       },
       // App Links Android: autoVerify=true richiede che
-      // https://accanto.care/.well-known/assetlinks.json sia pubblicato e
-      // contenga il SHA-256 del certificato di firma per QUESTO bundle.
-      // Usiamo un unico host: tutti i deep link (/invite/...,
+      // https://app.accanto.care/.well-known/assetlinks.json sia pubblicato e
+      // contenga il SHA-256 della Play App Signing key per QUESTO bundle.
+      // Host = app.accanto.care (PWA): tutti i deep link (/invite/...,
       // /care-circles/..., /reset-password) atterrano in app senza
       // chooser quando la verifica passa.
       intentFilters: [
         {
           action: 'VIEW',
           autoVerify: true,
-          data: [{ scheme: 'https', host: 'accanto.care' }],
+          data: [{ scheme: 'https', host: 'app.accanto.care' }],
           category: ['BROWSABLE', 'DEFAULT']
         }
       ]
@@ -144,7 +145,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       apiBaseUrl:
         process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://api.accanto.care',
       webBaseUrl:
-        process.env.EXPO_PUBLIC_WEB_BASE_URL ?? 'https://accanto.care',
+        process.env.EXPO_PUBLIC_WEB_BASE_URL ?? 'https://app.accanto.care',
       variant
     },
     experiments: {

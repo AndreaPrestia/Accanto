@@ -68,23 +68,23 @@ npx eas build --profile production --platform all
 
 ## Universal / App Links
 
-Le build production usano `https://accanto.care/...` come universal link.
-Il dominio serve due file statici (da `web/public/.well-known/`):
+Le build production usano `https://app.accanto.care/...` come universal link
+(dominio della PWA, dove vivono reset-password, invite, care-circles).
+Il dominio serve due file statici (da `frontend/public/.well-known/`):
 
-- `apple-app-site-association` — content-type `application/json`, deve includere il
-  `<TeamID>.app.accanto.mobile` reale. Placeholder `REPLACE_WITH_APPLE_TEAM_ID` da
-  sostituire dopo aver configurato l'App ID su Apple Developer.
-- `assetlinks.json` — content-type `application/json`, deve includere il SHA-256 del
-  certificato di firma release Android (`eas credentials` per estrarlo). Placeholder
-  `REPLACE_WITH_RELEASE_KEYSTORE_SHA256_FINGERPRINT` da sostituire alla prima build.
+- `apple-app-site-association` — content-type `application/json`, include il
+  `JP7XBZJ6FN.app.accanto.mobile` reale.
+- `assetlinks.json` — content-type `application/json`, deve includere il SHA-256 della
+  **Play App Signing key** (Play Console → App integrity → App signing). Placeholder
+  `REPLACE_WITH_PLAY_APP_SIGNING_SHA256_FINGERPRINT` da sostituire dopo il primo upload.
 
-`web/nginx.conf` ha già `location =` espliciti per entrambi che forzano
+`frontend/nginx.conf` ha già `location =` espliciti per entrambi che forzano
 `Content-Type: application/json` e disabilitano la cache.
 
 Per verificare l'AASA dopo il deploy:
 
 ```pwsh
-curl -sI https://accanto.care/.well-known/apple-app-site-association
+curl -sI https://app.accanto.care/.well-known/apple-app-site-association
 # Atteso: Content-Type: application/json
 # Apple validator: https://branch.io/resources/aasa-validator/
 ```
@@ -92,7 +92,7 @@ curl -sI https://accanto.care/.well-known/apple-app-site-association
 Per verificare assetlinks:
 
 ```pwsh
-curl -s https://accanto.care/.well-known/assetlinks.json | jq .
+curl -s https://app.accanto.care/.well-known/assetlinks.json | jq .
 # Validator Google: https://developers.google.com/digital-asset-links/tools/generator
 ```
 

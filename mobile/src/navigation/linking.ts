@@ -16,12 +16,12 @@ import type { RootStackParamList } from './types';
 // Linking.createURL('/') costruisce il prefisso giusto a runtime in
 // base allo scheme dichiarato in app.config.ts.
 //
-// Universal/App Links: https://accanto.care/... — funziona solo sulle
+// Universal/App Links: https://app.accanto.care/... — funziona solo sulle
 // build production firmate con il cert riportato in assetlinks.json /
-// apple-app-site-association serviti da web/Astro.
+// apple-app-site-association serviti dal container frontend (PWA).
 
 export const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: [Linking.createURL('/'), 'https://accanto.care'],
+  prefixes: [Linking.createURL('/'), 'https://app.accanto.care'],
   config: {
     screens: {
       Auth: {

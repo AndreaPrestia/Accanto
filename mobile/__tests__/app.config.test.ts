@@ -55,16 +55,16 @@ describe('app.config variant resolution', () => {
     expect(c.scheme).toBe('accanto');
   });
 
-  it('associatedDomains punta ad accanto.care', () => {
+  it('associatedDomains punta ad app.accanto.care', () => {
     const c = loadConfig(undefined);
-    expect(c.ios.associatedDomains).toEqual(['applinks:accanto.care']);
+    expect(c.ios.associatedDomains).toEqual(['applinks:app.accanto.care']);
   });
 
-  it('Android intent filter autoVerify=true su host accanto.care', () => {
+  it('Android intent filter autoVerify=true su host app.accanto.care', () => {
     const c = loadConfig(undefined);
     const filter = c.android.intentFilters[0];
     expect(filter.autoVerify).toBe(true);
-    expect(filter.data[0]).toEqual({ scheme: 'https', host: 'accanto.care' });
+    expect(filter.data[0]).toEqual({ scheme: 'https', host: 'app.accanto.care' });
     expect(filter.category).toEqual(
       expect.arrayContaining(['BROWSABLE', 'DEFAULT'])
     );

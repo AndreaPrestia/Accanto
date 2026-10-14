@@ -1,8 +1,8 @@
 import { linking } from '../linking';
 
 describe('linking config', () => {
-  it('include prefisso universal link su accanto.care', () => {
-    expect(linking.prefixes).toContain('https://accanto.care');
+  it('include prefisso universal link su app.accanto.care', () => {
+    expect(linking.prefixes).toContain('https://app.accanto.care');
   });
 
   it('include il prefisso scheme custom via Linking.createURL', () => {
