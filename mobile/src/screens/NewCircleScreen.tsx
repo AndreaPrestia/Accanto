@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Screen from '../components/ui/Screen';
 import Button from '../components/ui/Button';
 import TextField from '../components/ui/TextField';
@@ -11,6 +12,7 @@ import type { AppScreenProps } from '../navigation/types';
 type Props = AppScreenProps<'NewCircle'>;
 
 export default function NewCircleScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   // Pre-fill "name" arriva dal Welcome finale (o da futuri deep link).
   // Sanifichiamo brutalmente la lunghezza per non caricare pattern strani.
   const initialName = (route.params?.name ?? '').slice(0, 80);
@@ -22,7 +24,7 @@ export default function NewCircleScreen({ navigation, route }: Props) {
   const submit = async () => {
     const trimmedName = name.trim();
     if (trimmedName.length < 2) {
-      setError('Il nome deve contenere almeno 2 caratteri.');
+      setError(t('newCircle.nameTooShort'));
       return;
     }
     setError(null);
@@ -46,27 +48,26 @@ export default function NewCircleScreen({ navigation, route }: Props) {
     <Screen>
       <View className="max-w-md w-full self-center pt-2">
         <Text className="text-2xl font-semibold text-accanto-900 mb-2">
-          Nuovo cerchio
+          {t('newCircle.title')}
         </Text>
         <Text className="text-accanto-500 mb-6">
-          Dai un nome al cerchio (per esempio il nome della persona che stai
-          assistendo). Potrai modificarlo in qualsiasi momento.
+          {t('newCircle.intro')}
         </Text>
 
         <View className="gap-3">
           <TextField
-            label="Nome del cerchio"
+            label={t('newCircle.nameLabel') as string}
             value={name}
             onChangeText={setName}
-            placeholder="Es. Mamma"
+            placeholder={t('newCircle.namePlaceholder') as string}
             autoCapitalize="words"
             maxLength={120}
           />
           <TextField
-            label="Descrizione (facoltativa)"
+            label={t('newCircle.descriptionLabel') as string}
             value={description}
             onChangeText={setDescription}
-            placeholder="Una breve nota per orientarti"
+            placeholder={t('newCircle.descriptionPlaceholder') as string}
             multiline
             numberOfLines={3}
             style={{ minHeight: 80, textAlignVertical: 'top' }}
@@ -76,7 +77,7 @@ export default function NewCircleScreen({ navigation, route }: Props) {
 
           <View className="mt-2">
             <Button onPress={submit} busy={busy} disabled={busy}>
-              {busy ? 'Creazione…' : 'Crea cerchio'}
+              {busy ? t('newCircle.creating') : t('newCircle.create')}
             </Button>
           </View>
         </View>

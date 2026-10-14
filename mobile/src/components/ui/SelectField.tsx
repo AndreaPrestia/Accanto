@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export interface SelectOption<T extends string> {
   value: T;
@@ -28,9 +29,10 @@ export default function SelectField<T extends string>({
   onChange,
   options,
   emptyLabel,
-  placeholder = 'Seleziona…',
+  placeholder,
   disabled = false
 }: SelectFieldProps<T>) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const currentLabel =
@@ -57,7 +59,7 @@ export default function SelectField<T extends string>({
           }`}
           numberOfLines={1}
         >
-          {currentLabel || placeholder}
+          {currentLabel || placeholder || t('common.select')}
         </Text>
       </Pressable>
 

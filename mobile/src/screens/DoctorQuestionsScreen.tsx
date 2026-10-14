@@ -27,10 +27,6 @@ import type {
   DoctorQuestionStatus,
   DoctorQuestionTemplate
 } from '@accanto/shared/types';
-import {
-  QuestionCategoryLabel,
-  QuestionStatusLabel
-} from '@accanto/shared/types';
 
 const CATS: DoctorQuestionCategory[] = [
   'Diagnosis',
@@ -65,6 +61,7 @@ type Prefill = { question: string; category: DoctorQuestionCategory };
 
 export default function DoctorQuestionsScreen() {
   const circleId = useCircleId();
+  const { t } = useTranslation();
   const [items, setItems] = useState<DoctorQuestion[] | null>(null);
   const [templates, setTemplates] = useState<DoctorQuestionTemplate[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -118,10 +115,10 @@ export default function DoctorQuestionsScreen() {
   };
 
   const del = (q: DoctorQuestion) => {
-    Alert.alert('Eliminare questa domanda?', undefined, [
-      { text: 'Annulla', style: 'cancel' },
+    Alert.alert(t('questions.deleteConfirmTitle'), undefined, [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Elimina',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           try {
@@ -140,11 +137,10 @@ export default function DoctorQuestionsScreen() {
   return (
     <Screen>
       <Text className="text-2xl font-semibold text-accanto-900 mb-1">
-        Domande per il medico
+        {t('questions.title')}
       </Text>
       <Text className="text-accanto-500 mb-4">
-        Annota le domande quando ti vengono in mente. Riprenderle prima
-        della visita aiuta.
+        {t('questions.intro')}
       </Text>
 
       <View className="mb-4">
@@ -154,7 +150,7 @@ export default function DoctorQuestionsScreen() {
             setShowForm((s) => !s);
           }}
         >
-          {showForm ? 'Annulla' : '+ Nuova domanda'}
+          {showForm ? t('common.cancel') : t('questions.addCta')}
         </Button>
       </View>
 
@@ -184,7 +180,7 @@ export default function DoctorQuestionsScreen() {
             className="px-4 py-3 flex-row items-center justify-between"
           >
             <Text className="font-medium text-accanto-900">
-              Suggerimenti per categoria
+              {t('questions.templatesTitle')}
             </Text>
             <Text className="text-accanto-500">
               {showTemplates ? '−' : '+'}
@@ -192,17 +188,17 @@ export default function DoctorQuestionsScreen() {
           </Pressable>
           {showTemplates ? (
             <View className="px-4 pb-4 gap-3">
-              {templates.map((t) => (
-                <View key={t.category}>
+              {templates.map((tpl) => (
+                <View key={tpl.category}>
                   <Text className="text-sm font-medium text-accanto-900 mb-1">
-                    {t.categoryLabel}
+                    {tpl.categoryLabel}
                   </Text>
                   <View className="gap-1">
-                    {t.questions.map((q) => (
+                    {tpl.questions.map((q) => (
                       <Pressable
                         key={q}
                         onPress={() => {
-                          setPrefill({ question: q, category: t.category });
+                          setPrefill({ question: q, category: tpl.category });
                           setShowForm(true);
                         }}
                       >
@@ -228,7 +224,7 @@ export default function DoctorQuestionsScreen() {
           <ActivityIndicator color="#334155" />
         </View>
       ) : items.length === 0 ? (
-        <Text className="text-accanto-500">Ancora nessuna domanda.</Text>
+        <Text className="text-accanto-500">{t('questions.empty')}</Text>
       ) : (
         <View className="gap-3">
           {items.map((q) => (
@@ -254,32 +250,33 @@ function QuestionCard({
   onStatus: (s: DoctorQuestionStatus) => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const statusOptions = useMemo(
-    () => STATUSES.map((s) => ({ value: s, label: QuestionStatusLabel[s] })),
-    []
+    () => STATUSES.map((s) => ({ value: s, label: t(`questionStatus.${s}`) })),
+    [t]
   );
   return (
     <View className="rounded-lg border border-accanto-100 bg-white p-4">
       <Text className="font-medium text-accanto-900">{q.question}</Text>
       <Text className="text-xs text-accanto-500 mt-1">
-        {QuestionCategoryLabel[q.category]} •{' '}
-        {QuestionStatusLabel[q.status]}
+        {t(`questionCategory.${q.category}`)} •{' '}
+        {t(`questionStatus.${q.status}`)}
       </Text>
       {q.answerNotes ? (
         <Text className="text-sm text-accanto-900 mt-2">
-          <Text className="text-accanto-500">Risposta: </Text>
+          <Text className="text-accanto-500">{t('questions.answerPrefix')}</Text>
           {q.answerNotes}
         </Text>
       ) : null}
       <View className="mt-3 gap-2">
         <SelectField
-          label="Stato"
+          label={t('questions.statusLabel') as string}
           value={q.status}
           onChange={(v) => v && onStatus(v as DoctorQuestionStatus)}
           options={statusOptions}
         />
         <Pressable onPress={onDelete} className="py-2">
-          <Text className="text-sm text-accanto-500">Elimina</Text>
+          <Text className="text-sm text-accanto-500">{t('common.delete')}</Text>
         </Pressable>
       </View>
     </View>
@@ -299,17 +296,18 @@ function NewForm({
   const [category, setCategory] = useState<DoctorQuestionCategory>(
     prefill?.category ?? 'Other'
   );
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const catOptions = useMemo(
-    () => CATS.map((c) => ({ value: c, label: QuestionCategoryLabel[c] })),
-    []
+    () => CATS.map((c) => ({ value: c, label: t(`questionCategory.${c}`) })),
+    [t]
   );
 
   const submit = async () => {
     if (!question.trim()) {
-      setError('Scrivi la domanda.');
+      setError(t('questions.writeQuestion'));
       return;
     }
     setBusy(true);
@@ -330,7 +328,7 @@ function NewForm({
   return (
     <View className="rounded-lg border border-accanto-100 bg-white p-4 mb-4 gap-3">
       <TextField
-        label="Domanda"
+        label={t('questions.questionLabel') as string}
         value={question}
         onChangeText={setQuestion}
         multiline
@@ -338,14 +336,14 @@ function NewForm({
         style={{ minHeight: 80, textAlignVertical: 'top' }}
       />
       <SelectField
-        label="Categoria"
+        label={t('questions.categoryLabel') as string}
         value={category}
         onChange={(v) => v && setCategory(v as DoctorQuestionCategory)}
         options={catOptions}
       />
       <ErrorBanner message={error} />
       <Button onPress={submit} busy={busy} disabled={busy}>
-        {busy ? 'Salvataggio…' : 'Aggiungi domanda'}
+        {busy ? t('questions.saving') : t('questions.addQuestion')}
       </Button>
     </View>
   );

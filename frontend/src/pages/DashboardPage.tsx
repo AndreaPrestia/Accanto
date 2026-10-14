@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
-import { CareCircle, RoleLabel } from '../types';
+import { CareCircle } from '../types';
 import SecurityBanner from '../components/SecurityBanner';
 
 export default function DashboardPage() {
@@ -45,7 +45,7 @@ export default function DashboardPage() {
                   <Link to={`/care-circles/${c.id}`} className="text-lg font-medium text-accanto-900 hover:underline">
                     {c.name}
                   </Link>
-                  <span className="text-xs text-accanto-500 ml-2">{RoleLabel[c.myRole]}</span>
+                  <span className="text-xs text-accanto-500 ml-2">{t(`roles.${c.myRole.toLowerCase()}`)}</span>
                 </div>
                 {c.description && <p className="text-sm text-accanto-500 mt-1">{c.description}</p>}
                 {c.status === 'Archived' && <p className="text-xs text-accanto-500 mt-2">Archiviato</p>}

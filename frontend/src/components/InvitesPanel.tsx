@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
-import { CareCircleInvite, CareCircleRole, CreateInviteRequest, RoleLabel } from '../types';
+import { CareCircleInvite, CareCircleRole, CreateInviteRequest } from '../types';
 
 interface Props {
   circleId: string;
 }
 
 export default function InvitesPanel({ circleId }: Props) {
+  const { t } = useTranslation();
   const [invites, setInvites] = useState<CareCircleInvite[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -77,8 +79,8 @@ export default function InvitesPanel({ circleId }: Props) {
         <div>
           <label className="label">Ruolo</label>
           <select className="input" value={role} onChange={(e) => setRole(e.target.value as CareCircleRole)}>
-            <option value="Caregiver">{RoleLabel.Caregiver}</option>
-            <option value="Viewer">{RoleLabel.Viewer}</option>
+            <option value="Caregiver">{t('roles.caregiver')}</option>
+            <option value="Viewer">{t('roles.viewer')}</option>
           </select>
         </div>
         <div>
@@ -140,6 +142,7 @@ function InviteRow({ invite, url, copied, onCopy, onRevoke }: {
   onCopy: () => void;
   onRevoke: () => void;
 }) {
+  const { t } = useTranslation();
   const status = invite.revokedAt
     ? 'Revocato'
     : !invite.isActive
@@ -151,7 +154,7 @@ function InviteRow({ invite, url, copied, onCopy, onRevoke }: {
     <div className="border border-accanto-100 rounded-md p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-sm">
-          <strong>{RoleLabel[invite.role]}</strong> • scade il {expires} •{' '}
+          <strong>{t(`roles.${invite.role.toLowerCase()}`)}</strong> • scade il {expires} •{' '}
           {invite.usedCount}/{invite.maxUses} usi
         </div>
         <span

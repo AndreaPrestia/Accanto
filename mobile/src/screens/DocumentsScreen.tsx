@@ -7,6 +7,7 @@ import {
   View
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -20,7 +21,6 @@ import { getToken } from '../storage/secureStorage';
 import { API_BASE_URL } from '../config/env';
 import { useCircleId } from '../navigation/CircleContext';
 import type { DocumentCategory, DocumentItem } from '@accanto/shared/types';
-import { DocumentCategoryLabel } from '@accanto/shared/types';
 
 const CATS: DocumentCategory[] = [
   'Report',
@@ -47,6 +47,7 @@ function safeFilename(name: string): string {
 
 export default function DocumentsScreen() {
   const circleId = useCircleId();
+  const { t, i18n } = useTranslation();
   const [docs, setDocs] = useState<DocumentItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -77,7 +78,7 @@ export default function DocumentsScreen() {
     try {
       const token = await getToken();
       if (!token) {
-        setError('Sessione scaduta, accedi di nuovo.');
+        setError(t('documents.sessionExpired'));
         return;
       }
       const url = `${API_BASE_URL}/care-circles/${circleId}/documents/${d.id}/download`;
@@ -86,7 +87,7 @@ export default function DocumentsScreen() {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.status >= 400) {
-        setError('Errore durante il download.');
+        setError(t('documents.downloadError'));
         return;
       }
       if (await Sharing.isAvailableAsync()) {
@@ -97,8 +98,8 @@ export default function DocumentsScreen() {
         });
       } else {
         Alert.alert(
-          'Download completato',
-          `Salvato in: ${res.uri}`
+          t('documents.downloadDoneTitle'),
+          t('documents.downloadDoneBody', { path: res.uri })
         );
       }
     } catch (e) {
@@ -110,12 +111,12 @@ export default function DocumentsScreen() {
 
   const del = (d: DocumentItem) => {
     Alert.alert(
-      `Eliminare "${d.originalFileName}"?`,
-      'Il file non potrà essere recuperato.',
+      t('documents.deleteConfirmTitle', { name: d.originalFileName }),
+      t('documents.deleteConfirmBody'),
       [
-        { text: 'Annulla', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Elimina',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -135,15 +136,15 @@ export default function DocumentsScreen() {
   return (
     <Screen>
       <Text className="text-2xl font-semibold text-accanto-900 mb-1">
-        Documenti
+        {t('documents.title')}
       </Text>
       <Text className="text-accanto-500 mb-4">
-        Tieni vicino ciò che ti serve quando ti chiedono un documento.
+        {t('documents.intro')}
       </Text>
 
       <View className="mb-4">
         <Button onPress={() => setShowForm((s) => !s)}>
-          {showForm ? 'Annulla' : '+ Carica documento'}
+          {showForm ? t('common.cancel') : t('documents.addCta')}
         </Button>
       </View>
 
@@ -166,7 +167,7 @@ export default function DocumentsScreen() {
           <ActivityIndicator color="#334155" />
         </View>
       ) : docs.length === 0 ? (
-        <Text className="text-accanto-500">Ancora nessun documento.</Text>
+        <Text className="text-accanto-500">{t('documents.empty')}</Text>
       ) : (
         <View className="gap-3">
           {docs.map((d) => (
@@ -181,9 +182,9 @@ export default function DocumentsScreen() {
                 {d.originalFileName}
               </Text>
               <Text className="text-xs text-accanto-500 mt-0.5">
-                {DocumentCategoryLabel[d.category]} •{' '}
+                {t(`documentCategory.${d.category}`)} •{' '}
                 {formatSize(d.sizeInBytes)} •{' '}
-                {new Date(d.createdAt).toLocaleDateString('it-IT')}
+                {new Date(d.createdAt).toLocaleDateString(i18n.language)}
               </Text>
               {d.notes ? (
                 <Text className="text-sm text-accanto-900 mt-2">
@@ -192,12 +193,12 @@ export default function DocumentsScreen() {
               ) : null}
               {d.tags.length > 0 ? (
                 <View className="mt-2 flex-row flex-wrap gap-1">
-                  {d.tags.map((t) => (
+                  {d.tags.map((tag) => (
                     <View
-                      key={t}
+                      key={tag}
                       className="bg-accanto-100 rounded px-2 py-0.5"
                     >
-                      <Text className="text-xs text-accanto-700">{t}</Text>
+                      <Text className="text-xs text-accanto-700">{tag}</Text>
                     </View>
                   ))}
                 </View>
@@ -210,14 +211,14 @@ export default function DocumentsScreen() {
                     busy={downloadingId === d.id}
                     disabled={downloadingId === d.id}
                   >
-                    {downloadingId === d.id ? 'Apertura…' : 'Apri'}
+                    {downloadingId === d.id ? t('documents.opening') : t('documents.open')}
                   </Button>
                 </View>
                 <Pressable
                   onPress={() => del(d)}
                   className="px-3 py-2 items-center justify-center"
                 >
-                  <Text className="text-sm text-accanto-500">Elimina</Text>
+                  <Text className="text-sm text-accanto-500">{t('common.delete')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -235,6 +236,7 @@ function UploadForm({
   circleId: string;
   onUploaded: () => void;
 }) {
+  const { t } = useTranslation();
   const [file, setFile] = useState<DocumentPicker.DocumentPickerAsset | null>(
     null
   );
@@ -245,8 +247,8 @@ function UploadForm({
   const [error, setError] = useState<string | null>(null);
 
   const catOptions = useMemo(
-    () => CATS.map((c) => ({ value: c, label: DocumentCategoryLabel[c] })),
-    []
+    () => CATS.map((c) => ({ value: c, label: t(`documentCategory.${c}`) })),
+    [t]
   );
 
   const pickFile = async () => {
@@ -260,7 +262,7 @@ function UploadForm({
       const asset = res.assets[0];
       // 20 MB limite (allineato al backend del web).
       if (asset.size && asset.size > 20 * 1024 * 1024) {
-        setError('Il file supera i 20 MB.');
+        setError(t('documents.tooLarge'));
         return;
       }
       setFile(asset);
@@ -271,7 +273,7 @@ function UploadForm({
 
   const submit = async () => {
     if (!file) {
-      setError('Scegli un file.');
+      setError(t('documents.chooseFile'));
       return;
     }
     setBusy(true);
@@ -304,7 +306,7 @@ function UploadForm({
     <View className="rounded-lg border border-accanto-100 bg-white p-4 mb-4 gap-3">
       <View>
         <Text className="text-sm font-medium text-accanto-700 mb-1">
-          File
+          {t('documents.fileLabel')}
         </Text>
         <Pressable
           onPress={pickFile}
@@ -316,21 +318,21 @@ function UploadForm({
             }`}
             numberOfLines={1}
           >
-            {file ? file.name : 'Tocca per scegliere un file…'}
+            {file ? file.name : t('documents.filePlaceholder')}
           </Text>
         </Pressable>
-        <Text className="text-xs text-accanto-500 mt-1">Massimo 20 MB.</Text>
+        <Text className="text-xs text-accanto-500 mt-1">{t('documents.maxSize')}</Text>
       </View>
 
       <SelectField
-        label="Categoria"
+        label={t('documents.categoryLabel') as string}
         value={category}
         onChange={(v) => v && setCategory(v as DocumentCategory)}
         options={catOptions}
       />
 
       <TextField
-        label="Note (facoltative)"
+        label={t('documents.notesLabel') as string}
         value={notes}
         onChangeText={setNotes}
         multiline
@@ -339,7 +341,7 @@ function UploadForm({
       />
 
       <TextField
-        label="Tag (separati da virgola)"
+        label={t('documents.tagsLabel') as string}
         value={tags}
         onChangeText={setTags}
         autoCapitalize="none"
@@ -349,7 +351,7 @@ function UploadForm({
       <ErrorBanner message={error} />
 
       <Button onPress={submit} busy={busy} disabled={busy || !file}>
-        {busy ? 'Caricamento…' : 'Carica'}
+        {busy ? t('documents.uploading') : t('documents.upload')}
       </Button>
     </View>
   );

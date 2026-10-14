@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { api, extractError } from '../api/client';
-import { TimelineEntry, TimelineEntryType, TimelineTypeLabel, TimelineVisibility, VisibilityLabel } from '../types';
+import { TimelineEntry, TimelineEntryType, TimelineVisibility } from '../types';
 import { useTranslation } from 'react-i18next';
 import AiAssistPanel from '../components/AiAssistPanel';
 import { timelineSummary } from '../api/ai';
@@ -11,6 +11,7 @@ const TYPES: TimelineEntryType[] = ['MedicalUpdate','Symptom','Medication','Appo
 const VIS: TimelineVisibility[] = ['Circle','Private'];
 
 export default function TimelinePage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [entries, setEntries] = useState<TimelineEntry[] | null>(null);
@@ -79,7 +80,7 @@ export default function TimelinePage() {
       <div className="grid grid-cols-2 gap-2 mb-2">
         <select className="input" value={filterType} onChange={(e) => setFilterType(e.target.value as any)}>
           <option value="">Tutti i tipi</option>
-          {TYPES.map(t => <option key={t} value={t}>{TimelineTypeLabel[t]}</option>)}
+          {TYPES.map(type => <option key={type} value={type}>{t(`timelineType.${type}`)}</option>)}
         </select>
         <input className="input" placeholder="Filtra per tag" value={filterTag} onChange={(e) => setFilterTag(e.target.value)} />
       </div>
@@ -149,7 +150,7 @@ export default function TimelinePage() {
             <label className="label">Visibilità</label>
             <select className="input" value={bulkVisibility} onChange={(e) => setBulkVisibility(e.target.value as any)}>
               <option value="">Non modificare</option>
-              {VIS.map(v => <option key={v} value={v}>{VisibilityLabel[v]}</option>)}
+              {VIS.map(v => <option key={v} value={v}>{t(`visibility.${v}`)}</option>)}
             </select>
           </div>
           {bulkMsg && <p className="text-sm text-accanto-700">{bulkMsg}</p>}
@@ -224,6 +225,7 @@ export default function TimelinePage() {
 }
 
 function EntryCard({ entry, careCircleId, onDeleted, selectMode, selected, onToggleSelect }: { entry: TimelineEntry; careCircleId: string; onDeleted: () => void; selectMode: boolean; selected: boolean; onToggleSelect: () => void }) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const del = async () => {
     if (!confirm('Eliminare questa voce?')) return;
@@ -243,7 +245,7 @@ function EntryCard({ entry, careCircleId, onDeleted, selectMode, selected, onTog
           )}
           <div>
             <h3 className="font-medium">{entry.title}</h3>
-            <p className="text-xs text-accanto-500">{when} • {TimelineTypeLabel[entry.type]} • {VisibilityLabel[entry.visibility]}</p>
+            <p className="text-xs text-accanto-500">{when} • {t(`timelineType.${entry.type}`)} • {t(`visibility.${entry.visibility}`)}</p>
           </div>
         </div>
         <button onClick={del} disabled={busy} className="text-sm text-accanto-500 hover:text-red-700">Elimina</button>
@@ -251,7 +253,7 @@ function EntryCard({ entry, careCircleId, onDeleted, selectMode, selected, onTog
       <p className="mt-2 whitespace-pre-wrap">{entry.content}</p>
       {entry.tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
-          {entry.tags.map(t => <span key={t} className="text-xs bg-accanto-100 text-accanto-700 rounded px-2 py-0.5">{t}</span>)}
+          {entry.tags.map(tag => <span key={tag} className="text-xs bg-accanto-100 text-accanto-700 rounded px-2 py-0.5">{tag}</span>)}
         </div>
       )}
     </div>
@@ -259,6 +261,7 @@ function EntryCard({ entry, careCircleId, onDeleted, selectMode, selected, onTog
 }
 
 function NewEntryForm({ careCircleId, onCreated }: { careCircleId: string; onCreated: () => void }) {
+  const { t } = useTranslation();
   const nowLocal = useMemo(() => {
     const d = new Date();
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
@@ -301,7 +304,7 @@ function NewEntryForm({ careCircleId, onCreated }: { careCircleId: string; onCre
         <div>
           <label className="label">Tipo</label>
           <select className="input" value={type} onChange={(e) => setType(e.target.value as TimelineEntryType)}>
-            {TYPES.map(t => <option key={t} value={t}>{TimelineTypeLabel[t]}</option>)}
+            {TYPES.map(type => <option key={type} value={type}>{t(`timelineType.${type}`)}</option>)}
           </select>
         </div>
       </div>
@@ -321,7 +324,7 @@ function NewEntryForm({ careCircleId, onCreated }: { careCircleId: string; onCre
         <div>
           <label className="label">Visibilità</label>
           <select className="input" value={visibility} onChange={(e) => setVisibility(e.target.value as TimelineVisibility)}>
-            {VIS.map(v => <option key={v} value={v}>{VisibilityLabel[v]}</option>)}
+            {VIS.map(v => <option key={v} value={v}>{t(`visibility.${v}`)}</option>)}
           </select>
         </div>
       </div>

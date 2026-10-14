@@ -7,7 +7,66 @@
     "timeline": "Journal",
     "documents": "Documents",
     "questions": "Questions",
-    "updates": "Updates"
+    "updates": "Updates",
+    "register": "Create account",
+    "invite": "Invitation",
+    "forgotPassword": "Forgot password",
+    "resetPassword": "Reset password",
+    "support": "Support",
+    "selfCare": "Take care of yourself",
+    "dashboard": "My care circles",
+    "newCircle": "New care circle",
+    "overview": "Overview"
+  },
+  "roles": {
+    "owner": "Coordinator",
+    "caregiver": "Caregiver",
+    "viewer": "Listening"
+  },
+  "timelineType": {
+    "MedicalUpdate": "Medical update",
+    "Symptom": "Symptom",
+    "Medication": "Medication",
+    "Appointment": "Appointment",
+    "Decision": "Decision",
+    "PersonalNote": "Personal note",
+    "Practical": "Practical",
+    "Other": "Other"
+  },
+  "visibility": {
+    "Circle": "Whole circle",
+    "Private": "Only me"
+  },
+  "documentCategory": {
+    "Report": "Report",
+    "BloodTest": "Blood test",
+    "Imaging": "Imaging (X-ray, CT, MRI)",
+    "Prescription": "Prescription",
+    "Therapy": "Therapy",
+    "IdentityDocument": "Identity document",
+    "Delegation": "Delegation",
+    "HospitalContact": "Hospital contact",
+    "Other": "Other"
+  },
+  "questionCategory": {
+    "Diagnosis": "Diagnosis",
+    "Therapy": "Therapy",
+    "Pain": "Pain",
+    "Nutrition": "Nutrition",
+    "Hydration": "Hydration",
+    "PalliativeCare": "Palliative care",
+    "Discharge": "Discharge",
+    "HomeCare": "Home care",
+    "Emergency": "Emergency",
+    "Prognosis": "Prognosis",
+    "Practical": "Practical",
+    "Other": "Other"
+  },
+  "questionStatus": {
+    "ToAsk": "To ask",
+    "Asked": "Asked",
+    "Answered": "Answered",
+    "Archived": "Archived"
   },
   "common": {
     "save": "Save",
@@ -17,7 +76,13 @@
     "loading": "Loading…",
     "saving": "Saving…",
     "language": "Language",
-    "back": "Back"
+    "back": "Back",
+    "select": "Select…",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "share": "Share",
+    "clear": "Clear",
+    "done": "Done"
   },
   "auth": {
     "loginTitle": "Welcome back",
@@ -207,7 +272,200 @@
   },
   "dashboard": {
     "quickAddEntry": "+ Entry",
-    "quickAddEntryAria": "Add a journal entry to {{name}}"
+    "quickAddEntryAria": "Add a journal entry to {{name}}",
+    "title": "Your space",
+    "intro": "A care circle gathers the information about the person you're caring for, all in one place.",
+    "emptyTitle": "You haven't created any circle yet.",
+    "createFirst": "Create the first circle",
+    "archived": "Archived",
+    "newCircleCta": "+ New circle"
+  },
+  "inviteAccept": {
+    "invalidToken": "Invalid invite link.",
+    "unavailableTitle": "Invite not available",
+    "backHome": "Back to home",
+    "title": "You've been invited",
+    "body": "{{inviter}} would like you to join the care circle {{circle}} as {{role}}.",
+    "validUntil": "The link is valid until {{date}}.",
+    "joining": "Joining…",
+    "join": "Join the circle",
+    "notNow": "Not now",
+    "mustSignIn": "To accept, you first need to sign in to Accanto.",
+    "signInAndAccept": "Sign in and accept",
+    "registerAndAccept": "I don't have an account, register me"
+  },
+  "timeline": {
+    "title": "Journal",
+    "intro": "Keep track of what happens, day by day.",
+    "allTypes": "All types",
+    "typePlaceholder": "Type",
+    "filterTag": "Filter by tag",
+    "from": "From",
+    "to": "To",
+    "clearFilters": "Clear filters",
+    "addCta": "+ New entry",
+    "empty": "No entries yet.",
+    "deleteConfirmTitle": "Delete this entry?",
+    "deleteConfirmBody": "This action can't be undone.",
+    "requiredFields": "Fill in all required fields.",
+    "whenLabel": "When",
+    "typeLabel": "Type",
+    "titleLabel": "Title",
+    "detailLabel": "Detail",
+    "tagsLabel": "Tags (comma-separated)",
+    "tagsPlaceholder": "E.g. visit, meds",
+    "visibilityLabel": "Visibility",
+    "saving": "Saving…",
+    "save": "Save entry",
+    "bulk": {
+      "exit": "Exit multi-select",
+      "enter": "Multi-select",
+      "enterCount": "Multi-select ({{count}})",
+      "selectAll": "Select all ({{count}})",
+      "title": "Edit selected ({{count}})",
+      "addTags": "Add tags",
+      "addTagsPlaceholder": "urgent, follow-up",
+      "removeTags": "Remove tags",
+      "removeTagsPlaceholder": "old",
+      "noChange": "Don't change",
+      "specifyChange": "Specify at least one change.",
+      "confirmTitle": "Apply the changes?",
+      "confirmBody": "{{count}} entries will be updated.",
+      "apply": "Apply",
+      "result": "{{updated}} updated, {{skipped}} skipped.",
+      "applying": "Applying…",
+      "applyChanges": "Apply changes"
+    }
+  },
+  "questions": {
+    "title": "Questions for the doctor",
+    "intro": "Note down questions as they come to mind. Reviewing them before the visit helps.",
+    "addCta": "+ New question",
+    "empty": "No questions yet.",
+    "templatesTitle": "Suggestions by category",
+    "deleteConfirmTitle": "Delete this question?",
+    "answerPrefix": "Answer: ",
+    "statusLabel": "Status",
+    "categoryLabel": "Category",
+    "questionLabel": "Question",
+    "writeQuestion": "Write the question.",
+    "saving": "Saving…",
+    "addQuestion": "Add question"
+  },
+  "documents": {
+    "title": "Documents",
+    "intro": "Keep what you need close by for when someone asks you for a document.",
+    "addCta": "+ Upload document",
+    "empty": "No documents yet.",
+    "open": "Open",
+    "opening": "Opening…",
+    "deleteConfirmTitle": "Delete \"{{name}}\"?",
+    "deleteConfirmBody": "The file can't be recovered.",
+    "sessionExpired": "Session expired, sign in again.",
+    "downloadError": "Error during download.",
+    "downloadDoneTitle": "Download complete",
+    "downloadDoneBody": "Saved to: {{path}}",
+    "tooLarge": "The file exceeds 20 MB.",
+    "chooseFile": "Choose a file.",
+    "fileLabel": "File",
+    "filePlaceholder": "Tap to choose a file…",
+    "maxSize": "Maximum 20 MB.",
+    "categoryLabel": "Category",
+    "notesLabel": "Notes (optional)",
+    "tagsLabel": "Tags (comma-separated)",
+    "uploading": "Uploading…",
+    "upload": "Upload"
+  },
+  "newCircle": {
+    "title": "New circle",
+    "intro": "Give the circle a name (for example the name of the person you're caring for). You can change it at any time.",
+    "nameLabel": "Circle name",
+    "namePlaceholder": "E.g. Mum",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "A short note to orient yourself",
+    "nameTooShort": "The name must be at least 2 characters.",
+    "creating": "Creating…",
+    "create": "Create circle"
+  },
+  "audit": {
+    "title": "Activity log",
+    "intro": "The actions taken by circle members, newest first.",
+    "empty": "No actions recorded.",
+    "removedMember": "Removed member",
+    "loadMore": "Load more",
+    "actions": {
+      "CircleCreated": "Created the circle",
+      "CircleUpdated": "Updated the circle",
+      "CircleArchived": "Archived the circle",
+      "MemberJoined": "Joined the circle",
+      "InviteCreated": "Created an invite",
+      "InviteRevoked": "Revoked an invite",
+      "EntryCreated": "Added a journal entry",
+      "EntryUpdated": "Updated a journal entry",
+      "EntryDeleted": "Deleted a journal entry",
+      "EntriesBulkUpdated": "Updated multiple journal entries",
+      "DocumentUploaded": "Uploaded a document",
+      "DocumentDeleted": "Deleted a document",
+      "QuestionCreated": "Added a question for the doctor",
+      "QuestionUpdated": "Updated a question for the doctor",
+      "QuestionDeleted": "Deleted a question for the doctor",
+      "UpdateCreated": "Posted an update",
+      "UpdateDeleted": "Deleted an update",
+      "DataExported": "Exported their data"
+    }
+  },
+  "notifications": {
+    "title": "Notification preferences",
+    "hint": "Choose which notifications to receive via email and push. Security emails (e.g. password change) are always sent.",
+    "email": "Email",
+    "push": "Push",
+    "saved": "Preferences saved.",
+    "save": "Save preferences",
+    "topics": {
+      "TimelineEntryCreated": "New journal entries",
+      "SharedUpdateCreated": "New shared updates",
+      "DoctorQuestionAnswered": "Answers to doctor questions",
+      "InviteAccepted": "New people joining a circle"
+    }
+  },
+  "pushDevices": {
+    "title": "Push notifications",
+    "hint": "Devices on which this account receives push notifications.",
+    "enabledMsg": "Notifications enabled on this device.",
+    "permissionDeniedMsg": "Permission not granted. Enable notifications from your system settings.",
+    "removeConfirmTitle": "Remove this device?",
+    "removed": "Device removed.",
+    "testSent": "Test notification sent. It should arrive within a few seconds.",
+    "notRegistered": "This device isn't registered to receive notifications yet.",
+    "enableCta": "Enable on this device",
+    "deniedHint": "You denied permission before: to enable them open the app's system settings.",
+    "empty": "No registered devices.",
+    "thisDevice": "  · This device",
+    "lastUsed": "{{platform}} · last used {{date}}",
+    "remove": "Remove",
+    "sendTest": "Send test notification"
+  },
+  "twoFactor": {
+    "copyAll": "Copy all",
+    "secretCopiedTitle": "Copied",
+    "secretCopiedBody": "Secret copied to clipboard.",
+    "codesCopiedTitle": "Copied",
+    "codesCopiedBody": "Recovery codes are in the clipboard."
+  },
+  "difficultDay": {
+    "title": "A hard day",
+    "intro": "When everything weighs on you, try one of these small gestures. They don't fix things, but they let you breathe.",
+    "suggestions": [
+      "Take three slow breaths, doing nothing else.",
+      "Drink a glass of water. Eat something, even a little.",
+      "Write a single sentence in the journal, even a harsh one. It doesn't have to be nice.",
+      "Send a message to someone you trust: just “I'm having a hard day” is enough.",
+      "If you can, step outside for five minutes. Even just to the doorstep.",
+      "You're not alone. You're doing a lot."
+    ],
+    "needHelp": "If you feel you can't cope, talking to someone helps.",
+    "supportLink": "See support contacts",
+    "emergency": "If there's a medical emergency, call 112."
   },
   "selfCare": {
     "title": "Caring for yourself",
@@ -363,6 +621,69 @@
     "chips": {
       "audit": "Activity log",
       "ai": "Circle AI"
+    },
+    "role": "Your role: {{role}}",
+    "archivedSuffix": " • archived",
+    "sections": {
+      "timeline": {
+        "title": "Journal",
+        "desc": "Note appointments, symptoms, decisions."
+      },
+      "documents": {
+        "title": "Documents",
+        "desc": "Keep reports, tests, prescriptions."
+      },
+      "questions": {
+        "title": "Questions for the doctor",
+        "desc": "Prepare what to ask at the next visit."
+      },
+      "updates": {
+        "title": "Updates for others",
+        "desc": "Compose messages to copy and send."
+      },
+      "difficultDay": {
+        "title": "Hard day",
+        "desc": "A small breath when you need it."
+      }
+    },
+    "archive": {
+      "cta": "Archive circle",
+      "busy": "Archiving…",
+      "confirmTitle": "Archive the circle?",
+      "confirmBody": "It will stay visible in read-only mode.",
+      "confirmCta": "Archive"
+    },
+    "invites": {
+      "title": "Invite other people",
+      "subtitle": "Create a link to share with whoever you want to add to the circle. You alone decide the role and how long the link stays valid.",
+      "roleLabel": "Role",
+      "expiryLabel": "Expiry (days)",
+      "maxUsesLabel": "Max uses",
+      "createCta": "Create invite link",
+      "creating": "Creating…",
+      "empty": "No active invites.",
+      "copyLink": "Copy link",
+      "revoke": "Revoke",
+      "revokeConfirmTitle": "Revoke invite?",
+      "revokeConfirmBody": "Anyone who hasn't used it yet will no longer be able to join.",
+      "copyError": "Can't copy to the clipboard.",
+      "shareMessage": "I'm inviting you to my care circle on Accanto:\n{{url}}",
+      "rowMeta": " • expires on {{date}} • {{used}}/{{max}} uses",
+      "status": {
+        "revoked": "Revoked",
+        "expired": "Expired",
+        "exhausted": "Used up",
+        "active": "Active"
+      }
+    },
+    "export": {
+      "title": "Export to PDF",
+      "subtitle": "A summary of the circle (journal and open questions) to bring to the doctor.",
+      "from": "From",
+      "to": "To",
+      "download": "Download PDF",
+      "generating": "Generating…",
+      "clearFilters": "Clear filters"
     },
     "emptyState": {
       "title": "Start here",

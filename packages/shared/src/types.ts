@@ -169,66 +169,6 @@ export interface CreateInviteRequest {
   maxUses?: number | null;
 }
 
-// Italian labels
-export const TimelineTypeLabel: Record<TimelineEntryType, string> = {
-  MedicalUpdate: 'Aggiornamento medico',
-  Symptom: 'Sintomo',
-  Medication: 'Farmaco',
-  Appointment: 'Appuntamento',
-  Decision: 'Decisione',
-  PersonalNote: 'Nota personale',
-  Practical: 'Pratica',
-  Other: 'Altro'
-};
-
-export const VisibilityLabel: Record<TimelineVisibility, string> = {
-  Circle: 'Tutto il cerchio',
-  Private: 'Solo io'
-};
-
-export const DocumentCategoryLabel: Record<DocumentCategory, string> = {
-  Report: 'Referto',
-  BloodTest: 'Esami del sangue',
-  Imaging: 'Imaging (radiografia, TAC, RM)',
-  Prescription: 'Prescrizione',
-  Therapy: 'Terapia',
-  IdentityDocument: 'Documento di identità',
-  Delegation: 'Delega',
-  HospitalContact: 'Contatto ospedaliero',
-  Other: 'Altro'
-};
-
-export const QuestionCategoryLabel: Record<DoctorQuestionCategory, string> = {
-  Diagnosis: 'Diagnosi',
-  Therapy: 'Terapia',
-  Pain: 'Dolore',
-  Nutrition: 'Alimentazione',
-  Hydration: 'Idratazione',
-  PalliativeCare: 'Cure palliative',
-  Discharge: 'Dimissione',
-  HomeCare: 'Assistenza domiciliare',
-  Emergency: 'Emergenza',
-  Prognosis: 'Prognosi',
-  Practical: 'Pratica',
-  Other: 'Altro'
-};
-
-export const QuestionStatusLabel: Record<DoctorQuestionStatus, string> = {
-  ToAsk: 'Da chiedere',
-  Asked: 'Chiesta',
-  Answered: 'Risposta ricevuta',
-  Archived: 'Archiviata'
-};
-
-export const AudienceLabel: Record<SharedUpdateAudience, string> = {
-  CloseFamily: 'Famiglia stretta',
-  ExtendedFamily: 'Famiglia allargata',
-  Friends: 'Amici',
-  Generic: 'Messaggio generico'
-};
-
-export const RoleLabel: Record<CareCircleRole, string> = {
-  Owner: 'Coordinatore',
-  Caregiver: 'Caregiver',
-  Viewer: 'In ascolto'
-};
+// User-facing labels for these enums now live in the i18n locale files
+// (timelineType.*, visibility.*, documentCategory.*, questionCategory.*,
+// questionStatus.*, audience.*, roles.*) and are resolved via t() in each app.

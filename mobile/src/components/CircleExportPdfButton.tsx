@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Button from './ui/Button';
 import DateField from './ui/DateField';
 import ErrorBanner from './ui/ErrorBanner';
@@ -15,6 +16,7 @@ interface Props {
  * sheet di sistema per salvare/inviare il PDF generato dal backend.
  */
 export default function CircleExportPdfButton({ circleId, circleName }: Props) {
+  const { t } = useTranslation();
   const [from, setFrom] = useState<string>('');
   const [to, setTo] = useState<string>('');
   const [busy, setBusy] = useState(false);
@@ -44,7 +46,7 @@ export default function CircleExportPdfButton({ circleId, circleName }: Props) {
         path,
         fallbackFilename: filename,
         mimeType: 'application/pdf',
-        dialogTitle: 'Esporta in PDF'
+        dialogTitle: t('circle.export.title')
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -56,16 +58,17 @@ export default function CircleExportPdfButton({ circleId, circleName }: Props) {
   return (
     <View className="rounded-lg border border-accanto-100 bg-white p-4 gap-3">
       <View className="gap-1">
-        <Text className="font-medium text-accanto-900">Esporta in PDF</Text>
+        <Text className="font-medium text-accanto-900">
+          {t('circle.export.title')}
+        </Text>
         <Text className="text-sm text-accanto-500">
-          Un riassunto del cerchio (diario e domande aperte) da portare al
-          medico.
+          {t('circle.export.subtitle')}
         </Text>
       </View>
       <View className="flex-row gap-2">
         <View className="flex-1">
           <DateField
-            label="Dal"
+            label={t('circle.export.from') as string}
             value={from}
             onChange={setFrom}
             maximumDate={to || undefined}
@@ -74,7 +77,7 @@ export default function CircleExportPdfButton({ circleId, circleName }: Props) {
         </View>
         <View className="flex-1">
           <DateField
-            label="Al"
+            label={t('circle.export.to') as string}
             value={to}
             onChange={setTo}
             minimumDate={from || undefined}
@@ -86,7 +89,7 @@ export default function CircleExportPdfButton({ circleId, circleName }: Props) {
       <View className="flex-row items-center gap-3">
         <View className="flex-1">
           <Button onPress={start} busy={busy} disabled={busy}>
-            {busy ? 'Generazione…' : 'Scarica PDF'}
+            {busy ? t('circle.export.generating') : t('circle.export.download')}
           </Button>
         </View>
         {from || to ? (
@@ -97,7 +100,7 @@ export default function CircleExportPdfButton({ circleId, circleName }: Props) {
             }}
           >
             <Text className="text-sm text-accanto-700 underline">
-              Pulisci filtri
+              {t('circle.export.clearFilters')}
             </Text>
           </Pressable>
         ) : null}

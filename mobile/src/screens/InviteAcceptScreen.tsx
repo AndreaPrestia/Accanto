@@ -3,6 +3,7 @@ import { ActivityIndicator, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import Screen from '../components/ui/Screen';
 import Button from '../components/ui/Button';
 import ErrorBanner from '../components/ui/ErrorBanner';
@@ -10,7 +11,6 @@ import { api, extractError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { setPendingInvite } from '../auth/pendingInvite';
 import type { CareCircleInvitePreview } from '@accanto/shared/types';
-import { RoleLabel } from '@accanto/shared/types';
 import type {
   AuthStackParamList,
   MainStackParamList
@@ -29,6 +29,7 @@ type RouteParams = RouteProp<
 export default function InviteAcceptScreen() {
   const navigation = useNavigation<AnyNav>();
   const route = useRoute<RouteParams>();
+  const { t, i18n } = useTranslation();
   const token = route.params?.token ?? '';
   const { user, loading } = useAuth();
 
@@ -47,7 +48,7 @@ export default function InviteAcceptScreen() {
   if (!token) {
     return (
       <Screen>
-        <Text className="text-sm text-red-700">Link di invito non valido.</Text>
+        <Text className="text-sm text-red-700">{t('inviteAccept.invalidToken')}</Text>
       </Screen>
     );
   }
@@ -57,7 +58,7 @@ export default function InviteAcceptScreen() {
       <Screen>
         <View className="max-w-md w-full self-center pt-2">
           <Text className="text-xl font-semibold text-accanto-900 mb-3">
-            Invito non disponibile
+            {t('inviteAccept.unavailableTitle')}
           </Text>
           <ErrorBanner message={error} />
           <View className="mt-4">
@@ -75,7 +76,7 @@ export default function InviteAcceptScreen() {
                 }
               }}
             >
-              Torna alla home
+              {t('inviteAccept.backHome')}
             </Button>
           </View>
         </View>
@@ -93,7 +94,7 @@ export default function InviteAcceptScreen() {
     );
   }
 
-  const expires = new Date(preview.expiresAt).toLocaleDateString('it-IT', {
+  const expires = new Date(preview.expiresAt).toLocaleDateString(i18n.language, {
     day: '2-digit',
     month: 'long',
     year: 'numeric'
@@ -122,24 +123,17 @@ export default function InviteAcceptScreen() {
     <Screen>
       <View className="max-w-md w-full self-center pt-2">
         <Text className="text-2xl font-semibold text-accanto-900">
-          Sei stato invitata/o
+          {t('inviteAccept.title')}
         </Text>
         <Text className="text-accanto-500 mt-2">
-          <Text className="font-semibold text-accanto-700">
-            {preview.invitedByDisplayName}
-          </Text>{' '}
-          vorrebbe che ti unissi al cerchio di cura{' '}
-          <Text className="font-semibold text-accanto-700">
-            {preview.circleName}
-          </Text>{' '}
-          come{' '}
-          <Text className="font-semibold text-accanto-700">
-            {RoleLabel[preview.role]}
-          </Text>
-          .
+          {t('inviteAccept.body', {
+            inviter: preview.invitedByDisplayName,
+            circle: preview.circleName,
+            role: t(`roles.${preview.role.toLowerCase()}`)
+          })}
         </Text>
         <Text className="text-xs text-accanto-500 mt-1">
-          Il link è valido fino al {expires}.
+          {t('inviteAccept.validUntil', { date: expires })}
         </Text>
 
         <View className="mt-3">
@@ -149,7 +143,7 @@ export default function InviteAcceptScreen() {
         {user ? (
           <View className="mt-6 gap-3">
             <Button onPress={accept} busy={accepting} disabled={accepting}>
-              {accepting ? 'Sto entrando…' : 'Entra nel cerchio'}
+              {accepting ? t('inviteAccept.joining') : t('inviteAccept.join')}
             </Button>
             <Button
               variant="ghost"
@@ -159,13 +153,13 @@ export default function InviteAcceptScreen() {
                 )
               }
             >
-              Non adesso
+              {t('inviteAccept.notNow')}
             </Button>
           </View>
         ) : (
           <View className="mt-6 gap-3">
             <Text className="text-sm text-accanto-500">
-              Per accettare devi prima entrare in Accanto.
+              {t('inviteAccept.mustSignIn')}
             </Text>
             <Button
               onPress={async () => {
@@ -175,7 +169,7 @@ export default function InviteAcceptScreen() {
                 );
               }}
             >
-              Accedi e accetta
+              {t('inviteAccept.signInAndAccept')}
             </Button>
             <Button
               variant="ghost"
@@ -186,7 +180,7 @@ export default function InviteAcceptScreen() {
                 );
               }}
             >
-              Non ho un accesso, registrami
+              {t('inviteAccept.registerAndAccept')}
             </Button>
           </View>
         )}

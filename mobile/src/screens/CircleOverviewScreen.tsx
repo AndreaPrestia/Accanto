@@ -12,7 +12,6 @@ import { setCircleAiEnabled } from '../api/ai';
 import { useAiContext } from '../hooks/useAiContext';
 import { useCircleId } from '../navigation/CircleContext';
 import type { CareCircle, TimelineEntry } from '@accanto/shared/types';
-import { RoleLabel } from '@accanto/shared/types';
 import type { CircleTabScreen } from '../navigation/types';
 
 type Nav = CircleTabScreen<'CircleOverview'>['navigation'];
@@ -101,8 +100,10 @@ export default function CircleOverviewScreen() {
         <Text className="text-accanto-500 mt-1">{circle.description}</Text>
       ) : null}
       <Text className="text-xs text-accanto-500 mt-2">
-        Il tuo ruolo: {RoleLabel[circle.myRole]}
-        {circle.status === 'Archived' ? ' • archiviato' : ''}
+        {t('circle.role', {
+          role: t(`roles.${circle.myRole.toLowerCase()}`) as string
+        })}
+        {circle.status === 'Archived' ? t('circle.archivedSuffix') : ''}
       </Text>
 
       {showEmptyState ? (
@@ -117,33 +118,33 @@ export default function CircleOverviewScreen() {
         <View className="mt-6 gap-3">
           <SectionCard
             testID="overview-card-timeline"
-            title="Diario"
-            desc="Annota appuntamenti, sintomi, decisioni."
+            title={t('circle.sections.timeline.title') as string}
+            desc={t('circle.sections.timeline.desc') as string}
             onPress={() => navigation.navigate('Timeline')}
           />
           <SectionCard
             testID="overview-card-documents"
-            title="Documenti"
-            desc="Conserva referti, esami, prescrizioni."
+            title={t('circle.sections.documents.title') as string}
+            desc={t('circle.sections.documents.desc') as string}
             onPress={() => navigation.navigate('Documents')}
           />
           <SectionCard
             testID="overview-card-questions"
-            title="Domande per il medico"
-            desc="Prepara cosa chiedere alla prossima visita."
+            title={t('circle.sections.questions.title') as string}
+            desc={t('circle.sections.questions.desc') as string}
             onPress={() => navigation.navigate('DoctorQuestions')}
           />
           <SectionCard
             testID="overview-card-updates"
-            title="Aggiornamenti per gli altri"
-            desc="Componi messaggi da copiare e inviare."
+            title={t('circle.sections.updates.title') as string}
+            desc={t('circle.sections.updates.desc') as string}
             onPress={() => navigation.navigate('SharedUpdates')}
           />
           <SectionCard
             testID="overview-card-difficult-day"
             emphasis
-            title="Giornata difficile"
-            desc="Un piccolo respiro quando serve."
+            title={t('circle.sections.difficultDay.title') as string}
+            desc={t('circle.sections.difficultDay.desc') as string}
             onPress={() => navigation.navigate('DifficultDay')}
           />
         </View>
@@ -303,17 +304,18 @@ function ArchiveButton({
   id: string;
   onArchived: () => void;
 }) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const click = () => {
     Alert.alert(
-      'Archiviare il cerchio?',
-      'Resterà visibile in sola lettura.',
+      t('circle.archive.confirmTitle'),
+      t('circle.archive.confirmBody'),
       [
-        { text: 'Annulla', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Archivia',
+          text: t('circle.archive.confirmCta'),
           style: 'destructive',
           onPress: async () => {
             setBusy(true);
@@ -337,7 +339,7 @@ function ArchiveButton({
         <Text className="text-sm text-red-700 mb-2">{error}</Text>
       ) : null}
       <Button variant="ghost" onPress={click} busy={busy} disabled={busy}>
-        {busy ? 'Archiviazione…' : 'Archivia cerchio'}
+        {busy ? t('circle.archive.busy') : t('circle.archive.cta')}
       </Button>
     </View>
   );

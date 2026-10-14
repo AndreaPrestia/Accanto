@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface DateFieldProps {
@@ -16,17 +17,21 @@ interface DateFieldProps {
   placeholder?: string;
 }
 
-function formatDisplay(iso: string, mode: 'date' | 'datetime'): string {
+function formatDisplay(
+  iso: string,
+  mode: 'date' | 'datetime',
+  locale: string
+): string {
   if (!iso) return '';
   const d = new Date(iso);
   if (mode === 'date') {
-    return d.toLocaleDateString('it-IT', {
+    return d.toLocaleDateString(locale, {
       day: '2-digit',
       month: 'long',
       year: 'numeric'
     });
   }
-  return d.toLocaleString('it-IT', {
+  return d.toLocaleString(locale, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -52,8 +57,9 @@ export default function DateField({
   minimumDate,
   maximumDate,
   clearable,
-  placeholder = 'Seleziona…'
+  placeholder
 }: DateFieldProps) {
+  const { t, i18n } = useTranslation();
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
 
@@ -111,7 +117,7 @@ export default function DateField({
               value ? 'text-accanto-900' : 'text-accanto-500'
             }`}
           >
-            {value ? formatDisplay(value, mode) : placeholder}
+            {value ? formatDisplay(value, mode, i18n.language) : (placeholder ?? t('common.select'))}
           </Text>
         </Pressable>
         {clearable && value ? (
@@ -119,7 +125,7 @@ export default function DateField({
             onPress={() => onChange('')}
             className="px-3 py-2.5 rounded-md border border-accanto-100 bg-white"
           >
-            <Text className="text-sm text-accanto-700">Pulisci</Text>
+            <Text className="text-sm text-accanto-700">{t('common.clear')}</Text>
           </Pressable>
         ) : null}
       </View>
@@ -150,7 +156,7 @@ export default function DateField({
           onPress={() => setShowDate(false)}
           className="mt-2 self-end px-3 py-2"
         >
-          <Text className="text-sm font-semibold text-accanto-700">Fatto</Text>
+          <Text className="text-sm font-semibold text-accanto-700">{t('common.done')}</Text>
         </Pressable>
       ) : null}
     </View>

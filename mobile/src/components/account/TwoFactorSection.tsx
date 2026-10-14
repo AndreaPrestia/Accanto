@@ -129,13 +129,13 @@ export default function TwoFactorSection() {
 
   const copySecret = async (s: string) => {
     await Clipboard.setStringAsync(s);
-    Alert.alert('Copiato', 'Segreto copiato negli appunti.');
+    Alert.alert(t('twoFactor.secretCopiedTitle'), t('twoFactor.secretCopiedBody'));
   };
 
   const copyRecoveryCodes = async () => {
     if (!recoveryCodes) return;
     await Clipboard.setStringAsync(recoveryCodes.join('\n'));
-    Alert.alert('Copiati', 'I codici di recupero sono negli appunti.');
+    Alert.alert(t('twoFactor.codesCopiedTitle'), t('twoFactor.codesCopiedBody'));
   };
 
   return (
@@ -171,7 +171,7 @@ export default function TwoFactorSection() {
             onPress={copyRecoveryCodes}
             className="self-start mt-1 px-3 py-1.5 rounded border border-amber-300"
           >
-            <Text className="text-xs text-amber-900">Copia tutti</Text>
+            <Text className="text-xs text-amber-900">{t('twoFactor.copyAll')}</Text>
           </Pressable>
         </View>
       ) : null}

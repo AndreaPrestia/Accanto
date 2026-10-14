@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
-import { CareCircleInvitePreview, RoleLabel } from '../types';
+import { CareCircleInvitePreview } from '../types';
 
 export default function InviteAcceptPage() {
+  const { t } = useTranslation();
   const { token } = useParams<{ token: string }>();
   const { user, loading } = useAuth();
   const nav = useNavigate();
@@ -63,7 +65,7 @@ export default function InviteAcceptPage() {
       <h1 className="text-2xl font-semibold">Sei stato invitata/o</h1>
       <p className="text-accanto-500 mt-2">
         <strong>{preview.invitedByDisplayName}</strong> vorrebbe che ti unissi al cerchio di cura
-        <strong> {preview.circleName}</strong> come <strong>{RoleLabel[preview.role]}</strong>.
+        <strong> {preview.circleName}</strong> come <strong>{t(`roles.${preview.role.toLowerCase()}`)}</strong>.
       </p>
       <p className="text-xs text-accanto-500 mt-1">Il link è valido fino al {expires}.</p>
 

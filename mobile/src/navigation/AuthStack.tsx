@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import type { AuthStackParamList } from './types';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -11,6 +12,7 @@ import SelfCareScreen from '../screens/SelfCareScreen';
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AuthStack() {
+  const { t } = useTranslation();
   return (
     <Stack.Navigator
       initialRouteName="Login"
@@ -24,32 +26,32 @@ export default function AuthStack() {
       <Stack.Screen
         name="Register"
         component={RegisterScreen}
-        options={{ title: 'Crea account' }}
+        options={{ title: t('nav.register') }}
       />
       <Stack.Screen
         name="ForgotPassword"
         component={ForgotPasswordScreen}
-        options={{ title: 'Password dimenticata' }}
+        options={{ title: t('nav.forgotPassword') }}
       />
       <Stack.Screen
         name="ResetPassword"
         component={ResetPasswordScreen}
-        options={{ title: 'Reimposta password' }}
+        options={{ title: t('nav.resetPassword') }}
       />
       <Stack.Screen
         name="InviteAccept"
         component={InviteAcceptScreen}
-        options={{ title: 'Invito' }}
+        options={{ title: t('nav.invite') }}
       />
       <Stack.Screen
         name="Support"
         component={SupportScreen}
-        options={{ title: 'Supporto' }}
+        options={{ title: t('nav.support') }}
       />
       <Stack.Screen
         name="SelfCare"
         component={SelfCareScreen}
-        options={{ title: 'Prenditi cura di te' }}
+        options={{ title: t('nav.selfCare') }}
       />
     </Stack.Navigator>
   );

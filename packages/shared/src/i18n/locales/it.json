@@ -7,7 +7,66 @@
     "timeline": "Diario",
     "documents": "Documenti",
     "questions": "Domande",
-    "updates": "Aggiornamenti"
+    "updates": "Aggiornamenti",
+    "register": "Crea account",
+    "invite": "Invito",
+    "forgotPassword": "Password dimenticata",
+    "resetPassword": "Reimposta password",
+    "support": "Supporto",
+    "selfCare": "Prenditi cura di te",
+    "dashboard": "Le mie care circle",
+    "newCircle": "Nuova care circle",
+    "overview": "Panoramica"
+  },
+  "roles": {
+    "owner": "Coordinatore",
+    "caregiver": "Caregiver",
+    "viewer": "In ascolto"
+  },
+  "timelineType": {
+    "MedicalUpdate": "Aggiornamento medico",
+    "Symptom": "Sintomo",
+    "Medication": "Farmaco",
+    "Appointment": "Appuntamento",
+    "Decision": "Decisione",
+    "PersonalNote": "Nota personale",
+    "Practical": "Pratica",
+    "Other": "Altro"
+  },
+  "visibility": {
+    "Circle": "Tutto il cerchio",
+    "Private": "Solo io"
+  },
+  "documentCategory": {
+    "Report": "Referto",
+    "BloodTest": "Esami del sangue",
+    "Imaging": "Imaging (radiografia, TAC, RM)",
+    "Prescription": "Prescrizione",
+    "Therapy": "Terapia",
+    "IdentityDocument": "Documento di identità",
+    "Delegation": "Delega",
+    "HospitalContact": "Contatto ospedaliero",
+    "Other": "Altro"
+  },
+  "questionCategory": {
+    "Diagnosis": "Diagnosi",
+    "Therapy": "Terapia",
+    "Pain": "Dolore",
+    "Nutrition": "Alimentazione",
+    "Hydration": "Idratazione",
+    "PalliativeCare": "Cure palliative",
+    "Discharge": "Dimissione",
+    "HomeCare": "Assistenza domiciliare",
+    "Emergency": "Emergenza",
+    "Prognosis": "Prognosi",
+    "Practical": "Pratica",
+    "Other": "Altro"
+  },
+  "questionStatus": {
+    "ToAsk": "Da chiedere",
+    "Asked": "Chiesta",
+    "Answered": "Risposta ricevuta",
+    "Archived": "Archiviata"
   },
   "common": {
     "save": "Salva",
@@ -17,7 +76,13 @@
     "loading": "Caricamento…",
     "saving": "Salvataggio…",
     "language": "Lingua",
-    "back": "Indietro"
+    "back": "Indietro",
+    "select": "Seleziona…",
+    "copy": "Copia",
+    "copied": "Copiato!",
+    "share": "Condividi",
+    "clear": "Pulisci",
+    "done": "Fatto"
   },
   "auth": {
     "loginTitle": "Bentornato",
@@ -207,7 +272,200 @@
   },
   "dashboard": {
     "quickAddEntry": "+ Voce",
-    "quickAddEntryAria": "Aggiungi una voce al diario di {{name}}"
+    "quickAddEntryAria": "Aggiungi una voce al diario di {{name}}",
+    "title": "Il tuo spazio",
+    "intro": "Un cerchio di cura raccoglie le informazioni sulla persona che stai assistendo, in un solo posto.",
+    "emptyTitle": "Non hai ancora creato nessun cerchio.",
+    "createFirst": "Crea il primo cerchio",
+    "archived": "Archiviato",
+    "newCircleCta": "+ Nuovo cerchio"
+  },
+  "inviteAccept": {
+    "invalidToken": "Link di invito non valido.",
+    "unavailableTitle": "Invito non disponibile",
+    "backHome": "Torna alla home",
+    "title": "Sei stato invitata/o",
+    "body": "{{inviter}} vorrebbe che ti unissi al cerchio di cura {{circle}} come {{role}}.",
+    "validUntil": "Il link è valido fino al {{date}}.",
+    "joining": "Sto entrando…",
+    "join": "Entra nel cerchio",
+    "notNow": "Non adesso",
+    "mustSignIn": "Per accettare devi prima entrare in Accanto.",
+    "signInAndAccept": "Accedi e accetta",
+    "registerAndAccept": "Non ho un accesso, registrami"
+  },
+  "timeline": {
+    "title": "Diario",
+    "intro": "Tieni traccia di ciò che succede, giorno per giorno.",
+    "allTypes": "Tutti i tipi",
+    "typePlaceholder": "Tipo",
+    "filterTag": "Filtra per tag",
+    "from": "Dal",
+    "to": "Al",
+    "clearFilters": "Pulisci filtri",
+    "addCta": "+ Nuova voce",
+    "empty": "Ancora nessuna voce.",
+    "deleteConfirmTitle": "Eliminare questa voce?",
+    "deleteConfirmBody": "L’azione non si può annullare.",
+    "requiredFields": "Compila tutti i campi obbligatori.",
+    "whenLabel": "Quando",
+    "typeLabel": "Tipo",
+    "titleLabel": "Titolo",
+    "detailLabel": "Dettaglio",
+    "tagsLabel": "Tag (separati da virgola)",
+    "tagsPlaceholder": "Es. visita, farmaci",
+    "visibilityLabel": "Visibilità",
+    "saving": "Salvataggio…",
+    "save": "Salva voce",
+    "bulk": {
+      "exit": "Esci da selezione multipla",
+      "enter": "Selezione multipla",
+      "enterCount": "Selezione multipla ({{count}})",
+      "selectAll": "Seleziona tutte ({{count}})",
+      "title": "Modifica selezionate ({{count}})",
+      "addTags": "Aggiungi tag",
+      "addTagsPlaceholder": "urgente, controllo",
+      "removeTags": "Rimuovi tag",
+      "removeTagsPlaceholder": "vecchio",
+      "noChange": "Non modificare",
+      "specifyChange": "Specifica almeno una modifica.",
+      "confirmTitle": "Applicare le modifiche?",
+      "confirmBody": "Saranno aggiornate {{count}} voci.",
+      "apply": "Applica",
+      "result": "{{updated}} aggiornate, {{skipped}} saltate.",
+      "applying": "Applicazione…",
+      "applyChanges": "Applica modifiche"
+    }
+  },
+  "questions": {
+    "title": "Domande per il medico",
+    "intro": "Annota le domande quando ti vengono in mente. Riprenderle prima della visita aiuta.",
+    "addCta": "+ Nuova domanda",
+    "empty": "Ancora nessuna domanda.",
+    "templatesTitle": "Suggerimenti per categoria",
+    "deleteConfirmTitle": "Eliminare questa domanda?",
+    "answerPrefix": "Risposta: ",
+    "statusLabel": "Stato",
+    "categoryLabel": "Categoria",
+    "questionLabel": "Domanda",
+    "writeQuestion": "Scrivi la domanda.",
+    "saving": "Salvataggio…",
+    "addQuestion": "Aggiungi domanda"
+  },
+  "documents": {
+    "title": "Documenti",
+    "intro": "Tieni vicino ciò che ti serve quando ti chiedono un documento.",
+    "addCta": "+ Carica documento",
+    "empty": "Ancora nessun documento.",
+    "open": "Apri",
+    "opening": "Apertura…",
+    "deleteConfirmTitle": "Eliminare \"{{name}}\"?",
+    "deleteConfirmBody": "Il file non potrà essere recuperato.",
+    "sessionExpired": "Sessione scaduta, accedi di nuovo.",
+    "downloadError": "Errore durante il download.",
+    "downloadDoneTitle": "Download completato",
+    "downloadDoneBody": "Salvato in: {{path}}",
+    "tooLarge": "Il file supera i 20 MB.",
+    "chooseFile": "Scegli un file.",
+    "fileLabel": "File",
+    "filePlaceholder": "Tocca per scegliere un file…",
+    "maxSize": "Massimo 20 MB.",
+    "categoryLabel": "Categoria",
+    "notesLabel": "Note (facoltative)",
+    "tagsLabel": "Tag (separati da virgola)",
+    "uploading": "Caricamento…",
+    "upload": "Carica"
+  },
+  "newCircle": {
+    "title": "Nuovo cerchio",
+    "intro": "Dai un nome al cerchio (per esempio il nome della persona che stai assistendo). Potrai modificarlo in qualsiasi momento.",
+    "nameLabel": "Nome del cerchio",
+    "namePlaceholder": "Es. Mamma",
+    "descriptionLabel": "Descrizione (facoltativa)",
+    "descriptionPlaceholder": "Una breve nota per orientarti",
+    "nameTooShort": "Il nome deve contenere almeno 2 caratteri.",
+    "creating": "Creazione…",
+    "create": "Crea cerchio"
+  },
+  "audit": {
+    "title": "Registro azioni",
+    "intro": "Le azioni svolte dai membri del cerchio, dalla più recente.",
+    "empty": "Nessuna azione registrata.",
+    "removedMember": "Membro rimosso",
+    "loadMore": "Carica altre",
+    "actions": {
+      "CircleCreated": "Ha creato il cerchio",
+      "CircleUpdated": "Ha modificato il cerchio",
+      "CircleArchived": "Ha archiviato il cerchio",
+      "MemberJoined": "È entrato nel cerchio",
+      "InviteCreated": "Ha creato un invito",
+      "InviteRevoked": "Ha revocato un invito",
+      "EntryCreated": "Ha aggiunto una voce al diario",
+      "EntryUpdated": "Ha modificato una voce del diario",
+      "EntryDeleted": "Ha eliminato una voce del diario",
+      "EntriesBulkUpdated": "Ha aggiornato più voci del diario",
+      "DocumentUploaded": "Ha caricato un documento",
+      "DocumentDeleted": "Ha eliminato un documento",
+      "QuestionCreated": "Ha aggiunto una domanda per il medico",
+      "QuestionUpdated": "Ha modificato una domanda per il medico",
+      "QuestionDeleted": "Ha eliminato una domanda per il medico",
+      "UpdateCreated": "Ha pubblicato un aggiornamento",
+      "UpdateDeleted": "Ha eliminato un aggiornamento",
+      "DataExported": "Ha esportato i propri dati"
+    }
+  },
+  "notifications": {
+    "title": "Preferenze notifiche",
+    "hint": "Scegli quali notifiche ricevere via email e via push. Le email di sicurezza (es. cambio password) vengono inviate sempre.",
+    "email": "Email",
+    "push": "Push",
+    "saved": "Preferenze salvate.",
+    "save": "Salva preferenze",
+    "topics": {
+      "TimelineEntryCreated": "Nuove voci nel diario",
+      "SharedUpdateCreated": "Nuovi aggiornamenti condivisi",
+      "DoctorQuestionAnswered": "Risposte alle domande al medico",
+      "InviteAccepted": "Nuove persone entrate in un cerchio"
+    }
+  },
+  "pushDevices": {
+    "title": "Notifiche push",
+    "hint": "Dispositivi sui quali questo account riceve notifiche push.",
+    "enabledMsg": "Notifiche attivate su questo dispositivo.",
+    "permissionDeniedMsg": "Permesso non concesso. Abilita le notifiche dalle impostazioni del sistema.",
+    "removeConfirmTitle": "Rimuovere questo dispositivo?",
+    "removed": "Dispositivo rimosso.",
+    "testSent": "Notifica di prova inviata. Dovrebbe arrivarti tra pochi secondi.",
+    "notRegistered": "Questo dispositivo non è ancora registrato per ricevere notifiche.",
+    "enableCta": "Attiva su questo dispositivo",
+    "deniedHint": "Hai negato il permesso in passato: per attivarle apri le impostazioni di sistema dell'app.",
+    "empty": "Nessun dispositivo registrato.",
+    "thisDevice": "  · Questo dispositivo",
+    "lastUsed": "{{platform}} · ultimo uso {{date}}",
+    "remove": "Rimuovi",
+    "sendTest": "Invia notifica di prova"
+  },
+  "twoFactor": {
+    "copyAll": "Copia tutti",
+    "secretCopiedTitle": "Copiato",
+    "secretCopiedBody": "Segreto copiato negli appunti.",
+    "codesCopiedTitle": "Copiati",
+    "codesCopiedBody": "I codici di recupero sono negli appunti."
+  },
+  "difficultDay": {
+    "title": "Giornata difficile",
+    "intro": "Quando tutto pesa, prova uno di questi piccoli gesti. Non risolvono, ma fanno respirare.",
+    "suggestions": [
+      "Concediti tre respiri lenti, senza fare altro.",
+      "Bevi un bicchiere d’acqua. Mangia qualcosa, anche poco.",
+      "Scrivi una sola frase nel diario, anche dura. Non deve essere bella.",
+      "Manda un messaggio a una persona di fiducia: basta “ho una giornata difficile”.",
+      "Se puoi, esci cinque minuti. Anche solo sulla soglia.",
+      "Non sei sola. Non sei solo. Stai facendo molto."
+    ],
+    "needHelp": "Se senti di non farcela, parlare con qualcuno aiuta.",
+    "supportLink": "Vedi i contatti di supporto",
+    "emergency": "Se c’è un’emergenza sanitaria, chiama il 112."
   },
   "selfCare": {
     "title": "Cura di te",
@@ -363,6 +621,69 @@
     "chips": {
       "audit": "Registro azioni",
       "ai": "AI del cerchio"
+    },
+    "role": "Il tuo ruolo: {{role}}",
+    "archivedSuffix": " • archiviato",
+    "sections": {
+      "timeline": {
+        "title": "Diario",
+        "desc": "Annota appuntamenti, sintomi, decisioni."
+      },
+      "documents": {
+        "title": "Documenti",
+        "desc": "Conserva referti, esami, prescrizioni."
+      },
+      "questions": {
+        "title": "Domande per il medico",
+        "desc": "Prepara cosa chiedere alla prossima visita."
+      },
+      "updates": {
+        "title": "Aggiornamenti per gli altri",
+        "desc": "Componi messaggi da copiare e inviare."
+      },
+      "difficultDay": {
+        "title": "Giornata difficile",
+        "desc": "Un piccolo respiro quando serve."
+      }
+    },
+    "archive": {
+      "cta": "Archivia cerchio",
+      "busy": "Archiviazione…",
+      "confirmTitle": "Archiviare il cerchio?",
+      "confirmBody": "Resterà visibile in sola lettura.",
+      "confirmCta": "Archivia"
+    },
+    "invites": {
+      "title": "Invita altre persone",
+      "subtitle": "Crea un link da condividere con chi vuoi far entrare nel cerchio. Tu sola/o decidi il ruolo e quanto a lungo il link resta valido.",
+      "roleLabel": "Ruolo",
+      "expiryLabel": "Scadenza (giorni)",
+      "maxUsesLabel": "N. massimo di usi",
+      "createCta": "Crea link di invito",
+      "creating": "Creazione…",
+      "empty": "Nessun invito attivo.",
+      "copyLink": "Copia link",
+      "revoke": "Revoca",
+      "revokeConfirmTitle": "Revocare invito?",
+      "revokeConfirmBody": "Chi non lo ha ancora usato non potrà più accedere.",
+      "copyError": "Non riesco a copiare negli appunti.",
+      "shareMessage": "Ti invito al mio cerchio di cura su Accanto:\n{{url}}",
+      "rowMeta": " • scade il {{date}} • {{used}}/{{max}} usi",
+      "status": {
+        "revoked": "Revocato",
+        "expired": "Scaduto",
+        "exhausted": "Esaurito",
+        "active": "Attivo"
+      }
+    },
+    "export": {
+      "title": "Esporta in PDF",
+      "subtitle": "Un riassunto del cerchio (diario e domande aperte) da portare al medico.",
+      "from": "Dal",
+      "to": "Al",
+      "download": "Scarica PDF",
+      "generating": "Generazione…",
+      "clearFilters": "Pulisci filtri"
     },
     "emptyState": {
       "title": "Iniziamo da qui",

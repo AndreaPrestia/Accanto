@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import * as Notifications from 'expo-notifications';
 import ErrorBanner from '../ui/ErrorBanner';
 import Button from '../ui/Button';
@@ -35,6 +36,7 @@ function formatDate(iso: string): string {
  * device specifici (es. vecchio telefono).
  */
 export default function PushDevicesSection() {
+  const { t } = useTranslation();
   const [devices, setDevices] = useState<DevicePushToken[] | null>(null);
   const [permission, setPermission] = useState<Notifications.PermissionStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,10 +69,10 @@ export default function PushDevicesSection() {
     try {
       const token = await registerForPushNotificationsAsync();
       if (token) {
-        setMsg('Notifiche attivate su questo dispositivo.');
+        setMsg(t('pushDevices.enabledMsg'));
         await load();
       } else {
-        setMsg('Permesso non concesso. Abilita le notifiche dalle impostazioni del sistema.');
+        setMsg(t('pushDevices.permissionDeniedMsg'));
         const perm = await Notifications.getPermissionsAsync();
         setPermission(perm.status);
       }
@@ -83,12 +85,12 @@ export default function PushDevicesSection() {
 
   const removeDevice = (d: DevicePushToken) => {
     Alert.alert(
-      'Rimuovere questo dispositivo?',
+      t('pushDevices.removeConfirmTitle'),
       d.deviceName ?? d.platform,
       [
-        { text: 'Annulla', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Rimuovi',
+          text: t('pushDevices.remove'),
           style: 'destructive',
           onPress: async () => {
             setBusy(true);
@@ -101,7 +103,7 @@ export default function PushDevicesSection() {
                 await unregisterPushTokenAsync(d.token);
               }
               await load();
-              setMsg('Dispositivo rimosso.');
+              setMsg(t('pushDevices.removed'));
             } catch (e) {
               setError(extractError(e));
             } finally {
@@ -119,7 +121,7 @@ export default function PushDevicesSection() {
     setMsg(null);
     try {
       await api.post('/account/push-devices/test');
-      setMsg('Notifica di prova inviata. Dovrebbe arrivarti tra pochi secondi.');
+      setMsg(t('pushDevices.testSent'));
     } catch (e) {
       setError(extractError(e));
     } finally {
@@ -136,10 +138,10 @@ export default function PushDevicesSection() {
   return (
     <View className="gap-3 border-t border-accanto-100 pt-6">
       <Text className="text-base font-semibold text-accanto-900">
-        Notifiche push
+        {t('pushDevices.title')}
       </Text>
       <Text className="text-sm text-accanto-700">
-        Dispositivi sui quali questo account riceve notifiche push.
+        {t('pushDevices.hint')}
       </Text>
 
       {loading ? (
@@ -151,15 +153,14 @@ export default function PushDevicesSection() {
           {!hasCurrentDevice ? (
             <View className="gap-2">
               <Text className="text-sm text-accanto-500">
-                Questo dispositivo non è ancora registrato per ricevere notifiche.
+                {t('pushDevices.notRegistered')}
               </Text>
               <Button onPress={enable} busy={busy} disabled={busy}>
-                Attiva su questo dispositivo
+                {t('pushDevices.enableCta')}
               </Button>
               {permission === 'denied' ? (
                 <Text className="text-xs text-amber-700">
-                  Hai negato il permesso in passato: per attivarle apri le
-                  impostazioni di sistema dell'app.
+                  {t('pushDevices.deniedHint')}
                 </Text>
               ) : null}
             </View>
@@ -167,7 +168,7 @@ export default function PushDevicesSection() {
 
           {list.length === 0 ? (
             <Text className="text-sm text-accanto-500">
-              Nessun dispositivo registrato.
+              {t('pushDevices.empty')}
             </Text>
           ) : (
             <View className="gap-2">
@@ -181,10 +182,13 @@ export default function PushDevicesSection() {
                     <View className="flex-1 gap-0.5">
                       <Text className="text-sm font-semibold text-accanto-900">
                         {d.deviceName ?? d.platform}
-                        {isCurrent ? '  · Questo dispositivo' : ''}
+                        {isCurrent ? t('pushDevices.thisDevice') : ''}
                       </Text>
                       <Text className="text-xs text-accanto-500">
-                        {d.platform} · ultimo uso {formatDate(d.lastUsedAt)}
+                        {t('pushDevices.lastUsed', {
+                          platform: d.platform,
+                          date: formatDate(d.lastUsedAt)
+                        })}
                       </Text>
                     </View>
                     <Pressable
@@ -192,7 +196,7 @@ export default function PushDevicesSection() {
                       disabled={busy}
                       className="px-3 py-2 rounded-lg border border-rose-200"
                     >
-                      <Text className="text-sm text-rose-700">Rimuovi</Text>
+                      <Text className="text-sm text-rose-700">{t('pushDevices.remove')}</Text>
                     </Pressable>
                   </View>
                 );
@@ -206,7 +210,7 @@ export default function PushDevicesSection() {
       {msg ? <Text className="text-sm text-accanto-700">{msg}</Text> : null}
       {!loading && list.length > 0 ? (
         <Button onPress={sendTest} busy={busy} disabled={busy}>
-          Invia notifica di prova
+          {t('pushDevices.sendTest')}
         </Button>
       ) : null}
     </View>

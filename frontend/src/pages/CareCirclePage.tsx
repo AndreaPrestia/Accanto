@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
-import { CareCircle, RoleLabel, TimelineEntry } from '../types';
+import { CareCircle, TimelineEntry } from '../types';
 import InvitesPanel from '../components/InvitesPanel';
 import { setCircleAiEnabled } from '../api/ai';
 import { useAiContext } from '../hooks/useAiContext';
@@ -51,7 +51,7 @@ export default function CareCirclePage() {
         )}
       </div>
       {circle.description && <p className="text-accanto-500 mt-1">{circle.description}</p>}
-      <p className="text-xs text-accanto-500 mt-2">Il tuo ruolo: {RoleLabel[circle.myRole]}{circle.status === 'Archived' ? ' • archiviato' : ''}</p>
+      <p className="text-xs text-accanto-500 mt-2">{t('circle.role', { role: t(`roles.${circle.myRole.toLowerCase()}`) })}{circle.status === 'Archived' ? t('circle.archivedSuffix') : ''}</p>
 
       {showEmptyState ? (
         <EmptyStateChecklist

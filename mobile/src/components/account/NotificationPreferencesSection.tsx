@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Button from '../ui/Button';
 import ErrorBanner from '../ui/ErrorBanner';
 import { api, extractError } from '../../api/client';
@@ -20,13 +21,6 @@ interface Pref {
    */
   pushEnabled: boolean | null;
 }
-
-const TOPIC_LABEL: Record<Topic, string> = {
-  TimelineEntryCreated: 'Nuove voci nel diario',
-  SharedUpdateCreated: 'Nuovi aggiornamenti condivisi',
-  DoctorQuestionAnswered: 'Risposte alle domande al medico',
-  InviteAccepted: 'Nuove persone entrate in un cerchio'
-};
 
 type Channel = 'email' | 'push';
 
@@ -60,6 +54,7 @@ function Switch({
 }
 
 export default function NotificationPreferencesSection() {
+  const { t } = useTranslation();
   const [prefs, setPrefs] = useState<Pref[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -108,7 +103,7 @@ export default function NotificationPreferencesSection() {
         { preferences: prefs }
       );
       setPrefs(data);
-      setMsg('Preferenze salvate.');
+      setMsg(t('notifications.saved'));
     } catch (e) {
       setError(extractError(e));
     } finally {
@@ -119,11 +114,10 @@ export default function NotificationPreferencesSection() {
   return (
     <View className="gap-3 border-t border-accanto-100 pt-6">
       <Text className="text-base font-semibold text-accanto-900">
-        Preferenze notifiche
+        {t('notifications.title')}
       </Text>
       <Text className="text-sm text-accanto-700">
-        Scegli quali notifiche ricevere via email e via push. Le email di
-        sicurezza (es. cambio password) vengono inviate sempre.
+        {t('notifications.hint')}
       </Text>
 
       {loading ? (
@@ -140,17 +134,17 @@ export default function NotificationPreferencesSection() {
                 className="gap-2 border border-accanto-100 rounded-lg px-3 py-3"
               >
                 <Text className="text-sm text-accanto-800">
-                  {TOPIC_LABEL[p.topic]}
+                  {t(`notifications.topics.${p.topic}`)}
                 </Text>
                 <View className="flex-row gap-4 flex-wrap">
                   <Switch
                     on={p.emailEnabled}
-                    label="Email"
+                    label={t('notifications.email')}
                     onPress={() => toggle(p.topic, 'email')}
                   />
                   <Switch
                     on={pushOn}
-                    label="Push"
+                    label={t('notifications.push')}
                     onPress={() => toggle(p.topic, 'push')}
                   />
                 </View>
@@ -163,7 +157,7 @@ export default function NotificationPreferencesSection() {
       <ErrorBanner message={error} />
       {msg ? <Text className="text-sm text-green-700">{msg}</Text> : null}
       <Button onPress={save} busy={saving} disabled={saving || !prefs}>
-        {saving ? 'Salvataggio…' : 'Salva preferenze'}
+        {saving ? t('common.saving') : t('notifications.save')}
       </Button>
     </View>
   );

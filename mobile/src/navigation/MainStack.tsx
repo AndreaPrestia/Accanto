@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import type { MainStackParamList } from './types';
 import DashboardScreen from '../screens/DashboardScreen';
 import NewCircleScreen from '../screens/NewCircleScreen';
@@ -18,13 +19,14 @@ const Stack = createNativeStackNavigator<MainStackParamList>();
  * `Circle` ha headerShown:false perché CircleStack porta già il proprio.
  */
 export default function MainStack() {
+  const { t } = useTranslation();
   return (
     <Stack.Navigator screenOptions={{ headerTitleAlign: 'center' }}>
       <Stack.Screen
         name="Dashboard"
         component={DashboardScreen}
         options={{
-          title: 'Le mie care circle',
+          title: t('nav.dashboard'),
           headerLeft: () => <MenuButton />
         }}
       />
@@ -36,7 +38,7 @@ export default function MainStack() {
       <Stack.Screen
         name="NewCircle"
         component={NewCircleScreen}
-        options={{ title: 'Nuova care circle' }}
+        options={{ title: t('nav.newCircle') }}
       />
       <Stack.Screen
         name="Circle"
@@ -46,7 +48,7 @@ export default function MainStack() {
       <Stack.Screen
         name="InviteAccept"
         component={InviteAcceptScreen}
-        options={{ title: 'Invito' }}
+        options={{ title: t('nav.invite') }}
       />
     </Stack.Navigator>
   );

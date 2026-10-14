@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Screen from '../components/ui/Screen';
 import Button from '../components/ui/Button';
 import ErrorBanner from '../components/ui/ErrorBanner';
@@ -27,29 +28,9 @@ type Page = {
 
 const PAGE_SIZE = 50;
 
-const ACTION_LABEL: Record<string, string> = {
-  CircleCreated: 'Ha creato il cerchio',
-  CircleUpdated: 'Ha modificato il cerchio',
-  CircleArchived: 'Ha archiviato il cerchio',
-  MemberJoined: 'È entrato nel cerchio',
-  InviteCreated: 'Ha creato un invito',
-  InviteRevoked: 'Ha revocato un invito',
-  EntryCreated: 'Ha aggiunto una voce al diario',
-  EntryUpdated: 'Ha modificato una voce del diario',
-  EntryDeleted: 'Ha eliminato una voce del diario',
-  EntriesBulkUpdated: 'Ha aggiornato più voci del diario',
-  DocumentUploaded: 'Ha caricato un documento',
-  DocumentDeleted: 'Ha eliminato un documento',
-  QuestionCreated: 'Ha aggiunto una domanda per il medico',
-  QuestionUpdated: 'Ha modificato una domanda per il medico',
-  QuestionDeleted: 'Ha eliminato una domanda per il medico',
-  UpdateCreated: 'Ha pubblicato un aggiornamento',
-  UpdateDeleted: 'Ha eliminato un aggiornamento',
-  DataExported: 'Ha esportato i propri dati'
-};
-
 export default function AuditScreen() {
   const circleId = useCircleId();
+  const { t, i18n } = useTranslation();
   const [items, setItems] = useState<AuditEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [skip, setSkip] = useState(0);
@@ -84,16 +65,16 @@ export default function AuditScreen() {
   return (
     <Screen>
       <Text className="text-2xl font-semibold text-accanto-900 mb-1">
-        Registro azioni
+        {t('audit.title')}
       </Text>
       <Text className="text-accanto-500 mb-4">
-        Le azioni svolte dai membri del cerchio, dalla più recente.
+        {t('audit.intro')}
       </Text>
 
       <ErrorBanner message={error} />
 
       {items.length === 0 && !loading ? (
-        <Text className="text-accanto-500">Nessuna azione registrata.</Text>
+        <Text className="text-accanto-500">{t('audit.empty')}</Text>
       ) : (
         <View className="gap-2">
           {items.map((e) => (
@@ -103,10 +84,10 @@ export default function AuditScreen() {
             >
               <Text className="text-sm text-accanto-900">
                 <Text className="font-medium">
-                  {e.performedByDisplayName ?? 'Membro rimosso'}
+                  {e.performedByDisplayName ?? t('audit.removedMember')}
                 </Text>
                 {' — '}
-                <Text>{ACTION_LABEL[e.actionType] ?? e.actionType}</Text>
+                <Text>{t(`audit.actions.${e.actionType}`, { defaultValue: e.actionType })}</Text>
               </Text>
               {e.summary ? (
                 <Text className="text-sm text-accanto-700 mt-1">
@@ -114,7 +95,7 @@ export default function AuditScreen() {
                 </Text>
               ) : null}
               <Text className="text-xs text-accanto-500 mt-1">
-                {new Date(e.timestamp).toLocaleString('it-IT')}
+                {new Date(e.timestamp).toLocaleString(i18n.language)}
               </Text>
             </View>
           ))}
@@ -129,7 +110,7 @@ export default function AuditScreen() {
             disabled={loading}
             busy={loading}
           >
-            {loading ? 'Caricamento…' : 'Carica altre'}
+            {loading ? t('common.loading') : t('audit.loadMore')}
           </Button>
         </View>
       ) : null}

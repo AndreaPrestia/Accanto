@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, Share, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import * as Clipboard from 'expo-clipboard';
 import { api, extractError } from '../api/client';
 import Button from './ui/Button';
@@ -11,7 +12,6 @@ import type {
   CareCircleRole,
   CreateInviteRequest
 } from '@accanto/shared/types';
-import { RoleLabel } from '@accanto/shared/types';
 
 interface Props {
   circleId: string;
@@ -27,6 +27,7 @@ interface Props {
  * - revoca con Alert di conferma
  */
 export default function InvitesPanel({ circleId }: Props) {
+  const { t } = useTranslation();
   const [invites, setInvites] = useState<CareCircleInvite[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -75,12 +76,12 @@ export default function InvitesPanel({ circleId }: Props) {
 
   const revoke = (inviteId: string) => {
     Alert.alert(
-      'Revocare invito?',
-      'Chi non lo ha ancora usato non potrà più accedere.',
+      t('circle.invites.revokeConfirmTitle'),
+      t('circle.invites.revokeConfirmBody'),
       [
-        { text: 'Annulla', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Revoca',
+          text: t('circle.invites.revoke'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -106,14 +107,14 @@ export default function InvitesPanel({ circleId }: Props) {
         2000
       );
     } catch {
-      setError('Non riesco a copiare negli appunti.');
+      setError(t('circle.invites.copyError'));
     }
   };
 
   const shareLink = async (token: string) => {
     try {
       await Share.share({
-        message: `Ti invito al mio cerchio di cura su Accanto:\n${inviteUrl(token)}`
+        message: t('circle.invites.shareMessage', { url: inviteUrl(token) })
       });
     } catch {
       // Utente ha annullato lo share sheet: nessun errore reale.
@@ -122,15 +123,16 @@ export default function InvitesPanel({ circleId }: Props) {
 
   return (
     <View className="mt-6 rounded-lg border border-accanto-100 bg-white p-4">
-      <Text className="font-medium text-accanto-900">Invita altre persone</Text>
+      <Text className="font-medium text-accanto-900">
+        {t('circle.invites.title')}
+      </Text>
       <Text className="text-sm text-accanto-500 mt-1">
-        Crea un link da condividere con chi vuoi far entrare nel cerchio. Tu
-        sola/o decidi il ruolo e quanto a lungo il link resta valido.
+        {t('circle.invites.subtitle')}
       </Text>
 
       {/* Toggle ruolo: Caregiver / Viewer */}
       <Text className="text-sm font-medium text-accanto-700 mt-4 mb-1">
-        Ruolo
+        {t('circle.invites.roleLabel')}
       </Text>
       <View className="flex-row rounded-md border border-accanto-100 overflow-hidden">
         {(['Caregiver', 'Viewer'] as const).map((r) => {
@@ -148,7 +150,7 @@ export default function InvitesPanel({ circleId }: Props) {
                   selected ? 'text-white' : 'text-accanto-700'
                 }`}
               >
-                {RoleLabel[r]}
+                {t(`roles.${r.toLowerCase()}`)}
               </Text>
             </Pressable>
           );
@@ -158,7 +160,7 @@ export default function InvitesPanel({ circleId }: Props) {
       <View className="flex-row gap-3 mt-3">
         <View className="flex-1">
           <TextField
-            label="Scadenza (giorni)"
+            label={t('circle.invites.expiryLabel') as string}
             value={expiresInDays}
             onChangeText={setExpiresInDays}
             keyboardType="number-pad"
@@ -167,7 +169,7 @@ export default function InvitesPanel({ circleId }: Props) {
         </View>
         <View className="flex-1">
           <TextField
-            label="N. massimo di usi"
+            label={t('circle.invites.maxUsesLabel') as string}
             value={maxUses}
             onChangeText={setMaxUses}
             keyboardType="number-pad"
@@ -178,7 +180,7 @@ export default function InvitesPanel({ circleId }: Props) {
 
       <View className="mt-3">
         <Button onPress={create} busy={creating} disabled={creating}>
-          {creating ? 'Creazione…' : 'Crea link di invito'}
+          {creating ? t('circle.invites.creating') : t('circle.invites.createCta')}
         </Button>
       </View>
 
@@ -188,9 +190,11 @@ export default function InvitesPanel({ circleId }: Props) {
 
       <View className="mt-4 gap-3">
         {invites === null ? (
-          <Text className="text-sm text-accanto-500">Caricamento…</Text>
+          <Text className="text-sm text-accanto-500">{t('common.loading')}</Text>
         ) : invites.length === 0 ? (
-          <Text className="text-sm text-accanto-500">Nessun invito attivo.</Text>
+          <Text className="text-sm text-accanto-500">
+            {t('circle.invites.empty')}
+          </Text>
         ) : (
           invites.map((i) => (
             <InviteRow
@@ -224,29 +228,34 @@ function InviteRow({
   onShare: () => void;
   onRevoke: () => void;
 }) {
-  const status = invite.revokedAt
-    ? 'Revocato'
+  const { t, i18n } = useTranslation();
+  const statusKey = invite.revokedAt
+    ? 'revoked'
     : !invite.isActive
     ? new Date(invite.expiresAt) <= new Date()
-      ? 'Scaduto'
-      : 'Esaurito'
-    : 'Attivo';
-  const expires = new Date(invite.expiresAt).toLocaleDateString('it-IT', {
+      ? 'expired'
+      : 'exhausted'
+    : 'active';
+  const status = t(`circle.invites.status.${statusKey}`) as string;
+  const expires = new Date(invite.expiresAt).toLocaleDateString(i18n.language, {
     day: '2-digit',
     month: 'long',
     year: 'numeric'
   });
-  const statusActive = status === 'Attivo';
+  const statusActive = statusKey === 'active';
 
   return (
     <View className="border border-accanto-100 rounded-md p-3">
       <View className="flex-row items-center justify-between gap-2">
         <Text className="text-sm text-accanto-900 flex-1" numberOfLines={2}>
-          <Text className="font-semibold">{RoleLabel[invite.role]}</Text>
-          {' • scade il '}
-          {expires}
-          {' • '}
-          {invite.usedCount}/{invite.maxUses} usi
+          <Text className="font-semibold">
+            {t(`roles.${invite.role.toLowerCase()}`)}
+          </Text>
+          {t('circle.invites.rowMeta', {
+            date: expires,
+            used: invite.usedCount,
+            max: invite.maxUses
+          })}
         </Text>
         <View
           className={`px-2 py-0.5 rounded-full ${
@@ -278,17 +287,17 @@ function InviteRow({
           <View className="mt-2 flex-row flex-wrap gap-2">
             <View className="flex-1 min-w-[100px]">
               <Button variant="ghost" onPress={onCopy}>
-                {copied ? 'Copiato!' : 'Copia link'}
+                {copied ? t('common.copied') : t('circle.invites.copyLink')}
               </Button>
             </View>
             <View className="flex-1 min-w-[100px]">
               <Button variant="ghost" onPress={onShare}>
-                Condividi
+                {t('common.share')}
               </Button>
             </View>
             <View className="flex-1 min-w-[100px]">
               <Button variant="ghost" onPress={onRevoke}>
-                Revoca
+                {t('circle.invites.revoke')}
               </Button>
             </View>
           </View>

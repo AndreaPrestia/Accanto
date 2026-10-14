@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, extractError } from '../api/client';
-import { DoctorQuestion, DoctorQuestionCategory, DoctorQuestionStatus, DoctorQuestionTemplate, QuestionCategoryLabel, QuestionStatusLabel } from '../types';
+import { DoctorQuestion, DoctorQuestionCategory, DoctorQuestionStatus, DoctorQuestionTemplate } from '../types';
 import { useTranslation } from 'react-i18next';
 import AiAssistPanel from '../components/AiAssistPanel';
 import { doctorQuestionDraft } from '../api/ai';
@@ -11,6 +11,7 @@ const CATS: DoctorQuestionCategory[] = ['Diagnosis','Therapy','Pain','Nutrition'
 const STATUSES: DoctorQuestionStatus[] = ['ToAsk','Asked','Answered','Archived'];
 
 export default function DoctorQuestionsPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [items, setItems] = useState<DoctorQuestion[] | null>(null);
   const [templates, setTemplates] = useState<DoctorQuestionTemplate[]>([]);
@@ -64,16 +65,16 @@ export default function DoctorQuestionsPage() {
         <details className="card mb-4">
           <summary className="cursor-pointer font-medium">Suggerimenti per categoria</summary>
           <div className="mt-3 space-y-3">
-            {templates.map(t => (
-              <div key={t.category}>
-                <p className="text-sm font-medium">{t.categoryLabel}</p>
+            {templates.map(tpl => (
+              <div key={tpl.category}>
+                <p className="text-sm font-medium">{tpl.categoryLabel}</p>
                 <ul className="mt-1 space-y-1">
-                  {t.questions.map(q => (
+                  {tpl.questions.map(q => (
                     <li key={q} className="text-sm flex items-start gap-2">
                       <button
                         type="button"
                         className="text-accanto-700 hover:underline text-left"
-                        onClick={() => { setPrefill({ q, c: t.category }); setShowForm(true); }}
+                        onClick={() => { setPrefill({ q, c: tpl.category }); setShowForm(true); }}
                       >+ {q}</button>
                     </li>
                   ))}
@@ -92,11 +93,11 @@ export default function DoctorQuestionsPage() {
           {items.map(q => (
             <div key={q.id} className="card">
               <p className="font-medium">{q.question}</p>
-              <p className="text-xs text-accanto-500 mt-1">{QuestionCategoryLabel[q.category]} • {QuestionStatusLabel[q.status]}</p>
+              <p className="text-xs text-accanto-500 mt-1">{t(`questionCategory.${q.category}`)} • {t(`questionStatus.${q.status}`)}</p>
               {q.answerNotes && <p className="text-sm mt-2 whitespace-pre-wrap"><span className="text-accanto-500">Risposta: </span>{q.answerNotes}</p>}
               <div className="mt-3 flex flex-wrap gap-2 items-center">
                 <select className="input max-w-[200px]" value={q.status} onChange={(e) => updateStatus(q, e.target.value as DoctorQuestionStatus)}>
-                  {STATUSES.map(s => <option key={s} value={s}>{QuestionStatusLabel[s]}</option>)}
+                  {STATUSES.map(s => <option key={s} value={s}>{t(`questionStatus.${s}`)}</option>)}
                 </select>
                 <button onClick={() => del(q)} className="text-sm text-accanto-500 hover:text-red-700">Elimina</button>
               </div>
@@ -109,6 +110,7 @@ export default function DoctorQuestionsPage() {
 }
 
 function NewForm({ careCircleId, prefill, onCreated }: { careCircleId: string; prefill: { q: string; c: DoctorQuestionCategory } | null; onCreated: () => void }) {
+  const { t } = useTranslation();
   const [question, setQuestion] = useState(prefill?.q ?? '');
   const [category, setCategory] = useState<DoctorQuestionCategory>(prefill?.c ?? 'Other');
   const [busy, setBusy] = useState(false);
@@ -133,7 +135,7 @@ function NewForm({ careCircleId, prefill, onCreated }: { careCircleId: string; p
       <div>
         <label className="label">Categoria</label>
         <select className="input" value={category} onChange={(e) => setCategory(e.target.value as DoctorQuestionCategory)}>
-          {CATS.map(c => <option key={c} value={c}>{QuestionCategoryLabel[c]}</option>)}
+          {CATS.map(c => <option key={c} value={c}>{t(`questionCategory.${c}`)}</option>)}
         </select>
       </div>
       {error && <div className="text-sm text-red-700">{error}</div>}

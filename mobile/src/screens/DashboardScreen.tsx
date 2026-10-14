@@ -9,7 +9,6 @@ import ErrorBanner from '../components/ui/ErrorBanner';
 import SecurityBanner from '../components/SecurityBanner';
 import { api, extractError } from '../api/client';
 import type { CareCircle } from '@accanto/shared/types';
-import { RoleLabel } from '@accanto/shared/types';
 import type { MainStackParamList } from '../navigation/types';
 import { hasSeenWelcome } from '../storage/welcomeFlag';
 
@@ -69,11 +68,10 @@ export default function DashboardScreen() {
   return (
     <Screen>
       <Text className="text-2xl font-semibold text-accanto-900 mb-1">
-        Il tuo spazio
+        {t('dashboard.title')}
       </Text>
       <Text className="text-accanto-500 mb-6">
-        Un cerchio di cura raccoglie le informazioni sulla persona che stai
-        assistendo, in un solo posto.
+        {t('dashboard.intro')}
       </Text>
 
       <SecurityBanner />
@@ -89,10 +87,10 @@ export default function DashboardScreen() {
       ) : circles.length === 0 ? (
         <View className="rounded-lg border border-accanto-100 bg-white p-4 mb-4">
           <Text className="text-accanto-900 mb-3">
-            Non hai ancora creato nessun cerchio.
+            {t('dashboard.emptyTitle')}
           </Text>
           <Button onPress={() => navigation.navigate('NewCircle')}>
-            Crea il primo cerchio
+            {t('dashboard.createFirst')}
           </Button>
         </View>
       ) : (
@@ -113,7 +111,7 @@ export default function DashboardScreen() {
                       {c.name}
                     </Text>
                     <Text className="text-xs text-accanto-500 ml-2">
-                      {RoleLabel[c.myRole]}
+                      {t(`roles.${c.myRole.toLowerCase()}`)}
                     </Text>
                   </View>
                   {c.description ? (
@@ -122,7 +120,7 @@ export default function DashboardScreen() {
                     </Text>
                   ) : null}
                   {c.status === 'Archived' ? (
-                    <Text className="text-xs text-accanto-500 mt-2">Archiviato</Text>
+                    <Text className="text-xs text-accanto-500 mt-2">{t('dashboard.archived')}</Text>
                   ) : null}
                 </Pressable>
 
@@ -153,7 +151,7 @@ export default function DashboardScreen() {
             variant="ghost"
             onPress={() => navigation.navigate('NewCircle')}
           >
-            + Nuovo cerchio
+            {t('dashboard.newCircleCta')}
           </Button>
         </>
       )}

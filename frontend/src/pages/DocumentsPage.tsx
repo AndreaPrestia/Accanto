@@ -1,11 +1,13 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api, extractError } from '../api/client';
-import { DocumentCategory, DocumentCategoryLabel, DocumentItem } from '../types';
+import { DocumentCategory, DocumentItem } from '../types';
 
 const CATS: DocumentCategory[] = ['Report','BloodTest','Imaging','Prescription','Therapy','IdentityDocument','Delegation','HospitalContact','Other'];
 
 export default function DocumentsPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [docs, setDocs] = useState<DocumentItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -62,13 +64,13 @@ export default function DocumentsPage() {
               <div className="flex items-baseline justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="font-medium truncate">{d.originalFileName}</h3>
-                  <p className="text-xs text-accanto-500">{DocumentCategoryLabel[d.category]} • {formatSize(d.sizeInBytes)} • {new Date(d.createdAt).toLocaleDateString('it-IT')}</p>
+                  <p className="text-xs text-accanto-500">{t(`documentCategory.${d.category}`)} • {formatSize(d.sizeInBytes)} • {new Date(d.createdAt).toLocaleDateString('it-IT')}</p>
                 </div>
               </div>
               {d.notes && <p className="text-sm mt-2">{d.notes}</p>}
               {d.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {d.tags.map(t => <span key={t} className="text-xs bg-accanto-100 text-accanto-700 rounded px-2 py-0.5">{t}</span>)}
+                  {d.tags.map(tag => <span key={tag} className="text-xs bg-accanto-100 text-accanto-700 rounded px-2 py-0.5">{tag}</span>)}
                 </div>
               )}
               <div className="mt-3 flex gap-2">
@@ -84,6 +86,7 @@ export default function DocumentsPage() {
 }
 
 function UploadForm({ careCircleId, onUploaded }: { careCircleId: string; onUploaded: () => void }) {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [category, setCategory] = useState<DocumentCategory>('Report');
   const [notes, setNotes] = useState('');
@@ -119,7 +122,7 @@ function UploadForm({ careCircleId, onUploaded }: { careCircleId: string; onUplo
       <div>
         <label className="label">Categoria</label>
         <select className="input" value={category} onChange={(e) => setCategory(e.target.value as DocumentCategory)}>
-          {CATS.map(c => <option key={c} value={c}>{DocumentCategoryLabel[c]}</option>)}
+          {CATS.map(c => <option key={c} value={c}>{t(`documentCategory.${c}`)}</option>)}
         </select>
       </div>
       <div>

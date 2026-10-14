@@ -86,9 +86,9 @@ export default function WellbeingSection() {
       t('account.wellbeing.confirmDelete') as string,
       undefined,
       [
-        { text: 'Annulla', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Elimina',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {

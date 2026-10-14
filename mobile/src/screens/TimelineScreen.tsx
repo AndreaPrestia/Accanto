@@ -25,7 +25,6 @@ import type {
   TimelineEntryType,
   TimelineVisibility
 } from '@accanto/shared/types';
-import { TimelineTypeLabel, VisibilityLabel } from '@accanto/shared/types';
 import type { CircleTabParamList } from '../navigation/types';
 
 const TYPES: TimelineEntryType[] = [
@@ -44,6 +43,7 @@ export default function TimelineScreen() {
   const circleId = useCircleId();
   const navigation = useNavigation();
   const route = useRoute<RouteProp<CircleTabParamList, 'Timeline'>>();
+  const { t } = useTranslation();
 
   const [entries, setEntries] = useState<TimelineEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -112,15 +112,15 @@ export default function TimelineScreen() {
   };
 
   const typeOptions = useMemo(
-    () => TYPES.map((t) => ({ value: t, label: TimelineTypeLabel[t] })),
-    []
+    () => TYPES.map((type) => ({ value: type, label: t(`timelineType.${type}`) })),
+    [t]
   );
 
   return (
     <Screen>
-      <Text className="text-2xl font-semibold text-accanto-900 mb-1">Diario</Text>
+      <Text className="text-2xl font-semibold text-accanto-900 mb-1">{t('timeline.title')}</Text>
       <Text className="text-accanto-500 mb-4">
-        Tieni traccia di ciò che succede, giorno per giorno.
+        {t('timeline.intro')}
       </Text>
 
       {/* Filtri */}
@@ -130,13 +130,13 @@ export default function TimelineScreen() {
             value={filterType}
             onChange={(v) => setFilterType(v as TimelineEntryType | '')}
             options={typeOptions}
-            emptyLabel="Tutti i tipi"
-            placeholder="Tipo"
+            emptyLabel={t('timeline.allTypes') as string}
+            placeholder={t('timeline.typePlaceholder') as string}
           />
         </View>
         <View className="flex-1">
           <TextField
-            placeholder="Filtra per tag"
+            placeholder={t('timeline.filterTag') as string}
             value={filterTag}
             onChangeText={setFilterTag}
             autoCapitalize="none"
@@ -147,7 +147,7 @@ export default function TimelineScreen() {
       <View className="flex-row gap-2 mt-2">
         <View className="flex-1">
           <DateField
-            label="Dal"
+            label={t('timeline.from') as string}
             value={filterFrom}
             onChange={setFilterFrom}
             maximumDate={filterTo || undefined}
@@ -156,7 +156,7 @@ export default function TimelineScreen() {
         </View>
         <View className="flex-1">
           <DateField
-            label="Al"
+            label={t('timeline.to') as string}
             value={filterTo}
             onChange={setFilterTo}
             minimumDate={filterFrom || undefined}
@@ -167,14 +167,14 @@ export default function TimelineScreen() {
       {hasFilters ? (
         <Pressable onPress={clearFilters} className="mb-2 py-1">
           <Text className="text-sm text-accanto-700 underline">
-            Pulisci filtri
+            {t('timeline.clearFilters')}
           </Text>
         </Pressable>
       ) : null}
 
       <View className="mt-2 mb-4">
         <Button onPress={() => setShowForm((s) => !s)}>
-          {showForm ? 'Annulla' : '+ Nuova voce'}
+          {showForm ? t('common.cancel') : t('timeline.addCta')}
         </Button>
       </View>
 
@@ -225,7 +225,7 @@ export default function TimelineScreen() {
           <ActivityIndicator color="#334155" />
         </View>
       ) : entries.length === 0 ? (
-        <Text className="text-accanto-500">Ancora nessuna voce.</Text>
+        <Text className="text-accanto-500">{t('timeline.empty')}</Text>
       ) : (
         <View className="gap-3">
           {entries.map((e) => (
@@ -267,13 +267,14 @@ function EntryCard({
   selected: boolean;
   onToggleSelect: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   const [busy, setBusy] = useState(false);
 
   const del = () => {
-    Alert.alert('Eliminare questa voce?', 'L’azione non si può annullare.', [
-      { text: 'Annulla', style: 'cancel' },
+    Alert.alert(t('timeline.deleteConfirmTitle'), t('timeline.deleteConfirmBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Elimina',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           setBusy(true);
@@ -290,7 +291,7 @@ function EntryCard({
     ]);
   };
 
-  const when = new Date(entry.occurredAt).toLocaleString('it-IT');
+  const when = new Date(entry.occurredAt).toLocaleString(i18n.language);
 
   return (
     <Pressable
@@ -317,8 +318,8 @@ function EntryCard({
           <View className="flex-1">
             <Text className="font-medium text-accanto-900">{entry.title}</Text>
             <Text className="text-xs text-accanto-500 mt-0.5">
-              {when} • {TimelineTypeLabel[entry.type]} •{' '}
-              {VisibilityLabel[entry.visibility]}
+              {when} • {t(`timelineType.${entry.type}`)} •{' '}
+              {t(`visibility.${entry.visibility}`)}
             </Text>
           </View>
         </View>
@@ -328,19 +329,19 @@ function EntryCard({
             disabled={busy}
             className="px-2 py-1"
           >
-            <Text className="text-sm text-accanto-500">Elimina</Text>
+            <Text className="text-sm text-accanto-500">{t('common.delete')}</Text>
           </Pressable>
         )}
       </View>
       <Text className="mt-2 text-accanto-900">{entry.content}</Text>
       {entry.tags.length > 0 ? (
         <View className="mt-2 flex-row flex-wrap gap-1">
-          {entry.tags.map((t) => (
+          {entry.tags.map((tag) => (
             <View
-              key={t}
+              key={tag}
               className="bg-accanto-100 rounded px-2 py-0.5"
             >
-              <Text className="text-xs text-accanto-700">{t}</Text>
+              <Text className="text-xs text-accanto-700">{tag}</Text>
             </View>
           ))}
         </View>
@@ -362,21 +363,22 @@ function NewEntryForm({
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
   const [visibility, setVisibility] = useState<TimelineVisibility>('Circle');
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const typeOptions = useMemo(
-    () => TYPES.map((t) => ({ value: t, label: TimelineTypeLabel[t] })),
-    []
+    () => TYPES.map((type) => ({ value: type, label: t(`timelineType.${type}`) })),
+    [t]
   );
   const visOptions = useMemo(
-    () => VIS.map((v) => ({ value: v, label: VisibilityLabel[v] })),
-    []
+    () => VIS.map((v) => ({ value: v, label: t(`visibility.${v}`) })),
+    [t]
   );
 
   const submit = async () => {
     if (!title.trim() || !content.trim() || !occurredAt) {
-      setError('Compila tutti i campi obbligatori.');
+      setError(t('timeline.requiredFields'));
       return;
     }
     setBusy(true);
@@ -406,7 +408,7 @@ function NewEntryForm({
       <View className="flex-row gap-2">
         <View className="flex-1">
           <DateField
-            label="Quando"
+            label={t('timeline.whenLabel') as string}
             value={occurredAt}
             onChange={setOccurredAt}
             mode="datetime"
@@ -414,7 +416,7 @@ function NewEntryForm({
         </View>
         <View className="flex-1">
           <SelectField
-            label="Tipo"
+            label={t('timeline.typeLabel') as string}
             value={type}
             onChange={(v) => v && setType(v as TimelineEntryType)}
             options={typeOptions}
@@ -422,12 +424,12 @@ function NewEntryForm({
         </View>
       </View>
       <TextField
-        label="Titolo"
+        label={t('timeline.titleLabel') as string}
         value={title}
         onChangeText={setTitle}
       />
       <TextField
-        label="Dettaglio"
+        label={t('timeline.detailLabel') as string}
         value={content}
         onChangeText={setContent}
         multiline
@@ -437,17 +439,17 @@ function NewEntryForm({
       <View className="flex-row gap-2">
         <View className="flex-1">
           <TextField
-            label="Tag (separati da virgola)"
+            label={t('timeline.tagsLabel') as string}
             value={tags}
             onChangeText={setTags}
-            placeholder="Es. visita, farmaci"
+            placeholder={t('timeline.tagsPlaceholder') as string}
             autoCapitalize="none"
             autoCorrect={false}
           />
         </View>
         <View className="flex-1">
           <SelectField
-            label="Visibilità"
+            label={t('timeline.visibilityLabel') as string}
             value={visibility}
             onChange={(v) => v && setVisibility(v as TimelineVisibility)}
             options={visOptions}
@@ -456,7 +458,7 @@ function NewEntryForm({
       </View>
       <ErrorBanner message={error} />
       <Button onPress={submit} busy={busy} disabled={busy}>
-        {busy ? 'Salvataggio…' : 'Salva voce'}
+        {busy ? t('timeline.saving') : t('timeline.save')}
       </Button>
     </View>
   );
@@ -475,21 +477,22 @@ function BulkSelectBar({
   onToggle: () => void;
   onSelectAll: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <View className="flex-row items-center gap-4 mb-3">
       <Pressable onPress={onToggle} className="py-1">
         <Text className="text-sm text-accanto-700 underline">
           {selectMode
-            ? 'Esci da selezione multipla'
-            : `Selezione multipla${
-                selectedCount > 0 ? ` (${selectedCount})` : ''
-              }`}
+            ? t('timeline.bulk.exit')
+            : selectedCount > 0
+            ? t('timeline.bulk.enterCount', { count: selectedCount })
+            : t('timeline.bulk.enter')}
         </Text>
       </Pressable>
       {selectMode && totalCount > 0 ? (
         <Pressable onPress={onSelectAll} className="py-1">
           <Text className="text-sm text-accanto-500 underline">
-            Seleziona tutte ({totalCount})
+            {t('timeline.bulk.selectAll', { count: totalCount })}
           </Text>
         </Pressable>
       ) : null}
@@ -513,10 +516,11 @@ function BulkEditForm({
   );
   const [bulkBusy, setBulkBusy] = useState(false);
   const [bulkMsg, setBulkMsg] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const visOptions = useMemo(
-    () => VIS.map((v) => ({ value: v, label: VisibilityLabel[v] })),
-    []
+    () => VIS.map((v) => ({ value: v, label: t(`visibility.${v}`) })),
+    [t]
   );
 
   const apply = async () => {
@@ -529,17 +533,17 @@ function BulkEditForm({
       .map((s) => s.trim())
       .filter(Boolean);
     if (addTags.length === 0 && removeTags.length === 0 && !bulkVisibility) {
-      setBulkMsg('Specifica almeno una modifica.');
+      setBulkMsg(t('timeline.bulk.specifyChange'));
       return;
     }
     if (selectedIds.size === 0) return;
     Alert.alert(
-      'Applicare le modifiche?',
-      `Saranno aggiornate ${selectedIds.size} voci.`,
+      t('timeline.bulk.confirmTitle'),
+      t('timeline.bulk.confirmBody', { count: selectedIds.size }),
       [
-        { text: 'Annulla', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Applica',
+          text: t('timeline.bulk.apply'),
           onPress: async () => {
             setBulkBusy(true);
             setBulkMsg(null);
@@ -554,7 +558,10 @@ function BulkEditForm({
                 newVisibility: bulkVisibility || null
               });
               setBulkMsg(
-                `${data.updated} aggiornate, ${data.skipped} saltate.`
+                t('timeline.bulk.result', {
+                  updated: data.updated,
+                  skipped: data.skipped
+                })
               );
               setBulkAddTags('');
               setBulkRemoveTags('');
@@ -574,36 +581,36 @@ function BulkEditForm({
   return (
     <View className="rounded-lg border border-accanto-100 bg-white p-4 mb-4 gap-3">
       <Text className="font-medium text-accanto-900">
-        Modifica selezionate ({selectedIds.size})
+        {t('timeline.bulk.title', { count: selectedIds.size })}
       </Text>
       <View className="flex-row gap-2">
         <View className="flex-1">
           <TextField
-            label="Aggiungi tag"
+            label={t('timeline.bulk.addTags') as string}
             value={bulkAddTags}
             onChangeText={setBulkAddTags}
-            placeholder="urgente, controllo"
+            placeholder={t('timeline.bulk.addTagsPlaceholder') as string}
             autoCapitalize="none"
             autoCorrect={false}
           />
         </View>
         <View className="flex-1">
           <TextField
-            label="Rimuovi tag"
+            label={t('timeline.bulk.removeTags') as string}
             value={bulkRemoveTags}
             onChangeText={setBulkRemoveTags}
-            placeholder="vecchio"
+            placeholder={t('timeline.bulk.removeTagsPlaceholder') as string}
             autoCapitalize="none"
             autoCorrect={false}
           />
         </View>
       </View>
       <SelectField
-        label="Visibilità"
+        label={t('timeline.visibilityLabel') as string}
         value={bulkVisibility}
         onChange={(v) => setBulkVisibility(v as '' | TimelineVisibility)}
         options={visOptions}
-        emptyLabel="Non modificare"
+        emptyLabel={t('timeline.bulk.noChange') as string}
       />
       {bulkMsg ? (
         <Text className="text-sm text-accanto-700">{bulkMsg}</Text>
@@ -613,7 +620,7 @@ function BulkEditForm({
         busy={bulkBusy}
         disabled={bulkBusy || selectedIds.size === 0}
       >
-        {bulkBusy ? 'Applicazione…' : 'Applica modifiche'}
+        {bulkBusy ? t('timeline.bulk.applying') : t('timeline.bulk.applyChanges')}
       </Button>
     </View>
   );
