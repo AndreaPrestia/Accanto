@@ -11,3 +11,16 @@
 # Rivalutare al prossimo bump di react-router.
 # Scadenza tolleranza: 2026-12-31. Owner: andrea.
 GHSA-qwww-vcr4-c8h2 # react-router 7.18.1 patched + SPA client-side (no RSC), falso positivo, rivalutare al bump
+
+# --- Build-tooling mobile (Expo/Metro), NON nel binario distribuito ---
+# L'audit del job "frontend" copre l'intero tree del monorepo npm, incluso
+# il workspace mobile (Expo). Le advisory sotto sono tutte in dipendenze
+# BUILD-TIME di Expo/Metro/EAS: girano solo durante bundling/signing, non
+# sono nel binario React Native spedito e non processano input esterni a
+# runtime. Nessuna versione patchata same-major disponibile (richiederebbero
+# un upgrade Expo SDK 54->57, pianificato separatamente). Rivalutare al bump Expo.
+# Scadenza tolleranza: 2026-12-31. Owner: andrea.
+GHSA-vfj7-8cjw-p6xm # braces DoS, build-time glob (metro/tailwind), no patch, fix = tailwind4/expo57
+GHSA-w3rx-r6r6-pgpr # image-size ICNS DoS, build-time metro bundler, 1.x senza patch, fix = image-size 2 (expo57)
+GHSA-5p2g-fcmc-qvqq # image-size JXL/HEIF DoS, build-time metro bundler, 1.x senza patch, fix = image-size 2 (expo57)
+GHSA-86w9-cpqp-85rv # node-forge sig-verify, build-time expo-updates code-signing/@expo/cli, no patch, fix = expo57
