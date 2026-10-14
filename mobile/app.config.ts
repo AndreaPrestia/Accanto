@@ -52,7 +52,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     name: `Accanto${label}`,
     slug: 'accanto-app',
     scheme,
-    version: '0.1.0',
+    version: '0.1.1',
     // OTA updates via EAS Update: runtimeVersion legato alla versione app
     // (bump manuale = nuova baseline; patch JS via `eas update`).
     runtimeVersion: { policy: 'appVersion' },
