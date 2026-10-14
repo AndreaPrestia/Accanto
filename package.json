@@ -15,6 +15,16 @@
   },
   "overrides": {
     "form-data": "^4.0.6",
-    "brace-expansion@5": "^5.0.9"
+    "axios": "^1.20.0",
+    "shell-quote": "^1.12.0",
+    "nanoid@3": "^3.3.18",
+    "undici@6": "^6.28.1",
+    "source-map-js": "^1.2.2",
+    "compression": "^1.8.2",
+    "postcss": "^8.5.23",
+    "js-yaml@4": "^4.3.2",
+    "brace-expansion@1": "^1.1.21",
+    "brace-expansion@2": "^2.1.7",
+    "brace-expansion@5": "^5.0.12"
   }
 }
