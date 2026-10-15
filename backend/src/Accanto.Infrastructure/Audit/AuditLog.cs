@@ -47,6 +47,10 @@ public class AuditLog : IAuditLog
         catch (Exception ex)
         {
             // L'audit non deve mai propagare errori: limita ad un warning.
+            // resourceType/actionType sono enum (es. MedicalDocument = *tipo* di
+            // risorsa, non il contenuto medico); careCircleId e' un GUID opaco.
+            // Nessun dato personale/sanitario viene scritto nel log.
+            // codeql[cs/exposure-of-sensitive-information]
             _logger.LogWarning(ex, "Errore nella scrittura dell'audit log ({Action} su {Resource} per cerchio {Circle})", actionType, resourceType, careCircleId);
         }
     }

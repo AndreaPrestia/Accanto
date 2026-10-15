@@ -31,7 +31,8 @@ public class KeyRotationFileStorageTests
             var legacy = Build(master: KeyA, active: null);
             var legacyStorage = Storage(root, legacy);
             var payload = new byte[] { 10, 20, 30, 40, 50, 60 };
-            var stored = await legacyStorage.SaveAsync(new MemoryStream(payload), "x.bin", "application/octet-stream");
+            using var payloadStream = new MemoryStream(payload);
+            var stored = await legacyStorage.SaveAsync(payloadStream, "x.bin", "application/octet-stream");
 
             // Step 2: rotazione con key-ring A+B, active=B.
             var ring = Build(master: KeyA, active: "kB", ("kA", KeyA), ("kB", KeyB));

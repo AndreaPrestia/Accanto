@@ -43,7 +43,7 @@ public class AdminEmailSender : IAdminEmailSender
 
         try
         {
-            var msg = new MimeMessage();
+            using var msg = new MimeMessage();
             msg.From.Add(new MailboxAddress(_options.FromName, _options.FromAddress));
             msg.To.Add(new MailboxAddress(recipientDisplayName ?? string.Empty, recipientEmail));
             msg.Subject = subject;

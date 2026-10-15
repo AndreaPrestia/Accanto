@@ -28,7 +28,11 @@ public class DocumentSyncOutboxTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_root, recursive: true); } catch { }
+        // Cleanup best-effort della directory temporanea: un errore di IO qui
+        // (file lockato, gia' rimosso) non deve far fallire il teardown.
+        try { Directory.Delete(_root, recursive: true); }
+        catch (IOException) { /* ignorato: cleanup best-effort */ }
+        catch (UnauthorizedAccessException) { /* ignorato: cleanup best-effort */ }
     }
 
     [Fact]

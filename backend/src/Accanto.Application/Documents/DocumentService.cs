@@ -82,7 +82,7 @@ public class DocumentService : IDocumentService
         // bufferizziamo l'intero stream (size gia' validata <= MaxFileSizeBytes
         // poco sopra) e validiamo struttura, estensione e magics noti
         // pericolosi.
-        var buffer = new MemoryStream((int)request.SizeInBytes);
+        using var buffer = new MemoryStream((int)request.SizeInBytes);
         await request.Content.CopyToAsync(buffer, cancellationToken);
         buffer.Position = 0;
 
