@@ -28,12 +28,19 @@ public class LocalFileStorage : IFileStorage
         ext = SanitizeExtension(ext);
 
         var now = DateTimeOffset.UtcNow;
+        // subDir/internalName sono interamente server-generated (anno/mese a 4/2
+        // cifre, GUID): nessun input utente, nessun segmento puo' essere assoluto.
+        // codeql[cs/path-combine]
         var subDir = Path.Combine(now.Year.ToString("D4"), now.Month.ToString("D2"));
+        // codeql[cs/path-combine]
         var dirFull = Path.Combine(_rootFull, subDir);
         Directory.CreateDirectory(dirFull);
 
         var internalName = Guid.NewGuid().ToString("N") + ext;
+        // codeql[cs/path-combine]
         var relative = Path.Combine(subDir, internalName).Replace('\\', '/');
+        // Difesa comunque applicata: GetFullPath + EnsureWithinRoot sotto.
+        // codeql[cs/path-combine]
         var fullPath = Path.GetFullPath(Path.Combine(_rootFull, relative));
         EnsureWithinRoot(fullPath);
 
@@ -89,7 +96,22 @@ public class LocalFileStorage : IFileStorage
     {
         if (string.IsNullOrWhiteSpace(relativePath))
             throw new ArgumentException("Percorso vuoto.", nameof(relativePath));
-        var combined = Path.Combine(_rootFull, relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+        // Difesa in profondita' contro il path traversal: un segmento assoluto
+        // (es. "C:\\x", "/etc/passwd") farebbe scartare _rootFull a Path.Combine
+        // (cs/path-combine). Rifiutiamo esplicitamente path radicati e '..'
+        // PRIMA di combinare, cosi' l'input non puo' uscire dalla root.
+        // IsPathRooted va valutato sull'input originale (prima di normalizzare).
+        var unixStyle = relativePath.Replace('\\', '/');
+        if (Path.IsPathRooted(relativePath)
+            || unixStyle.StartsWith('/')
+            || unixStyle.Split('/').Any(seg => seg == ".."))
+        {
+            throw new UnauthorizedAccessException("Percorso non consentito.");
+        }
+
+        var normalized = unixStyle;
+        var combined = Path.Combine(_rootFull, normalized.Replace('/', Path.DirectorySeparatorChar));
         var full = Path.GetFullPath(combined);
         EnsureWithinRoot(full);
         return full;

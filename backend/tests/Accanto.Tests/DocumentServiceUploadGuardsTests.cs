@@ -16,6 +16,8 @@ public class DocumentServiceUploadGuardsTests : IDisposable
 
     public DocumentServiceUploadGuardsTests()
     {
+        // Path temp con GUID: nessun input utente.
+        // codeql[cs/path-combine]
         _root = Path.Combine(Path.GetTempPath(), "accanto-doc-tests-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_root);
     }

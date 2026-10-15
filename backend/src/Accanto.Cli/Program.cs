@@ -313,6 +313,9 @@ public static class Program
         var prefix = (s3Section.GetValue<string>("Prefix") ?? string.Empty).TrimEnd('/');
         var rel = $"_smoke/test-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}.bin";
         var key = string.IsNullOrEmpty(prefix) ? rel : $"{prefix}/{rel}";
+        // rel e' interamente server-generated (prefisso fisso + timestamp + GUID):
+        // nessun input utente, nessun segmento assoluto. Smoke-test CLI.
+        // codeql[cs/path-combine]
         var localPath = Path.Combine(storageOpts.RootPath, rel.Replace('/', Path.DirectorySeparatorChar));
 
         Console.WriteLine($"[smoke-s3] bucket : {bucket}");

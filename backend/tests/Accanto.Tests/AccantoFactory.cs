@@ -17,6 +17,8 @@ public class AccantoFactory : WebApplicationFactory<Program>
         builder.UseSetting("Jwt:Audience", "accanto-test");
         builder.UseSetting("Jwt:Key", "test-key-very-long-test-key-very-long-1234");
         builder.UseSetting("Jwt:ExpiryMinutes", "60");
+        // _dbName e' un GUID generato in test: nessun input utente.
+        // codeql[cs/path-combine]
         builder.UseSetting("Storage:RootPath", Path.Combine(Path.GetTempPath(), _dbName));
         builder.UseSetting("ConnectionStrings:Postgres", "Host=ignored");
         // Chiave AES-256 deterministica di test (32 zeri in base64). NON usare in produzione.

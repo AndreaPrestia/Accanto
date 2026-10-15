@@ -23,6 +23,8 @@ public class KeyRotationFileStorageTests
     [Fact]
     public async Task RewriteWithActiveKey_converts_legacy_v1_file_to_v2_with_active_key()
     {
+        // Path temp con GUID: nessun input utente.
+        // codeql[cs/path-combine]
         var root = Path.Combine(Path.GetTempPath(), "accanto-rotate-" + Guid.NewGuid());
         Directory.CreateDirectory(root);
         try
@@ -40,6 +42,8 @@ public class KeyRotationFileStorageTests
             await ringStorage.RewriteWithActiveKeyAsync(stored.RelativePath);
 
             // Verifica intermedia: il file su disco ora ha il magic header v2.
+            // stored.RelativePath e' generato internamente da LocalFileStorage (GUID).
+            // codeql[cs/path-combine]
             var diskBytes = await File.ReadAllBytesAsync(Path.Combine(root, stored.RelativePath.Replace('/', Path.DirectorySeparatorChar)));
             diskBytes[0].Should().Be(0xA1);
             diskBytes[1].Should().Be(0x02);

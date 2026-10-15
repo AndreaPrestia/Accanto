@@ -121,7 +121,21 @@ public class S3DocumentReplica : IS3DocumentReplica
     {
         if (string.IsNullOrWhiteSpace(relativePath))
             throw new ArgumentException("Percorso vuoto.", nameof(relativePath));
-        var combined = Path.Combine(_rootFull, relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+        // Difesa in profondita' contro il path traversal: rifiutiamo path
+        // radicati e '..' PRIMA di Path.Combine, cosi' un segmento assoluto non
+        // puo' scartare _rootFull (cs/path-combine) e uscire dalla root.
+        // IsPathRooted va valutato sull'input originale (prima di normalizzare).
+        var unixStyle = relativePath.Replace('\\', '/');
+        if (Path.IsPathRooted(relativePath)
+            || unixStyle.StartsWith('/')
+            || unixStyle.Split('/').Any(seg => seg == ".."))
+        {
+            throw new UnauthorizedAccessException("Percorso non consentito.");
+        }
+
+        var normalized = unixStyle;
+        var combined = Path.Combine(_rootFull, normalized.Replace('/', Path.DirectorySeparatorChar));
         var full = Path.GetFullPath(combined);
         if (!full.StartsWith(_rootFull, StringComparison.Ordinal))
             throw new UnauthorizedAccessException("Percorso non consentito.");
