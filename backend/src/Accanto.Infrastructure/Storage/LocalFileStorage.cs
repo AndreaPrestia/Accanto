@@ -93,23 +93,31 @@ public class LocalFileStorage : IFileStorage
         if (string.IsNullOrWhiteSpace(relativePath))
             throw new ArgumentException("Percorso vuoto.", nameof(relativePath));
 
-        // Difesa in profondita' contro il path traversal: rifiutiamo path
-        // radicati e '..' PRIMA di comporre. IsPathRooted va valutato
-        // sull'input originale (prima di normalizzare).
-        var unixStyle = relativePath.Replace('\\', '/');
-        if (Path.IsPathRooted(relativePath)
-            || unixStyle.StartsWith('/')
-            || unixStyle.Split('/').Any(seg => seg == ".."))
-        {
+        if (IsUnsafeRelativePath(relativePath))
             throw new UnauthorizedAccessException("Percorso non consentito.");
-        }
 
         // Path.Join (non Path.Combine): non scarta _rootFull se il secondo
         // segmento fosse assoluto.
+        var unixStyle = relativePath.Replace('\\', '/');
         var combined = Path.Join(_rootFull, unixStyle.Replace('/', Path.DirectorySeparatorChar));
         var full = Path.GetFullPath(combined);
         EnsureWithinRoot(full);
         return full;
+    }
+
+    /// <summary>
+    /// Difesa cross-platform contro il path traversal: rifiuta path radicati,
+    /// drive-letter Windows (es. "C:\\") e segmenti '..', in modo deterministico
+    /// indipendentemente dall'OS host (su Linux "C:\\x" non e' rooted, su Windows
+    /// "/x" lo e': normalizziamo entrambi i casi).
+    /// </summary>
+    private static bool IsUnsafeRelativePath(string relativePath)
+    {
+        var unixStyle = relativePath.Replace('\\', '/');
+        return Path.IsPathRooted(relativePath)
+            || unixStyle.StartsWith('/')
+            || (relativePath.Length >= 2 && char.IsLetter(relativePath[0]) && relativePath[1] == ':')
+            || unixStyle.Split('/').Any(seg => seg == "..");
     }
 
     private void EnsureWithinRoot(string fullPath)
