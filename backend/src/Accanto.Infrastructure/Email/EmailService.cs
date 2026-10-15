@@ -26,7 +26,7 @@ public class EmailService : IEmailService
     {
         if (!IsConfigured)
         {
-            _logger.LogDebug("EmailService non configurato: email a {Recipient} ignorata.", recipientEmail);
+            _logger.LogDebug("EmailService non configurato: email a {Recipient} ignorata.", MaskEmail(recipientEmail));
             return;
         }
         if (string.IsNullOrWhiteSpace(recipientEmail))
@@ -37,7 +37,7 @@ public class EmailService : IEmailService
 
         try
         {
-            var msg = new MimeMessage();
+            using var msg = new MimeMessage();
             msg.From.Add(new MailboxAddress(_options.FromName, _options.FromAddress));
             msg.To.Add(new MailboxAddress(recipientDisplayName ?? string.Empty, recipientEmail));
             msg.Subject = subject;
@@ -55,7 +55,23 @@ public class EmailService : IEmailService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Errore invio email a {Recipient}", recipientEmail);
+            _logger.LogWarning(ex, "Errore invio email a {Recipient}", MaskEmail(recipientEmail));
         }
+    }
+
+    /// <summary>
+    /// Maschera un indirizzo email per il logging (PII utente finale): tiene la
+    /// prima lettera della parte locale e il dominio, oscurando il resto.
+    /// Es. "mario.rossi@example.com" -> "m***@example.com".
+    /// </summary>
+    public static string MaskEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return "(vuota)";
+        var at = email.IndexOf('@');
+        if (at <= 0) return "***";
+        var local = email[..at];
+        var domain = email[at..]; // include '@'
+        var head = local.Length > 0 ? local[0].ToString() : string.Empty;
+        return $"{head}***{domain}";
     }
 }

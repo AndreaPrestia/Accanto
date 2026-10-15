@@ -132,12 +132,10 @@ public static class FileSignatureValidator
             // RAR ("Rar!").
             if (head[0] == 0x52 && head[1] == 0x61 && head[2] == 0x72 && head[3] == 0x21) return true;
         }
-        if (head.Length >= 6)
-        {
-            // 7z signature "7z\xBC\xAF\x27\x1C".
-            if (head[0] == 0x37 && head[1] == 0x7A && head[2] == 0xBC
-                && head[3] == 0xAF && head[4] == 0x27 && head[5] == 0x1C) return true;
-        }
+        // 7z signature "7z\xBC\xAF\x27\x1C".
+        if (head.Length >= 6
+            && head[0] == 0x37 && head[1] == 0x7A && head[2] == 0xBC
+            && head[3] == 0xAF && head[4] == 0x27 && head[5] == 0x1C) return true;
         return false;
     }
 

@@ -134,7 +134,7 @@ public class InviteServiceTests
     [Fact]
     public async Task Accept_fails_when_max_uses_reached()
     {
-        var (invites, circles, db) = Build();
+        var (invites, circles, _) = Build();
         var owner = Guid.NewGuid();
         var firstInvitee = Guid.NewGuid();
         var secondInvitee = Guid.NewGuid();

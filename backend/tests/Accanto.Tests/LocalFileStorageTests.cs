@@ -10,13 +10,17 @@ public class LocalFileStorageTests : IDisposable
 
     public LocalFileStorageTests()
     {
-        _root = Path.Combine(Path.GetTempPath(), "accanto-tests-" + Guid.NewGuid().ToString("N"));
+        _root = Path.Join(Path.GetTempPath(), "accanto-tests-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_root);
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_root, recursive: true); } catch { }
+        // Cleanup best-effort della directory temporanea: un errore di IO qui
+        // (file lockato, gia' rimosso) non deve far fallire il teardown.
+        try { Directory.Delete(_root, recursive: true); }
+        catch (IOException) { /* ignorato: cleanup best-effort */ }
+        catch (UnauthorizedAccessException) { /* ignorato: cleanup best-effort */ }
     }
 
     private LocalFileStorage Create()
@@ -68,7 +72,7 @@ public class LocalFileStorageTests : IDisposable
         stored.SizeInBytes.Should().Be(plaintext.LongLength);
 
         // Su disco i byte non corrispondono al plaintext
-        var onDiskPath = Path.Combine(_root, stored.RelativePath.Replace('/', Path.DirectorySeparatorChar));
+        var onDiskPath = Path.Join(_root, stored.RelativePath.Replace('/', Path.DirectorySeparatorChar));
         var onDisk = await File.ReadAllBytesAsync(onDiskPath);
         onDisk.Should().NotEqual(plaintext);
         onDisk.Length.Should().Be(plaintext.Length + 12 + 16); // nonce + tag overhead
@@ -78,5 +82,34 @@ public class LocalFileStorageTests : IDisposable
         var decrypted = new byte[plaintext.Length];
         await read.ReadExactlyAsync(decrypted);
         decrypted.Should().Equal(plaintext);
+    }
+
+    [Theory]
+    [InlineData("../../../etc/passwd")]
+    [InlineData("..\\..\\windows\\system32\\config")]
+    [InlineData("sub/../../escape.bin")]
+    public async Task OpenRead_rejects_path_traversal_variants(string malicious)
+    {
+        var storage = Create();
+        var act = async () => await storage.OpenReadAsync(malicious);
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Theory]
+    [InlineData("/etc/passwd")]
+    [InlineData("C:\\Windows\\win.ini")]
+    public async Task OpenRead_rejects_absolute_path(string absolute)
+    {
+        var storage = Create();
+        var act = async () => await storage.OpenReadAsync(absolute);
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task Delete_rejects_path_traversal()
+    {
+        var storage = Create();
+        var act = async () => await storage.DeleteAsync("../../secret.bin");
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
     }
 }

@@ -59,7 +59,7 @@ public class TwoFactorOwnerEnforcementTests : IClassFixture<AccantoFactory>
     [Fact]
     public async Task Owner_within_grace_passes_and_exposes_header()
     {
-        var (client, userId, circleId) = await RegisterOwnerAsync();
+        var (client, _, circleId) = await RegisterOwnerAsync();
         // Promozione runtime (createAsync) ha gia' settato la deadline ~7gg nel futuro.
         var resp = await client.GetAsync($"/api/care-circles/{circleId}");
         resp.StatusCode.Should().Be(HttpStatusCode.OK);

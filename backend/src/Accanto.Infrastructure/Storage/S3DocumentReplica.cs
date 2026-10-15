@@ -89,9 +89,8 @@ public class S3DocumentReplica : IS3DocumentReplica
 
             if (listResp.Versions is not null)
             {
-                foreach (var v in listResp.Versions)
+                foreach (var v in listResp.Versions.Where(v => v.Key == key))
                 {
-                    if (v.Key != key) continue;
                     await _client.DeleteObjectAsync(new DeleteObjectRequest
                     {
                         BucketName = _options.Bucket,
@@ -121,10 +120,31 @@ public class S3DocumentReplica : IS3DocumentReplica
     {
         if (string.IsNullOrWhiteSpace(relativePath))
             throw new ArgumentException("Percorso vuoto.", nameof(relativePath));
-        var combined = Path.Combine(_rootFull, relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+        if (IsUnsafeRelativePath(relativePath))
+            throw new UnauthorizedAccessException("Percorso non consentito.");
+
+        // Path.Join (non Path.Combine): non scarta _rootFull se il secondo
+        // segmento fosse assoluto.
+        var unixStyle = relativePath.Replace('\\', '/');
+        var combined = Path.Join(_rootFull, unixStyle.Replace('/', Path.DirectorySeparatorChar));
         var full = Path.GetFullPath(combined);
         if (!full.StartsWith(_rootFull, StringComparison.Ordinal))
             throw new UnauthorizedAccessException("Percorso non consentito.");
         return full;
+    }
+
+    /// <summary>
+    /// Difesa cross-platform contro il path traversal: rifiuta path radicati,
+    /// drive-letter Windows (es. "C:\\") e segmenti '..', in modo deterministico
+    /// indipendentemente dall'OS host.
+    /// </summary>
+    private static bool IsUnsafeRelativePath(string relativePath)
+    {
+        var unixStyle = relativePath.Replace('\\', '/');
+        return Path.IsPathRooted(relativePath)
+            || unixStyle.StartsWith('/')
+            || (relativePath.Length >= 2 && char.IsLetter(relativePath[0]) && relativePath[1] == ':')
+            || unixStyle.Split('/').Any(seg => seg == "..");
     }
 }

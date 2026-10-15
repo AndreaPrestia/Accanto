@@ -23,7 +23,7 @@ public class KeyRotationFileStorageTests
     [Fact]
     public async Task RewriteWithActiveKey_converts_legacy_v1_file_to_v2_with_active_key()
     {
-        var root = Path.Combine(Path.GetTempPath(), "accanto-rotate-" + Guid.NewGuid());
+        var root = Path.Join(Path.GetTempPath(), "accanto-rotate-" + Guid.NewGuid());
         Directory.CreateDirectory(root);
         try
         {
@@ -31,7 +31,8 @@ public class KeyRotationFileStorageTests
             var legacy = Build(master: KeyA, active: null);
             var legacyStorage = Storage(root, legacy);
             var payload = new byte[] { 10, 20, 30, 40, 50, 60 };
-            var stored = await legacyStorage.SaveAsync(new MemoryStream(payload), "x.bin", "application/octet-stream");
+            using var payloadStream = new MemoryStream(payload);
+            var stored = await legacyStorage.SaveAsync(payloadStream, "x.bin", "application/octet-stream");
 
             // Step 2: rotazione con key-ring A+B, active=B.
             var ring = Build(master: KeyA, active: "kB", ("kA", KeyA), ("kB", KeyB));
@@ -39,7 +40,7 @@ public class KeyRotationFileStorageTests
             await ringStorage.RewriteWithActiveKeyAsync(stored.RelativePath);
 
             // Verifica intermedia: il file su disco ora ha il magic header v2.
-            var diskBytes = await File.ReadAllBytesAsync(Path.Combine(root, stored.RelativePath.Replace('/', Path.DirectorySeparatorChar)));
+            var diskBytes = await File.ReadAllBytesAsync(Path.Join(root, stored.RelativePath.Replace('/', Path.DirectorySeparatorChar)));
             diskBytes[0].Should().Be(0xA1);
             diskBytes[1].Should().Be(0x02);
 

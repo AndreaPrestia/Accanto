@@ -132,7 +132,6 @@ public static class Program
         {
             await migratorDb.Database.MigrateAsync();
         }
-        var db = scope.ServiceProvider.GetRequiredService<AccantoDbContext>();
 
         var rotator = scope.ServiceProvider.GetRequiredService<KeyRotationService>();
         var report = await rotator.RotateAsync();
@@ -313,7 +312,8 @@ public static class Program
         var prefix = (s3Section.GetValue<string>("Prefix") ?? string.Empty).TrimEnd('/');
         var rel = $"_smoke/test-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}.bin";
         var key = string.IsNullOrEmpty(prefix) ? rel : $"{prefix}/{rel}";
-        var localPath = Path.Combine(storageOpts.RootPath, rel.Replace('/', Path.DirectorySeparatorChar));
+        // Path.Join non scarta RootPath; rel e' server-generated (smoke-test CLI).
+        var localPath = Path.Join(storageOpts.RootPath, rel.Replace('/', Path.DirectorySeparatorChar));
 
         Console.WriteLine($"[smoke-s3] bucket : {bucket}");
         Console.WriteLine($"[smoke-s3] key    : {key}");

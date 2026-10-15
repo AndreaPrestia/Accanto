@@ -52,8 +52,11 @@ public class AdminSystemController : ControllerBase
     {
         try
         {
-            var ok = await _adminDb.AdminUsers.AsNoTracking().AnyAsync(ct);
-            return ok || true ? "Healthy" : "Degraded";
+            // Se la query non lancia, il DB e' raggiungibile e sano: il
+            // risultato di AnyAsync (DB vuoto o meno) e' irrilevante ai fini
+            // della salute. Un DB irraggiungibile cade nel catch -> "Down".
+            await _adminDb.AdminUsers.AsNoTracking().AnyAsync(ct);
+            return "Healthy";
         }
         catch
         {

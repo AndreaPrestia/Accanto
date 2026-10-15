@@ -39,6 +39,9 @@ public class SecurityAuditLog : ISecurityAuditLog
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 EmailAttempted = Truncate(emailAttempted, 320),
+                // eventType e' una costante enum (es. PasswordChanged), non la
+                // password: non viene memorizzato alcun segreto in chiaro.
+                // codeql[cs/cleartext-storage-of-sensitive-information]
                 EventType = eventType,
                 Summary = Truncate(summary, 500),
                 IpAddress = Truncate(client?.IpAddress, 64),

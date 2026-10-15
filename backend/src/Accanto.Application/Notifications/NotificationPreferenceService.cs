@@ -48,6 +48,9 @@ public class NotificationPreferenceService : INotificationPreferenceService
         var byTopic = saved.ToDictionary(p => p.Topic);
 
         var now = DateTimeOffset.UtcNow;
+        // Il filtro usa TryGetValue per estrarre anche 'dto': non esprimibile
+        // pulitamente con .Where() senza una doppia lookup.
+        // codeql[cs/linq/missed-where]
         foreach (var topic in AllTopics)
         {
             if (!incoming.TryGetValue(topic, out var dto)) continue;

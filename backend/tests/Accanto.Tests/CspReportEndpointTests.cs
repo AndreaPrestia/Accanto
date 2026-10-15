@@ -27,7 +27,7 @@ public class CspReportEndpointTests : IClassFixture<AccantoFactory>
             "disposition": "enforce"
         } }
         """;
-        var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
         {
             Content = new StringContent(payload, Encoding.UTF8)
         };
@@ -60,7 +60,7 @@ public class CspReportEndpointTests : IClassFixture<AccantoFactory>
           }
         }]
         """;
-        var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
         {
             Content = new StringContent(payload, Encoding.UTF8)
         };
@@ -77,7 +77,7 @@ public class CspReportEndpointTests : IClassFixture<AccantoFactory>
         // Non vogliamo dare segnali utili a chi tenta di sondare l'endpoint:
         // 204 sempre, anche su body invalido.
         var client = _factory.CreateClient();
-        var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
         {
             Content = new StringContent("{ not json", Encoding.UTF8)
         };
@@ -92,7 +92,7 @@ public class CspReportEndpointTests : IClassFixture<AccantoFactory>
     public async Task Empty_body_returns_204()
     {
         var client = _factory.CreateClient();
-        var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
         {
             Content = new StringContent("", Encoding.UTF8)
         };
@@ -109,7 +109,7 @@ public class CspReportEndpointTests : IClassFixture<AccantoFactory>
         // Nessun token Authorization -> deve comunque accettare il report,
         // perche' il browser non puo' allegare credenziali a un report CSP.
         var client = _factory.CreateClient();
-        var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/security/csp-report")
         {
             Content = new StringContent("{\"csp-report\":{}}", Encoding.UTF8)
         };
