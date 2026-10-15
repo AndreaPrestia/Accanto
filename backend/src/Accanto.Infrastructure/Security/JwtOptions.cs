@@ -120,7 +120,7 @@ public sealed class JwtSigningMaterial
     public IEnumerable<SecurityKey> Resolve(string? kid)
     {
         if (!string.IsNullOrEmpty(kid) && Keys.TryGetValue(kid, out var match))
-            return new[] { (SecurityKey)match };
+            return new SecurityKey[] { match };
         return Keys.Values.Cast<SecurityKey>();
     }
 }

@@ -48,8 +48,7 @@ public sealed class AiPromptBuilder
         // Limita a sequenze di ≥ 8 caratteri numerici totali per ridurre falsi positivi.
         s = PhoneRegex.Replace(s, match =>
         {
-            var digits = 0;
-            foreach (var c in match.Value) if (char.IsDigit(c)) digits++;
+            var digits = match.Value.Count(char.IsDigit);
             return digits >= 8 ? "[phone]" : match.Value;
         });
         return s;
@@ -68,6 +67,9 @@ public sealed class AiPromptBuilder
         var hasItalian = false;
         var hasEnglish = false;
         var hasSpanish = false;
+        // Il corpo mappa raw->tag ma contiene continue + try/catch + side-effect
+        // multipli: un .Select() peggiorerebbe la leggibilita'.
+        // codeql[cs/linq/missed-select]
         foreach (var raw in acceptLanguage.Split(',', StringSplitOptions.RemoveEmptyEntries))
         {
             var tag = raw.Split(';')[0].Trim();

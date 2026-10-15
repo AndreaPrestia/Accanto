@@ -74,7 +74,7 @@ public class InternalUserMetadataTests
     }
 
     private static InternalUserMetadataService CreateService(AccantoDbContext db)
-        => new((IAccantoDbContext)db);
+        => new(db);
 
     private static User SeedUser(AccantoDbContext db, string email = "user@example.com", string displayName = "User")
     {

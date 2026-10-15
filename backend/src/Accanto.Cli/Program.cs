@@ -132,7 +132,6 @@ public static class Program
         {
             await migratorDb.Database.MigrateAsync();
         }
-        var db = scope.ServiceProvider.GetRequiredService<AccantoDbContext>();
 
         var rotator = scope.ServiceProvider.GetRequiredService<KeyRotationService>();
         var report = await rotator.RotateAsync();

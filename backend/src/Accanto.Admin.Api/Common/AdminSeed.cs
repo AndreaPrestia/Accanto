@@ -27,14 +27,11 @@ public static class AdminSeed
 
         // 1) Ruoli canonici (idempotente).
         var existingRoles = await db.AdminRoles.ToListAsync(ct);
-        foreach (var roleName in AdminRoles.All)
+        foreach (var roleName in AdminRoles.All.Where(rn => existingRoles.All(r => r.Name != rn)))
         {
-            if (!existingRoles.Any(r => r.Name == roleName))
-            {
-                var role = new AdminRole { Id = Guid.NewGuid(), Name = roleName };
-                db.AdminRoles.Add(role);
-                existingRoles.Add(role);
-            }
+            var role = new AdminRole { Id = Guid.NewGuid(), Name = roleName };
+            db.AdminRoles.Add(role);
+            existingRoles.Add(role);
         }
         await db.SaveChangesAsync(ct);
 

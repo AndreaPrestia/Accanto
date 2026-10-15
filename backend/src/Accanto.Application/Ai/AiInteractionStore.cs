@@ -65,14 +65,9 @@ public sealed class AiInteractionStore : IAiInteractionStore
             if (member is null)
                 throw new ForbiddenException("not_member_of_care_circle");
 
-            if (member.Role == CareCircleRole.Owner)
-            {
-                query = query.Where(x => x.CareCircleId == circleId.Value);
-            }
-            else
-            {
-                query = query.Where(x => x.CareCircleId == circleId.Value && x.UserId == userId);
-            }
+            query = member.Role == CareCircleRole.Owner
+                ? query.Where(x => x.CareCircleId == circleId.Value)
+                : query.Where(x => x.CareCircleId == circleId.Value && x.UserId == userId);
         }
         else
         {

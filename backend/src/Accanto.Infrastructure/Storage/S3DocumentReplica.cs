@@ -89,9 +89,8 @@ public class S3DocumentReplica : IS3DocumentReplica
 
             if (listResp.Versions is not null)
             {
-                foreach (var v in listResp.Versions)
+                foreach (var v in listResp.Versions.Where(v => v.Key == key))
                 {
-                    if (v.Key != key) continue;
                     await _client.DeleteObjectAsync(new DeleteObjectRequest
                     {
                         BucketName = _options.Bucket,
