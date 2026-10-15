@@ -10,9 +10,7 @@ public class LocalFileStorageTests : IDisposable
 
     public LocalFileStorageTests()
     {
-        // Path temp con GUID: nessun input utente.
-        // codeql[cs/path-combine]
-        _root = Path.Combine(Path.GetTempPath(), "accanto-tests-" + Guid.NewGuid().ToString("N"));
+        _root = Path.Join(Path.GetTempPath(), "accanto-tests-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_root);
     }
 
@@ -74,9 +72,7 @@ public class LocalFileStorageTests : IDisposable
         stored.SizeInBytes.Should().Be(plaintext.LongLength);
 
         // Su disco i byte non corrispondono al plaintext
-        // stored.RelativePath e' generato internamente da LocalFileStorage (GUID).
-        // codeql[cs/path-combine]
-        var onDiskPath = Path.Combine(_root, stored.RelativePath.Replace('/', Path.DirectorySeparatorChar));
+        var onDiskPath = Path.Join(_root, stored.RelativePath.Replace('/', Path.DirectorySeparatorChar));
         var onDisk = await File.ReadAllBytesAsync(onDiskPath);
         onDisk.Should().NotEqual(plaintext);
         onDisk.Length.Should().Be(plaintext.Length + 12 + 16); // nonce + tag overhead

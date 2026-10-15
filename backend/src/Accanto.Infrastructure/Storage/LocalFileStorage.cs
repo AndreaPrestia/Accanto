@@ -28,20 +28,16 @@ public class LocalFileStorage : IFileStorage
         ext = SanitizeExtension(ext);
 
         var now = DateTimeOffset.UtcNow;
-        // subDir/internalName sono interamente server-generated (anno/mese a 4/2
-        // cifre, GUID): nessun input utente, nessun segmento puo' essere assoluto.
-        // codeql[cs/path-combine]
-        var subDir = Path.Combine(now.Year.ToString("D4"), now.Month.ToString("D2"));
-        // codeql[cs/path-combine]
-        var dirFull = Path.Combine(_rootFull, subDir);
+        // Path.Join (non Path.Combine): non scarta i segmenti precedenti se uno
+        // e' assoluto, quindi _rootFull non puo' mai essere "perso". subDir e
+        // internalName sono comunque server-generated (anno/mese, GUID).
+        var subDir = Path.Join(now.Year.ToString("D4"), now.Month.ToString("D2"));
+        var dirFull = Path.Join(_rootFull, subDir);
         Directory.CreateDirectory(dirFull);
 
         var internalName = Guid.NewGuid().ToString("N") + ext;
-        // codeql[cs/path-combine]
-        var relative = Path.Combine(subDir, internalName).Replace('\\', '/');
-        // Difesa comunque applicata: GetFullPath + EnsureWithinRoot sotto.
-        // codeql[cs/path-combine]
-        var fullPath = Path.GetFullPath(Path.Combine(_rootFull, relative));
+        var relative = Path.Join(subDir, internalName).Replace('\\', '/');
+        var fullPath = Path.GetFullPath(Path.Join(_rootFull, relative));
         EnsureWithinRoot(fullPath);
 
         // Carichiamo l'intero contenuto in memoria (limite upload 20 MB applicato a monte) e cifriamo con AES-GCM.
@@ -97,11 +93,9 @@ public class LocalFileStorage : IFileStorage
         if (string.IsNullOrWhiteSpace(relativePath))
             throw new ArgumentException("Percorso vuoto.", nameof(relativePath));
 
-        // Difesa in profondita' contro il path traversal: un segmento assoluto
-        // (es. "C:\\x", "/etc/passwd") farebbe scartare _rootFull a Path.Combine
-        // (cs/path-combine). Rifiutiamo esplicitamente path radicati e '..'
-        // PRIMA di combinare, cosi' l'input non puo' uscire dalla root.
-        // IsPathRooted va valutato sull'input originale (prima di normalizzare).
+        // Difesa in profondita' contro il path traversal: rifiutiamo path
+        // radicati e '..' PRIMA di comporre. IsPathRooted va valutato
+        // sull'input originale (prima di normalizzare).
         var unixStyle = relativePath.Replace('\\', '/');
         if (Path.IsPathRooted(relativePath)
             || unixStyle.StartsWith('/')
@@ -110,8 +104,9 @@ public class LocalFileStorage : IFileStorage
             throw new UnauthorizedAccessException("Percorso non consentito.");
         }
 
-        var normalized = unixStyle;
-        var combined = Path.Combine(_rootFull, normalized.Replace('/', Path.DirectorySeparatorChar));
+        // Path.Join (non Path.Combine): non scarta _rootFull se il secondo
+        // segmento fosse assoluto.
+        var combined = Path.Join(_rootFull, unixStyle.Replace('/', Path.DirectorySeparatorChar));
         var full = Path.GetFullPath(combined);
         EnsureWithinRoot(full);
         return full;
