@@ -10,7 +10,7 @@
     "check": "astro check"
   },
   "dependencies": {
-    "astro": "^7.3.8",
+    "astro": "^7.4.12",
     "@astrojs/mdx": "^7.0.5",
     "@astrojs/sitemap": "~3.7.3",
     "@astrojs/check": "^0.9.10",
