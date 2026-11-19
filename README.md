@@ -565,3 +565,7 @@ Questa scelta è deliberata: chiunque modifichi Accanto e lo offra come servizio
 ## Contribuire
 
 Vedi [CONTRIBUTING.md](CONTRIBUTING.md). Per vulnerabilità di sicurezza, [SECURITY.md](SECURITY.md).
+
+## Alla memoria di mia madre.
+
+Accanto nasce dall'esperienza di averla accompagnata durante la sua malattia, con la speranza di rendere questo percorso un po' meno difficile per altre famiglie.
