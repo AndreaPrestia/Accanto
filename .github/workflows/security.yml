@@ -51,6 +51,8 @@ jobs:
           load: true
           push: false
           tags: accanto-${{ matrix.image.name }}:scan
+          build-args: |
+            APK_UPGRADE_CACHE_BUST=${{ github.run_id }}
           cache-from: type=gha,scope=sec-${{ matrix.image.name }}
           cache-to: type=gha,scope=sec-${{ matrix.image.name }},mode=max
 

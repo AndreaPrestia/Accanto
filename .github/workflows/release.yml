@@ -112,6 +112,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             APP_VERSION=${{ steps.tag.outputs.version }}
+            APK_UPGRADE_CACHE_BUST=${{ github.run_id }}
             VITE_API_BASE_URL=${{ vars.WEB_API_BASE_URL || '/api' }}
             VITE_ADMIN_API_BASE_URL=${{ vars.WEB_ADMIN_API_BASE_URL || '/admin-api' }}
             SITE_URL=${{ vars.WEB_SITE_URL || 'http://localhost:4321' }}
