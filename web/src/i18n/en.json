@@ -31,9 +31,9 @@
     "es": "Español"
   },
   "mobile": {
-    "title": "Mobile app coming soon",
-    "subtitle": "Accanto is coming to iPhone and Android. In the meantime you can use the web app from any device.",
-    "comingSoon": "Coming soon to",
+    "title": "Get the Accanto app",
+    "subtitle": "Accanto is available on iPhone and Android. You can also keep using the web app from any device.",
+    "availableOn": "Download on",
     "ios": "App Store",
     "android": "Google Play"
   }
