@@ -1,5 +1,7 @@
 using Accanto.Admin.Application.Common.Persistence;
+using Accanto.Admin.Application.Diagnostics;
 using Accanto.Admin.Application.Stats;
+using Accanto.Admin.Domain.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +49,13 @@ public class AdminSystemController : ControllerBase
     [HttpGet("stats")]
     public async Task<ActionResult<AdminStatsDto>> Stats([FromServices] IAdminStatsService svc, CancellationToken ct)
         => Ok(await svc.GetStatsAsync(ct));
+
+    [HttpGet("technical-logs")]
+    [Authorize(Roles = AdminRoles.Owner + "," + AdminRoles.SecurityAuditor)]
+    public ActionResult<AdminTechnicalLogListResponse> TechnicalLogs(
+        [FromServices] IAdminTechnicalLogStore logs,
+        [FromQuery] int limit = 100)
+        => Ok(logs.List(limit));
 
     private async Task<string> ProbeAdminDbAsync(CancellationToken ct)
     {

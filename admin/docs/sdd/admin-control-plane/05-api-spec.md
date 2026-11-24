@@ -374,7 +374,27 @@ Response:
 
 ### GET /api/admin/system/technical-logs
 
-Restricted to Owner/SecurityAuditor.
+Restricted to Owner/SecurityAuditor. Returns at most 100 recent, redacted unhandled API errors from the current process (maximum retention 200; cleared on restart). The query parameter `limit` is clamped to 1-200.
+
+Response:
+
+```json
+{
+  "items": [
+    {
+      "createdAt": "2026-07-27T10:00:00Z",
+      "level": "Error",
+      "component": "Admin API",
+      "event": "Unhandled API error",
+      "code": "ADMIN_API_500"
+    }
+  ],
+  "limit": 100,
+  "retainedCount": 1
+}
+```
+
+The endpoint does not expose raw Serilog events, exception messages, stack traces, or request metadata.
 
 Must not return:
 

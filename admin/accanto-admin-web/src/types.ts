@@ -95,6 +95,20 @@ export interface SystemHealth {
   checkedAt: string;
 }
 
+export interface TechnicalLogEntry {
+  createdAt: string;
+  level: string;
+  component: string;
+  event: string;
+  code: string;
+}
+
+export interface TechnicalLogListResponse {
+  items: TechnicalLogEntry[];
+  limit: number;
+  retainedCount: number;
+}
+
 export interface AdminStats {
   totalUsers: number;
   disabledUsers: number;

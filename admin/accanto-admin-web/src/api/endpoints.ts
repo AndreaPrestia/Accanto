@@ -6,6 +6,7 @@ import {
   OperationListResponse,
   OperationResult,
   SystemHealth,
+  TechnicalLogListResponse,
   UserListResponse,
   UserMetadata
 } from '../types';
@@ -65,6 +66,13 @@ export async function getOperation(operationId: string): Promise<Operation> {
 // --- System ---
 export async function getSystemHealth(): Promise<SystemHealth> {
   const { data } = await adminApi.get<SystemHealth>('/api/admin/system/health');
+  return data;
+}
+
+export async function listTechnicalLogs(limit = 100): Promise<TechnicalLogListResponse> {
+  const { data } = await adminApi.get<TechnicalLogListResponse>('/api/admin/system/technical-logs', {
+    params: { limit }
+  });
   return data;
 }
 

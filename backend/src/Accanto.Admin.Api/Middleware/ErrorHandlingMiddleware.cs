@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Accanto.Admin.Application.Common;
+using Accanto.Admin.Application.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Accanto.Admin.Api.Middleware;
@@ -12,11 +13,16 @@ public class ErrorHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ErrorHandlingMiddleware> _logger;
+    private readonly IAdminTechnicalLogStore _technicalLogs;
 
-    public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
+    public ErrorHandlingMiddleware(
+        RequestDelegate next,
+        ILogger<ErrorHandlingMiddleware> logger,
+        IAdminTechnicalLogStore technicalLogs)
     {
         _next = next;
         _logger = logger;
+        _technicalLogs = technicalLogs;
     }
 
     public async Task Invoke(HttpContext context)
@@ -43,7 +49,10 @@ public class ErrorHandlingMiddleware
         };
 
         if (status >= 500)
+        {
+            _technicalLogs.RecordUnhandledApiError();
             _logger.LogError(ex, "Errore non gestito nella Admin API");
+        }
 
         var problem = new ProblemDetails
         {
